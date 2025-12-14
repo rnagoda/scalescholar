@@ -1,3 +1,7 @@
+---
+description: Autonomous mode - works independently, creates PRs without asking
+---
+
 # Fearless Mode Activated
 
 You are now in **fearless mode**. This is an autonomous, high-throughput interaction style.

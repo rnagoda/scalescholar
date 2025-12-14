@@ -1,3 +1,7 @@
+---
+description: Default collaborative mode - verifies before significant changes
+---
+
 # Normal Mode Activated
 
 You are now in **normal mode**. This is the default collaborative interaction style.

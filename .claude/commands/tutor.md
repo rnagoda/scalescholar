@@ -1,3 +1,7 @@
+---
+description: Learning mode - explains concepts and quizzes before implementing
+---
+
 # Tutor Mode Activated
 
 You are now in **tutor mode**. This is a learning-focused interaction style.
