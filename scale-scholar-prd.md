@@ -2,9 +2,9 @@
 
 ## Overview
 
-**Product Name:** Scale Scholar  
-**Version:** 1.0 (MVP)  
-**Platform:** iOS and Android (React Native)  
+**Product Name:** Scale Scholar
+**Version:** 1.0 (MVP)
+**Platform:** iOS and Android (React Native with Expo)
 **Target Release:** TBD
 
 ### Vision Statement
@@ -203,12 +203,16 @@ Scale Scholar
 
 ### Navigation
 
-- Bottom tab bar: Home | Progress | Settings
-- Exercise screens: Full-screen with back button
+- Bottom tab bar: Home | Progress | Settings (using Expo Router tab groups)
+- Exercise screens: Full-screen stack navigation with back button
 
 ---
 
 ## Technical Requirements
+
+### Framework
+
+**Expo (Managed Workflow):** Using Expo for faster development, easier builds, and over-the-air updates. Expo Router provides file-based navigation.
 
 ### Typography
 
@@ -217,6 +221,8 @@ Scale Scholar
 - Must be bundled with the app (not loaded from web)
 
 ### Audio Engine
+
+**Implementation:** Using expo-audio for audio playback and synthesis capabilities within the Expo managed workflow.
 
 **Synthesis requirements:**
 - Generate piano-like tones (additive synthesis or wavetable)

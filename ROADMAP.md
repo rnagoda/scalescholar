@@ -10,16 +10,17 @@ Project setup, design system, and core infrastructure.
 
 - [x] Initialize repository and documentation
 - [x] Create PRD and CLAUDE.md development guidelines
-- [ ] Initialize React Native project (bare workflow)
+- [ ] Initialize Expo project with TypeScript template
 - [ ] Configure TypeScript strict mode
-- [ ] Set up project structure (`src/` directories)
+- [ ] Set up project structure (Expo Router `app/` + `src/` directories)
 - [ ] Install and configure dependencies
-  - [ ] React Navigation
+  - [ ] Expo Router (file-based navigation)
   - [ ] Zustand
-  - [ ] AsyncStorage
+  - [ ] @react-native-async-storage/async-storage
   - [ ] expo-sqlite
-  - [ ] react-native-audio-api
-- [ ] Set up Space Mono font
+  - [ ] expo-audio
+  - [ ] expo-font
+- [ ] Set up Space Mono font with expo-font
 - [ ] Implement theme system (colors, typography, spacing)
 - [ ] Build common components
   - [ ] BracketButton
@@ -30,7 +31,7 @@ Project setup, design system, and core infrastructure.
   - [ ] LabelValue
   - [ ] SectionHeader
   - [ ] AppFooter
-- [ ] Set up navigation structure (tabs + stack)
+- [ ] Set up navigation structure (tabs + stack with Expo Router)
 - [ ] Create placeholder screens
 
 ---
