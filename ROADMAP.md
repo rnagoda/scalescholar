@@ -4,43 +4,44 @@ This document tracks the development progress of Scale Scholar, a mobile ear tra
 
 ---
 
-## Current: v0.1.0 — Foundation
+## Completed: v0.1.0 — Foundation
 
 Project setup, design system, and core infrastructure.
 
 - [x] Initialize repository and documentation
 - [x] Create PRD and CLAUDE.md development guidelines
-- [ ] Initialize Expo project with TypeScript template
-- [ ] Configure TypeScript strict mode
-- [ ] Set up project structure (Expo Router `app/` + `src/` directories)
-- [ ] Install and configure dependencies
-  - [ ] Expo Router (file-based navigation)
-  - [ ] Zustand
-  - [ ] @react-native-async-storage/async-storage
-  - [ ] expo-sqlite
-  - [ ] expo-audio
-  - [ ] expo-font
-- [ ] Set up Space Mono font with expo-font
-- [ ] Implement theme system (colors, typography, spacing)
-- [ ] Build common components
-  - [ ] BracketButton
-  - [ ] Card
-  - [ ] ScreenHeader
-  - [ ] Divider
-  - [ ] ProgressBar
-  - [ ] LabelValue
-  - [ ] SectionHeader
-  - [ ] AppFooter
-- [ ] Set up navigation structure (tabs + stack with Expo Router)
-- [ ] Create placeholder screens
+- [x] Initialize Expo project with TypeScript template
+- [x] Configure TypeScript strict mode
+- [x] Set up project structure (Expo Router `app/` + `src/` directories)
+- [x] Install and configure dependencies
+  - [x] Expo Router (file-based navigation)
+  - [x] Zustand
+  - [x] @react-native-async-storage/async-storage
+  - [x] expo-sqlite
+  - [x] expo-av (audio)
+  - [x] expo-font
+- [x] Set up Space Mono font with expo-font
+- [x] Implement theme system (colors, typography, spacing)
+- [x] Build common components
+  - [x] BracketButton
+  - [x] Card
+  - [x] ScreenHeader
+  - [x] Divider
+  - [x] ProgressBar
+  - [x] LabelValue
+  - [x] SectionHeader
+  - [x] AppFooter
+- [x] Set up navigation structure (tabs + stack with Expo Router)
+- [x] Create placeholder screens
 
 ---
 
-## Next: v0.2.0 — Audio Engine & Interval Trainer
+## Current: v0.2.0 — Audio Engine & Interval Trainer
 
 Core audio synthesis and the first complete exercise module.
 
 ### Audio Engine
+
 - [ ] AudioEngine singleton with lazy initialization
 - [ ] Synthesizer interface definition
 - [ ] SineSynth implementation (pure tones)
@@ -52,6 +53,7 @@ Core audio synthesis and the first complete exercise module.
   - [ ] Interval calculations
 
 ### Interval Trainer
+
 - [ ] Exercise state machine (Ready → Playing → Answering → Feedback)
 - [ ] Question generator with constraints
 - [ ] PlayButton component
@@ -138,6 +140,7 @@ Final testing and app store submission.
 Ideas for future development, not committed to timeline:
 
 ### Near-term possibilities
+
 - Minor keys and modes
 - 7th chord types (Maj7, Min7, Dom7)
 - Chord inversions
@@ -146,6 +149,7 @@ Ideas for future development, not committed to timeline:
 - UI sound effects (optional)
 
 ### Long-term possibilities
+
 - Pitch detection (sing/play input)
 - Melodic dictation (multi-note sequences)
 - Chord progression identification
@@ -158,7 +162,18 @@ Ideas for future development, not committed to timeline:
 
 ## Changelog
 
+### 2024-12-14 — v0.1.0 Foundation Complete
+
+- Initialized Expo project with TypeScript
+- Set up project structure with Expo Router
+- Installed all dependencies (Zustand, AsyncStorage, SQLite, expo-av)
+- Implemented theme system (colors, typography, spacing)
+- Built common components (BracketButton, Card, ProgressBar, etc.)
+- Created tab navigation (Home, Progress, Settings)
+- Added placeholder exercise screens (Intervals, Scale Degrees, Chords)
+
 ### 2024-XX-XX — Project Initialized
+
 - Created repository
 - Added PRD and CLAUDE.md
 - Added ROADMAP.md and README.md
