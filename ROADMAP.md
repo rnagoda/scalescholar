@@ -4,38 +4,38 @@ This document tracks the development progress of Scale Scholar, a mobile ear tra
 
 ---
 
-## Current: v0.1.0 — Foundation
+## Completed: v0.1.0 — Foundation
 
 Project setup, design system, and core infrastructure.
 
 - [x] Initialize repository and documentation
 - [x] Create PRD and CLAUDE.md development guidelines
-- [ ] Initialize React Native project (bare workflow)
-- [ ] Configure TypeScript strict mode
-- [ ] Set up project structure (`src/` directories)
-- [ ] Install and configure dependencies
-  - [ ] React Navigation
-  - [ ] Zustand
-  - [ ] AsyncStorage
-  - [ ] expo-sqlite
-  - [ ] react-native-audio-api
-- [ ] Set up Space Mono font
-- [ ] Implement theme system (colors, typography, spacing)
-- [ ] Build common components
-  - [ ] BracketButton
-  - [ ] Card
-  - [ ] ScreenHeader
-  - [ ] Divider
-  - [ ] ProgressBar
-  - [ ] LabelValue
-  - [ ] SectionHeader
-  - [ ] AppFooter
-- [ ] Set up navigation structure (tabs + stack)
-- [ ] Create placeholder screens
+- [x] Initialize React Native project (bare workflow)
+- [x] Configure TypeScript strict mode
+- [x] Set up project structure (`src/` directories)
+- [x] Install and configure dependencies
+  - [x] React Navigation
+  - [x] Zustand
+  - [x] AsyncStorage
+  - [x] expo-sqlite
+  - [x] react-native-audio-api
+- [x] Set up Space Mono font
+- [x] Implement theme system (colors, typography, spacing)
+- [x] Build common components
+  - [x] BracketButton
+  - [x] Card
+  - [x] ScreenHeader
+  - [x] Divider
+  - [x] ProgressBar
+  - [x] LabelValue
+  - [x] SectionHeader
+  - [x] AppFooter
+- [x] Set up navigation structure (tabs + stack)
+- [x] Create placeholder screens
 
 ---
 
-## Next: v0.2.0 — Audio Engine & Interval Trainer
+## Current: v0.2.0 — Audio Engine & Interval Trainer
 
 Core audio synthesis and the first complete exercise module.
 
@@ -157,7 +157,17 @@ Ideas for future development, not committed to timeline:
 
 ## Changelog
 
-### 2024-XX-XX — Project Initialized
+### 2024-12-14 — v0.1.0 Foundation Complete
+- React Native 0.83.0 project initialized
+- TypeScript strict mode configured with path aliases
+- Theme system: colors, typography, spacing
+- Common components: BracketButton, Card, ScreenHeader, Divider, ProgressBar, LabelValue, SectionHeader, AppFooter
+- Navigation: Bottom tabs (Home, Progress, Settings) + Stack navigator
+- Placeholder screens for all views
+- Space Mono font integrated
+- Dependencies: React Navigation, Zustand, AsyncStorage, expo-sqlite, react-native-audio-api
+
+### 2024-12-14 — Project Initialized
 - Created repository
 - Added PRD and CLAUDE.md
 - Added ROADMAP.md and README.md
