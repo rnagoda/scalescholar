@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av';
+import { AudioContext, OscillatorNode, GainNode } from 'react-native-audio-api';
 import { Synthesizer, ADSREnvelope } from '../../types/audio';
 
 const DEFAULT_ENVELOPE: ADSREnvelope = {
@@ -9,8 +9,8 @@ const DEFAULT_ENVELOPE: ADSREnvelope = {
 };
 
 /**
- * Simple sine wave synthesizer using Web Audio API
- * Falls back gracefully on platforms without Web Audio support
+ * Simple sine wave synthesizer using react-native-audio-api
+ * Provides Web Audio API compatible synthesis on iOS and Android
  */
 export class SineSynth implements Synthesizer {
   private audioContext: AudioContext | null = null;
@@ -24,45 +24,18 @@ export class SineSynth implements Synthesizer {
   }
 
   /**
-   * Initialize audio context (must be called after user interaction)
+   * Initialize audio context (lazy initialization)
    */
-  private async initialize(): Promise<boolean> {
-    if (this.isInitialized) return true;
+  private initialize(): boolean {
+    if (this.isInitialized && this.audioContext) return true;
 
     try {
-      // Request audio focus on mobile
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-        shouldDuckAndroid: true,
-      });
-
-      // Check for Web Audio API support
-      if (typeof AudioContext !== 'undefined') {
-        this.audioContext = new AudioContext();
-        this.isInitialized = true;
-        return true;
-      } else if (typeof (window as any).webkitAudioContext !== 'undefined') {
-        this.audioContext = new (window as any).webkitAudioContext();
-        this.isInitialized = true;
-        return true;
-      }
-
-      console.warn('Web Audio API not available');
-      return false;
+      this.audioContext = new AudioContext();
+      this.isInitialized = true;
+      return true;
     } catch (error) {
-      console.error('Failed to initialize audio:', error);
+      console.error('Failed to initialize audio context:', error);
       return false;
-    }
-  }
-
-  /**
-   * Resume audio context if suspended (required after user interaction)
-   */
-  private async ensureContextRunning(): Promise<void> {
-    if (this.audioContext?.state === 'suspended') {
-      await this.audioContext.resume();
     }
   }
 
@@ -88,20 +61,18 @@ export class SineSynth implements Synthesizer {
 
     // Hold at sustain level until release
     const releaseStart = startTime + duration - release;
-    gain.setValueAtTime(sustain, releaseStart);
+    gain.setValueAtTime(sustain, Math.max(releaseStart, startTime + attack + decay));
 
     // Release: ramp to 0
     gain.linearRampToValueAtTime(0, startTime + duration);
   }
 
   async playNote(frequency: number, duration: number): Promise<void> {
-    const initialized = await this.initialize();
+    const initialized = this.initialize();
     if (!initialized || !this.audioContext) {
       console.warn('Audio not available, skipping playback');
       return;
     }
-
-    await this.ensureContextRunning();
 
     const oscillator = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
@@ -121,33 +92,28 @@ export class SineSynth implements Synthesizer {
     this.activeOscillators.push(oscillator);
     this.activeGains.push(gainNode);
 
-    // Clean up after note ends
-    oscillator.onended = () => {
-      const oscIndex = this.activeOscillators.indexOf(oscillator);
-      if (oscIndex > -1) this.activeOscillators.splice(oscIndex, 1);
-      const gainIndex = this.activeGains.indexOf(gainNode);
-      if (gainIndex > -1) this.activeGains.splice(gainIndex, 1);
-      oscillator.disconnect();
-      gainNode.disconnect();
-    };
-
     // Return promise that resolves when note is done
     return new Promise((resolve) => {
-      setTimeout(resolve, duration * 1000);
+      setTimeout(() => {
+        // Clean up
+        const oscIndex = this.activeOscillators.indexOf(oscillator);
+        if (oscIndex > -1) this.activeOscillators.splice(oscIndex, 1);
+        const gainIndex = this.activeGains.indexOf(gainNode);
+        if (gainIndex > -1) this.activeGains.splice(gainIndex, 1);
+        resolve();
+      }, duration * 1000);
     });
   }
 
   async playChord(frequencies: number[], duration: number): Promise<void> {
-    const initialized = await this.initialize();
+    const initialized = this.initialize();
     if (!initialized || !this.audioContext) {
       console.warn('Audio not available, skipping playback');
       return;
     }
 
-    await this.ensureContextRunning();
-
     // Play all notes simultaneously
-    const promises = frequencies.map((freq) => {
+    const playPromises = frequencies.map((freq) => {
       const oscillator = this.audioContext!.createOscillator();
       const gainNode = this.audioContext!.createGain();
 
@@ -171,28 +137,28 @@ export class SineSynth implements Synthesizer {
       this.activeOscillators.push(oscillator);
       this.activeGains.push(gainNode);
 
-      oscillator.onended = () => {
-        oscillator.disconnect();
-        gainNode.disconnect();
-        chordGain.disconnect();
-      };
-
       return new Promise<void>((resolve) => {
         setTimeout(resolve, duration * 1000);
       });
     });
 
-    await Promise.all(promises);
+    await Promise.all(playPromises);
   }
 
   stop(): void {
-    const now = this.audioContext?.currentTime ?? 0;
+    if (!this.audioContext) return;
+
+    const now = this.audioContext.currentTime;
 
     // Quick fade out to avoid clicks
     this.activeGains.forEach((gain) => {
-      gain.gain.cancelScheduledValues(now);
-      gain.gain.setValueAtTime(gain.gain.value, now);
-      gain.gain.linearRampToValueAtTime(0, now + 0.05);
+      try {
+        gain.gain.cancelScheduledValues(now);
+        gain.gain.setValueAtTime(gain.gain.value, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.05);
+      } catch {
+        // Ignore errors
+      }
     });
 
     // Stop oscillators after fade
