@@ -23,9 +23,9 @@ Scale Scholar features a distinctive retro terminal aesthetic — dark backgroun
 
 | Layer | Technology |
 |-------|------------|
-| Framework | React Native (bare workflow) |
-| Audio | react-native-audio-api |
-| Navigation | React Navigation 6+ |
+| Framework | React Native with Expo |
+| Audio | expo-audio |
+| Navigation | Expo Router |
 | State | Zustand |
 | Storage | AsyncStorage + expo-sqlite |
 | Language | TypeScript (strict mode) |
@@ -35,10 +35,10 @@ Scale Scholar features a distinctive retro terminal aesthetic — dark backgroun
 ### Prerequisites
 
 - Node.js 18+
-- Watchman (macOS)
-- Xcode 15+ (iOS development)
-- Android Studio (Android development)
-- CocoaPods (iOS dependencies)
+- Expo CLI (`npm install -g expo-cli`)
+- Expo Go app on your device (for testing on physical devices)
+- Xcode (iOS simulator, macOS only)
+- Android Studio (Android emulator, optional)
 
 ### Installation
 
@@ -49,22 +49,21 @@ cd scalescholar
 
 # Install dependencies
 npm install
-
-# iOS: Install pods
-cd ios && pod install && cd ..
 ```
 
 ### Running the App
 
 ```bash
-# Start Metro bundler
-npm start
+# Start Expo development server
+npx expo start
 
-# Run on iOS
-npm run ios
+# Run on iOS simulator
+npx expo start --ios
 
-# Run on Android
-npm run android
+# Run on Android emulator
+npx expo start --android
+
+# Scan QR code with Expo Go app to run on physical device
 ```
 
 ### Development Commands
@@ -83,9 +82,16 @@ npm run lint
 ## Project Structure
 
 ```
+app/                        # Expo Router file-based routing
+├── (tabs)/                 # Tab navigator group
+│   ├── _layout.tsx         # Tab layout configuration
+│   ├── index.tsx           # Home screen
+│   ├── progress.tsx        # Progress screen
+│   └── settings.tsx        # Settings screen
+├── exercise/               # Exercise screens (stack)
+├── _layout.tsx             # Root layout
+└── +not-found.tsx          # 404 screen
 src/
-├── app/                    # App entry, navigation setup
-├── screens/                # Screen components
 ├── components/
 │   ├── common/             # Reusable UI (BracketButton, Card, etc.)
 │   └── exercises/          # Exercise-specific components

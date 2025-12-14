@@ -303,9 +303,9 @@ INTERVALS                             [ CLOSE ]
 
 | Layer | Technology | Notes |
 |-------|------------|-------|
-| Framework | React Native (bare workflow) | Not Expo managed — we need native module access |
-| Audio | react-native-audio-api | Web Audio API implementation for RN |
-| Navigation | React Navigation 6+ | Stack + bottom tabs |
+| Framework | React Native with Expo | Expo managed workflow for faster development |
+| Audio | expo-audio | Expo's audio API for playback and synthesis |
+| Navigation | Expo Router | File-based routing built on React Navigation |
 | State | Zustand | Keep stores small and focused |
 | Storage | AsyncStorage | Settings, simple preferences |
 | Database | expo-sqlite | Exercise history, statistics |
@@ -315,15 +315,19 @@ INTERVALS                             [ CLOSE ]
 ## Project Structure
 
 ```
+app/                        # Expo Router file-based routing
+├── (tabs)/                 # Tab navigator group
+│   ├── _layout.tsx         # Tab layout configuration
+│   ├── index.tsx           # Home screen (default tab)
+│   ├── progress.tsx        # Progress screen
+│   └── settings.tsx        # Settings screen
+├── exercise/               # Exercise screens (stack)
+│   ├── intervals.tsx
+│   ├── scale-degrees.tsx
+│   └── chords.tsx
+├── _layout.tsx             # Root layout
+└── +not-found.tsx          # 404 screen
 src/
-├── app/                    # App entry, navigation setup
-├── screens/                # Screen components
-│   ├── HomeScreen.tsx
-│   ├── IntervalTrainerScreen.tsx
-│   ├── ScaleDegreeTrainerScreen.tsx
-│   ├── ChordTrainerScreen.tsx
-│   ├── ProgressScreen.tsx
-│   └── SettingsScreen.tsx
 ├── components/             # Reusable UI components
 │   ├── common/             # Buttons, cards, etc.
 │   └── exercises/          # Exercise-specific components
@@ -614,19 +618,19 @@ const completeSession = async (results: SessionResults) => {
 
 ## Things to Avoid
 
-1. **Don't use Expo managed workflow** — We need bare workflow for native audio module access
+1. **Don't create audio context on app load** — Must be triggered by user interaction
 
-2. **Don't create audio context on app load** — Must be triggered by user interaction
+2. **Don't hardcode frequencies** — Always calculate from MIDI numbers using the user's A4 reference
 
-3. **Don't hardcode frequencies** — Always calculate from MIDI numbers using the user's A4 reference
+3. **Don't block the UI during audio** — Audio operations should never freeze interactions
 
-4. **Don't block the UI during audio** — Audio operations should never freeze interactions
+4. **Don't store exercise history in AsyncStorage** — Use SQLite for queryable data
 
-5. **Don't store exercise history in AsyncStorage** — Use SQLite for queryable data
+5. **Don't skip TypeScript types** — This codebase should be fully typed
 
-6. **Don't skip TypeScript types** — This codebase should be fully typed
+6. **Don't use magic numbers** — Define constants for intervals, scale degrees, timing values
 
-7. **Don't use magic numbers** — Define constants for intervals, scale degrees, timing values
+7. **Don't eject from Expo** — Stay in managed workflow unless absolutely necessary
 
 ---
 
@@ -829,14 +833,14 @@ const MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
 # Install dependencies
 npm install
 
-# iOS setup
-cd ios && pod install && cd ..
+# Start development server (opens Expo DevTools)
+npx expo start
 
-# Run iOS
-npm run ios
+# Run on iOS simulator
+npx expo start --ios
 
-# Run Android
-npm run android
+# Run on Android emulator
+npx expo start --android
 
 # Run tests
 npm test
@@ -849,13 +853,15 @@ npm run typecheck
 
 1. Download Space Mono from Google Fonts: https://fonts.google.com/specimen/Space+Mono
 2. Add `SpaceMono-Regular.ttf` and `SpaceMono-Bold.ttf` to `assets/fonts/`
-3. Add to `react-native.config.js`:
-```javascript
-module.exports = {
-  assets: ['./assets/fonts'],
-};
+3. Expo automatically loads fonts from `assets/fonts/` — use `expo-font` to load them:
+```typescript
+import { useFonts } from 'expo-font';
+
+const [fontsLoaded] = useFonts({
+  'SpaceMono-Regular': require('./assets/fonts/SpaceMono-Regular.ttf'),
+  'SpaceMono-Bold': require('./assets/fonts/SpaceMono-Bold.ttf'),
+});
 ```
-4. Run `npx react-native-asset` to link fonts
 
 ## Questions for Human Review
 
