@@ -447,6 +447,121 @@ Implement as a simple state machine or useReducer, not scattered useState calls.
 - ALL CAPS with letter-spacing for headers and section titles
 - Bracketed buttons `[ ACTION ]` for all actions — this is the signature UI element
 
+---
+
+## SOLID Design Principles
+
+Apply SOLID principles throughout the codebase to ensure maintainable, testable, and extensible code.
+
+### Single Responsibility Principle (SRP)
+
+Each class, module, or function should have one reason to change.
+
+- **Components** — A component renders UI; it doesn't fetch data or manage complex business logic
+- **Stores** — Each Zustand store manages one domain (settings, progress, exercise state)
+- **Services** — Separate database operations from business logic
+- **Hooks** — Extract reusable logic into focused custom hooks
+
+```typescript
+// Bad: Component doing too much
+const ExerciseScreen = () => {
+  // Fetches data, manages state, calculates scores, renders UI...
+};
+
+// Good: Separated concerns
+const ExerciseScreen = () => {
+  const { question, submitAnswer } = useExerciseSession();
+  const { playInterval } = useAudioPlayer();
+  return <ExerciseUI question={question} onAnswer={submitAnswer} onPlay={playInterval} />;
+};
+```
+
+### Open/Closed Principle (OCP)
+
+Software entities should be open for extension but closed for modification.
+
+- **Synthesizers** — New instrument types implement the `Synthesizer` interface without modifying existing code
+- **Exercise types** — Add new trainers by implementing a common exercise interface
+- **Question generators** — Extend with new question types without changing the core engine
+
+```typescript
+// Adding a new synth doesn't require modifying AudioEngine
+class OrganSynth implements Synthesizer {
+  playNote(frequency: number, duration: number): void { /* ... */ }
+  playChord(frequencies: number[], duration: number): void { /* ... */ }
+  stop(): void { /* ... */ }
+}
+```
+
+### Liskov Substitution Principle (LSP)
+
+Subtypes must be substitutable for their base types without altering correctness.
+
+- All synthesizers must behave consistently when called through the `Synthesizer` interface
+- All exercise types must work with the common exercise flow state machine
+- Derived components must accept and handle all props their parent type declares
+
+### Interface Segregation Principle (ISP)
+
+Clients should not be forced to depend on interfaces they don't use.
+
+- **Small, focused interfaces** — Don't create monolithic interfaces with methods some implementations don't need
+- **Props interfaces** — Components should only require the props they actually use
+- **Store slices** — Use Zustand selectors to subscribe only to needed state
+
+```typescript
+// Bad: Forcing components to handle unused props
+interface ExerciseProps {
+  question: Question;
+  onAnswer: (answer: string) => void;
+  onSkip: () => void;  // Not all exercises support skipping
+  onHint: () => void;  // Not all exercises have hints
+}
+
+// Good: Compose smaller interfaces
+interface BaseExerciseProps {
+  question: Question;
+  onAnswer: (answer: string) => void;
+}
+
+interface SkippableExerciseProps extends BaseExerciseProps {
+  onSkip: () => void;
+}
+```
+
+### Dependency Inversion Principle (DIP)
+
+High-level modules should not depend on low-level modules; both should depend on abstractions.
+
+- **Audio engine** — Depends on the `Synthesizer` interface, not concrete synth implementations
+- **Services** — Accept database interface, not direct SQLite calls (enables testing with mocks)
+- **Components** — Receive dependencies via props or hooks, not direct imports of implementations
+
+```typescript
+// Bad: Direct dependency on implementation
+import { SQLiteDatabase } from 'expo-sqlite';
+const saveProgress = (db: SQLiteDatabase, data: Progress) => { /* ... */ };
+
+// Good: Depend on abstraction
+interface ProgressRepository {
+  save(data: Progress): Promise<void>;
+  load(): Promise<Progress>;
+}
+const saveProgress = (repo: ProgressRepository, data: Progress) => repo.save(data);
+```
+
+### Applying SOLID in Practice
+
+When writing new code or refactoring, ask:
+
+1. **SRP** — Does this module have more than one reason to change?
+2. **OCP** — Can I add new behavior without modifying existing code?
+3. **LSP** — Can any implementation of this interface be used interchangeably?
+4. **ISP** — Am I forcing consumers to depend on things they don't need?
+5. **DIP** — Am I depending on concrete implementations instead of abstractions?
+
+---
+
 ## Important Patterns
 
 ### Audio Playback
@@ -512,6 +627,144 @@ const completeSession = async (results: SessionResults) => {
 6. **Don't skip TypeScript types** — This codebase should be fully typed
 
 7. **Don't use magic numbers** — Define constants for intervals, scale degrees, timing values
+
+---
+
+## Git Workflow
+
+Follow a disciplined git workflow to maintain code quality and project history.
+
+### Branch Strategy
+
+**Never commit directly to `main`.** All work happens on feature branches.
+
+```bash
+# Branch naming conventions
+feature/interval-trainer      # New features
+fix/audio-click-on-stop       # Bug fixes
+refactor/extract-audio-hooks  # Code improvements
+docs/update-readme            # Documentation updates
+chore/upgrade-dependencies    # Maintenance tasks
+```
+
+### Workflow Steps
+
+1. **Create a feature branch** from `main`:
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make atomic commits** with clear, descriptive messages:
+   ```bash
+   # Good commit messages
+   git commit -m "Add interval playback to AudioEngine"
+   git commit -m "Fix memory leak in synthesizer cleanup"
+   git commit -m "Refactor question generator for testability"
+
+   # Bad commit messages
+   git commit -m "WIP"
+   git commit -m "fixes"
+   git commit -m "stuff"
+   ```
+
+3. **Push and create a pull request** for review:
+   ```bash
+   git push -u origin feature/your-feature-name
+   # Then create PR via GitHub
+   ```
+
+4. **Merge via pull request** after review — squash or merge commit as appropriate
+
+### Commit Message Format
+
+Use conventional commit style for clarity:
+
+```
+<type>: <short summary>
+
+[optional body with more detail]
+
+[optional footer with breaking changes, issue references]
+```
+
+Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `style`
+
+Examples:
+```
+feat: Add scale degree trainer exercise type
+
+Implements the core exercise flow for identifying scale degrees
+within a major scale context. Includes melodic and harmonic modes.
+
+Closes #42
+```
+
+```
+fix: Prevent audio context creation before user interaction
+
+iOS Safari requires user gesture before AudioContext can be created.
+Defer initialization to first play button tap.
+```
+
+### Documentation Requirements
+
+Keep documentation current as the project evolves:
+
+- **README.md** — Project overview, setup instructions, and quick start guide
+- **CLAUDE.md** — Development guidelines, architecture decisions, and patterns
+- **ROADMAP.md** — Current project status, planned features, and priorities
+
+### Roadmap Maintenance
+
+Maintain `ROADMAP.md` at the project root with:
+
+1. **Current milestone** — What we're working on now
+2. **Completed milestones** — What's been shipped
+3. **Upcoming milestones** — What's planned next
+4. **Backlog** — Ideas and future possibilities
+
+Update the roadmap when:
+- Starting work on a new feature
+- Completing a milestone
+- Reprioritizing based on learnings
+- Adding new feature ideas
+
+Example structure:
+```markdown
+# Scale Scholar Roadmap
+
+## Current: v0.1.0 — Foundation
+- [x] Project setup and configuration
+- [x] Design system implementation
+- [ ] Audio engine core
+- [ ] Interval trainer MVP
+
+## Next: v0.2.0 — Core Trainers
+- [ ] Scale degree trainer
+- [ ] Progress tracking
+- [ ] Settings screen
+
+## Future
+- Chord quality trainer
+- Custom practice sessions
+- Statistics and insights
+```
+
+### Pull Request Checklist
+
+Before requesting review:
+
+- [ ] Code follows style guidelines and SOLID principles
+- [ ] TypeScript compiles with no errors
+- [ ] Tests pass (if applicable)
+- [ ] README updated (if needed)
+- [ ] ROADMAP updated (if completing/starting milestone work)
+- [ ] No console.log statements left in code
+- [ ] No hardcoded values that should be constants
+
+---
 
 ## Testing Approach
 
