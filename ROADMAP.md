@@ -41,6 +41,7 @@ Project setup, design system, and core infrastructure.
 Core audio synthesis and the first complete exercise module.
 
 ### Audio Engine
+
 - [ ] AudioEngine singleton with lazy initialization
 - [ ] Synthesizer interface definition
 - [ ] SineSynth implementation (pure tones)
@@ -52,6 +53,7 @@ Core audio synthesis and the first complete exercise module.
   - [ ] Interval calculations
 
 ### Interval Trainer
+
 - [ ] Exercise state machine (Ready → Playing → Answering → Feedback)
 - [ ] Question generator with constraints
 - [ ] PlayButton component
@@ -138,6 +140,7 @@ Final testing and app store submission.
 Ideas for future development, not committed to timeline:
 
 ### Near-term possibilities
+
 - Minor keys and modes
 - 7th chord types (Maj7, Min7, Dom7)
 - Chord inversions
@@ -146,6 +149,7 @@ Ideas for future development, not committed to timeline:
 - UI sound effects (optional)
 
 ### Long-term possibilities
+
 - Pitch detection (sing/play input)
 - Melodic dictation (multi-note sequences)
 - Chord progression identification
@@ -159,6 +163,7 @@ Ideas for future development, not committed to timeline:
 ## Changelog
 
 ### 2024-12-14 — v0.1.0 Foundation Complete
+
 - Initialized Expo project with TypeScript
 - Set up project structure with Expo Router
 - Installed all dependencies (Zustand, AsyncStorage, SQLite, expo-av)
@@ -168,6 +173,7 @@ Ideas for future development, not committed to timeline:
 - Added placeholder exercise screens (Intervals, Scale Degrees, Chords)
 
 ### 2024-XX-XX — Project Initialized
+
 - Created repository
 - Added PRD and CLAUDE.md
 - Added ROADMAP.md and README.md
