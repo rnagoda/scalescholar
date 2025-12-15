@@ -64,22 +64,23 @@ Core audio synthesis and the first complete exercise module.
 
 ---
 
-## Current: v0.3.0 — Progress System & Unlocks
+## Completed: v0.3.0 — Progress System & Unlocks
 
 Track user progress and enable progressive difficulty.
 
-- [ ] SQLite database schema
-- [ ] Progress service (save/load attempt history)
-- [ ] useProgressStore (Zustand)
-- [ ] Per-exercise statistics calculation
-- [ ] Unlock logic (80% accuracy, 20+ attempts)
-- [ ] Progress screen UI
-- [ ] Interval unlocks: m2, M2, Tritone, m6, M6, m7, M7, P8
-- [ ] Interval modes: descending, mixed, harmonic
+- [x] SQLite database schema (`src/services/database.ts`)
+- [x] Progress service (save/load attempt history)
+- [x] useProgressStore (Zustand)
+- [x] Per-exercise statistics calculation
+- [x] Unlock logic (80% accuracy, 20+ attempts)
+- [x] Progress screen UI with interval breakdown
+- [x] Interval unlocks: m2, M2, Tritone, m6, M6, m7, M7, P8
+- [x] Interval modes infrastructure (descending, mixed, harmonic)
+  - Note: Mode selection UI will be added in v0.6.0 Settings
 
 ---
 
-## Planned: v0.4.0 — Scale Degree Trainer
+## Current: v0.4.0 — Scale Degree Trainer
 
 Second exercise module for functional ear training.
 
@@ -111,6 +112,7 @@ User preferences and final MVP polish.
 - [ ] Settings screen UI
 - [ ] useSettingsStore with AsyncStorage persistence
 - [ ] Instrument sound toggle (Piano/Sine)
+- [ ] Interval mode selection (ascending/descending/mixed, melodic/harmonic)
 - [ ] Scale degree label preference
 - [ ] Reference key selection
 - [ ] Reference pitch (A4) adjustment
@@ -161,9 +163,20 @@ Ideas for future development, not committed to timeline:
 
 ## Changelog
 
+### 2024-12-14 — v0.3.0 Progress System & Unlocks
+
+- Created SQLite database schema for attempts, sessions, and unlocks
+- Built progress service with CRUD operations
+- Implemented useProgressStore with Zustand
+- Added per-interval statistics tracking
+- Built unlock system (80% accuracy, 20+ attempts)
+- Created Progress screen with interval breakdown
+- Added unlock celebration banner on session complete
+- Integrated progress tracking into interval trainer
+
 ### 2024-12-14 — v0.2.0 Audio Engine & Interval Trainer
 
-- Built AudioEngine singleton with Web Audio API synthesis
+- Built AudioEngine singleton with react-native-audio-api
 - Implemented SineSynth and PianoSynth (additive synthesis)
 - Added ADSR envelopes for click-free playback
 - Created music theory utilities (MIDI, frequencies, intervals)
@@ -171,6 +184,7 @@ Ideas for future development, not committed to timeline:
 - Implemented question generator with similarity avoidance
 - Created PlayButton and AnswerButton components
 - Full interval trainer with feedback and session completion
+- Added expo-dev-client for native development builds
 
 ### 2024-12-14 — v0.1.0 Foundation Complete
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -13,9 +13,36 @@ import {
   Divider,
   AppFooter,
 } from '@/src/components/common';
+import { useProgressStore } from '@/src/stores/useProgressStore';
+import { ALL_INTERVALS } from '@/src/utils/music';
 
 export default function HomeScreen() {
   const router = useRouter();
+
+  const {
+    intervalProgress,
+    isInitialized,
+    initialize,
+    refreshIntervalProgress,
+  } = useProgressStore();
+
+  useEffect(() => {
+    if (!isInitialized) {
+      initialize();
+    } else {
+      refreshIntervalProgress();
+    }
+  }, []);
+
+  const { stats, unlockedIntervals } = intervalProgress;
+
+  const formatAccuracy = (accuracy: number): string => {
+    if (accuracy === 0 && stats.totalAttempts === 0) return '--';
+    return `${Math.round(accuracy * 100)}%`;
+  };
+
+  const unlockedCount = unlockedIntervals.length;
+  const totalIntervals = ALL_INTERVALS.length;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -38,12 +65,14 @@ export default function HomeScreen() {
         <Card>
           <Text style={styles.cardTitle}>Interval Trainer</Text>
           <View style={styles.cardContent}>
-            <LabelValue label="Accuracy:" value="--" />
-            <LabelValue label="Current Streak:" value="0" />
+            <LabelValue label="Accuracy:" value={formatAccuracy(stats.accuracy)} />
+            <LabelValue label="Current Streak:" value={stats.streak.toString()} />
           </View>
           <View style={styles.progressContainer}>
-            <ProgressBar progress={0.33} />
-            <Text style={styles.progressLabel}>4/12 unlocked</Text>
+            <ProgressBar progress={unlockedCount / totalIntervals} />
+            <Text style={styles.progressLabel}>
+              {unlockedCount}/{totalIntervals} unlocked
+            </Text>
           </View>
           <View style={styles.cardAction}>
             <BracketButton
@@ -66,9 +95,9 @@ export default function HomeScreen() {
           </View>
           <View style={styles.cardAction}>
             <BracketButton
-              label="TRAIN"
-              onPress={() => router.push('/exercise/scale-degrees')}
-              color={colors.accentGreen}
+              label="COMING SOON"
+              onPress={() => {}}
+              color={colors.textMuted}
             />
           </View>
         </Card>
@@ -85,9 +114,9 @@ export default function HomeScreen() {
           </View>
           <View style={styles.cardAction}>
             <BracketButton
-              label="TRAIN"
-              onPress={() => router.push('/exercise/chords')}
-              color={colors.accentGreen}
+              label="COMING SOON"
+              onPress={() => {}}
+              color={colors.textMuted}
             />
           </View>
         </Card>
