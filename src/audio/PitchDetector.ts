@@ -7,6 +7,7 @@
  */
 
 import { AudioRecorder } from 'react-native-audio-api';
+import { Audio } from 'expo-av';
 import {
   PitchResult,
   PitchDetectorConfig,
@@ -176,6 +177,18 @@ class PitchDetectorClass {
     this.setState('requesting');
 
     try {
+      // Request microphone permission
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== 'granted') {
+        throw new Error('Microphone permission not granted');
+      }
+
+      // Set audio mode for recording
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
       // Create audio recorder
       this.recorder = new AudioRecorder({
         sampleRate: this.config.sampleRate,
