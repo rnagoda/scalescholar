@@ -7,7 +7,7 @@
  */
 
 import { AudioRecorder } from 'react-native-audio-api';
-import { Audio } from 'expo-av';
+import { Platform, PermissionsAndroid } from 'react-native';
 import {
   PitchResult,
   PitchDetectorConfig,
@@ -177,17 +177,22 @@ class PitchDetectorClass {
     this.setState('requesting');
 
     try {
-      // Request microphone permission
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
-        throw new Error('Microphone permission not granted');
+      // Request microphone permission on Android
+      // iOS handles permission automatically when AudioRecorder starts
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+          {
+            title: 'Microphone Permission',
+            message: 'Scale Scholar needs microphone access to detect pitch.',
+            buttonPositive: 'Allow',
+            buttonNegative: 'Deny',
+          }
+        );
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          throw new Error('Microphone permission not granted');
+        }
       }
-
-      // Set audio mode for recording
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
 
       // Create audio recorder
       this.recorder = new AudioRecorder({
