@@ -8,6 +8,7 @@ import { ScreenHeader, BracketButton, Divider } from '@/src/components/common';
 import { PlayButton, AnswerButton } from '@/src/components/exercises';
 import { useScaleDegreeStore } from '@/src/stores/useScaleDegreeStore';
 import { useProgressStore } from '@/src/stores/useProgressStore';
+import { useSettingsStore } from '@/src/stores/useSettingsStore';
 import { AudioEngine } from '@/src/audio';
 import {
   ScaleDegree,
@@ -44,6 +45,13 @@ export default function ScaleDegreesExercise() {
     getUnlockedScaleDegrees,
   } = useProgressStore();
 
+  const {
+    questionsPerSession,
+    scaleDegreeLabels,
+  } = useSettingsStore();
+
+  const useSolfege = scaleDegreeLabels === 'solfege';
+
   // Initialize progress store and start session
   useEffect(() => {
     const setup = async () => {
@@ -53,9 +61,9 @@ export default function ScaleDegreesExercise() {
       const unlockedDegrees = getUnlockedScaleDegrees();
       startSession({
         availableDegrees: unlockedDegrees,
-        questionCount: 10,
+        questionCount: questionsPerSession,
         contextType: 'triad',
-        useSolfege: false,
+        useSolfege,
       });
     };
     setup();
@@ -113,11 +121,11 @@ export default function ScaleDegreesExercise() {
     const unlockedDegrees = getUnlockedScaleDegrees();
     startSession({
       availableDegrees: unlockedDegrees,
-      questionCount: 10,
+      questionCount: questionsPerSession,
       contextType: 'triad',
-      useSolfege: config.useSolfege,
+      useSolfege,
     });
-  }, [startSession, getUnlockedScaleDegrees, config.useSolfege]);
+  }, [startSession, getUnlockedScaleDegrees, questionsPerSession, useSolfege]);
 
   // Record session when complete
   useEffect(() => {
