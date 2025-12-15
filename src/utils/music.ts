@@ -199,3 +199,173 @@ export type ChordType = keyof typeof CHORD_TYPES;
 export function generateChord(rootMidi: number, type: ChordType): number[] {
   return CHORD_TYPES[type].map((interval) => rootMidi + interval);
 }
+
+// ============================================
+// SCALE DEGREES
+// ============================================
+
+/**
+ * Scale degree enum (1-7)
+ * Using 1-indexed to match music theory convention
+ */
+export enum ScaleDegree {
+  TONIC = 1,
+  SUPERTONIC = 2,
+  MEDIANT = 3,
+  SUBDOMINANT = 4,
+  DOMINANT = 5,
+  SUBMEDIANT = 6,
+  LEADING_TONE = 7,
+}
+
+/**
+ * Scale degree number names
+ */
+export const SCALE_DEGREE_NUMBERS: Record<ScaleDegree, string> = {
+  [ScaleDegree.TONIC]: '1',
+  [ScaleDegree.SUPERTONIC]: '2',
+  [ScaleDegree.MEDIANT]: '3',
+  [ScaleDegree.SUBDOMINANT]: '4',
+  [ScaleDegree.DOMINANT]: '5',
+  [ScaleDegree.SUBMEDIANT]: '6',
+  [ScaleDegree.LEADING_TONE]: '7',
+};
+
+/**
+ * Scale degree solfege names
+ */
+export const SCALE_DEGREE_SOLFEGE: Record<ScaleDegree, string> = {
+  [ScaleDegree.TONIC]: 'Do',
+  [ScaleDegree.SUPERTONIC]: 'Re',
+  [ScaleDegree.MEDIANT]: 'Mi',
+  [ScaleDegree.SUBDOMINANT]: 'Fa',
+  [ScaleDegree.DOMINANT]: 'Sol',
+  [ScaleDegree.SUBMEDIANT]: 'La',
+  [ScaleDegree.LEADING_TONE]: 'Ti',
+};
+
+/**
+ * Scale degree full names
+ */
+export const SCALE_DEGREE_FULL_NAMES: Record<ScaleDegree, string> = {
+  [ScaleDegree.TONIC]: 'Tonic',
+  [ScaleDegree.SUPERTONIC]: 'Supertonic',
+  [ScaleDegree.MEDIANT]: 'Mediant',
+  [ScaleDegree.SUBDOMINANT]: 'Subdominant',
+  [ScaleDegree.DOMINANT]: 'Dominant',
+  [ScaleDegree.SUBMEDIANT]: 'Submediant',
+  [ScaleDegree.LEADING_TONE]: 'Leading Tone',
+};
+
+/**
+ * Semitones from root for each scale degree in major scale
+ */
+export const SCALE_DEGREE_SEMITONES: Record<ScaleDegree, number> = {
+  [ScaleDegree.TONIC]: 0,
+  [ScaleDegree.SUPERTONIC]: 2,
+  [ScaleDegree.MEDIANT]: 4,
+  [ScaleDegree.SUBDOMINANT]: 5,
+  [ScaleDegree.DOMINANT]: 7,
+  [ScaleDegree.SUBMEDIANT]: 9,
+  [ScaleDegree.LEADING_TONE]: 11,
+};
+
+/**
+ * Starter scale degrees (unlocked by default)
+ * 1 (Do), 3 (Mi), 5 (Sol) - the tonic triad
+ */
+export const STARTER_SCALE_DEGREES: ScaleDegree[] = [
+  ScaleDegree.TONIC,
+  ScaleDegree.MEDIANT,
+  ScaleDegree.DOMINANT,
+];
+
+/**
+ * All scale degrees in unlock order
+ */
+export const ALL_SCALE_DEGREES: ScaleDegree[] = [
+  // Starter degrees (tonic triad)
+  ScaleDegree.TONIC,
+  ScaleDegree.MEDIANT,
+  ScaleDegree.DOMINANT,
+  // Unlockable degrees
+  ScaleDegree.SUBDOMINANT,
+  ScaleDegree.SUPERTONIC,
+  ScaleDegree.SUBMEDIANT,
+  ScaleDegree.LEADING_TONE,
+];
+
+/**
+ * Get scale degree name based on display preference
+ */
+export function getScaleDegreeName(
+  degree: ScaleDegree,
+  useSolfege: boolean = false
+): string {
+  return useSolfege
+    ? SCALE_DEGREE_SOLFEGE[degree]
+    : SCALE_DEGREE_NUMBERS[degree];
+}
+
+/**
+ * Get MIDI note for a scale degree given the key root
+ */
+export function scaleDegreeToMidi(
+  degree: ScaleDegree,
+  keyRootMidi: number,
+  octaveOffset: number = 0
+): number {
+  return keyRootMidi + SCALE_DEGREE_SEMITONES[degree] + octaveOffset * 12;
+}
+
+/**
+ * Generate a random scale degree from the given set
+ */
+export function randomScaleDegree(degrees: ScaleDegree[]): ScaleDegree {
+  return degrees[Math.floor(Math.random() * degrees.length)];
+}
+
+/**
+ * Check if two scale degrees are similar (adjacent)
+ */
+export function areScaleDegreesSimilar(
+  a: ScaleDegree,
+  b: ScaleDegree
+): boolean {
+  return a === b || Math.abs(a - b) === 1;
+}
+
+/**
+ * Key context types for establishing tonality
+ */
+export type KeyContextType = 'triad' | 'scale' | 'cadence';
+
+/**
+ * Generate MIDI notes for key context
+ */
+export function generateKeyContext(
+  keyRootMidi: number,
+  contextType: KeyContextType
+): number[][] {
+  switch (contextType) {
+    case 'triad':
+      // I chord (tonic triad)
+      return [generateChord(keyRootMidi, 'MAJOR')];
+
+    case 'scale':
+      // Ascending major scale
+      return [generateMajorScale(keyRootMidi)];
+
+    case 'cadence':
+      // I - IV - V - I cadence
+      return [
+        generateChord(keyRootMidi, 'MAJOR'), // I
+        generateChord(keyRootMidi + 5, 'MAJOR'), // IV
+        generateChord(keyRootMidi + 7, 'MAJOR'), // V
+        generateChord(keyRootMidi, 'MAJOR'), // I
+      ];
+
+    default:
+      return [generateChord(keyRootMidi, 'MAJOR')];
+  }
+}

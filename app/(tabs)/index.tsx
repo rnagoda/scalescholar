@@ -14,16 +14,18 @@ import {
   AppFooter,
 } from '@/src/components/common';
 import { useProgressStore } from '@/src/stores/useProgressStore';
-import { ALL_INTERVALS } from '@/src/utils/music';
+import { ALL_INTERVALS, ALL_SCALE_DEGREES } from '@/src/utils/music';
 
 export default function HomeScreen() {
   const router = useRouter();
 
   const {
     intervalProgress,
+    scaleDegreeProgress,
     isInitialized,
     initialize,
     refreshIntervalProgress,
+    refreshScaleDegreeProgress,
   } = useProgressStore();
 
   useEffect(() => {
@@ -31,18 +33,24 @@ export default function HomeScreen() {
       initialize();
     } else {
       refreshIntervalProgress();
+      refreshScaleDegreeProgress();
     }
   }, []);
 
-  const { stats, unlockedIntervals } = intervalProgress;
-
-  const formatAccuracy = (accuracy: number): string => {
-    if (accuracy === 0 && stats.totalAttempts === 0) return '--';
+  const formatAccuracy = (accuracy: number, totalAttempts: number): string => {
+    if (accuracy === 0 && totalAttempts === 0) return '--';
     return `${Math.round(accuracy * 100)}%`;
   };
 
-  const unlockedCount = unlockedIntervals.length;
+  // Interval progress
+  const intervalStats = intervalProgress.stats;
+  const unlockedIntervalsCount = intervalProgress.unlockedIntervals.length;
   const totalIntervals = ALL_INTERVALS.length;
+
+  // Scale degree progress
+  const scaleDegreeStats = scaleDegreeProgress.stats;
+  const unlockedDegreesCount = scaleDegreeProgress.unlockedDegrees.length;
+  const totalDegrees = ALL_SCALE_DEGREES.length;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -65,13 +73,16 @@ export default function HomeScreen() {
         <Card>
           <Text style={styles.cardTitle}>Interval Trainer</Text>
           <View style={styles.cardContent}>
-            <LabelValue label="Accuracy:" value={formatAccuracy(stats.accuracy)} />
-            <LabelValue label="Current Streak:" value={stats.streak.toString()} />
+            <LabelValue
+              label="Accuracy:"
+              value={formatAccuracy(intervalStats.accuracy, intervalStats.totalAttempts)}
+            />
+            <LabelValue label="Current Streak:" value={intervalStats.streak.toString()} />
           </View>
           <View style={styles.progressContainer}>
-            <ProgressBar progress={unlockedCount / totalIntervals} />
+            <ProgressBar progress={unlockedIntervalsCount / totalIntervals} />
             <Text style={styles.progressLabel}>
-              {unlockedCount}/{totalIntervals} unlocked
+              {unlockedIntervalsCount}/{totalIntervals} unlocked
             </Text>
           </View>
           <View style={styles.cardAction}>
@@ -86,18 +97,23 @@ export default function HomeScreen() {
         <Card>
           <Text style={styles.cardTitle}>Scale Degree Trainer</Text>
           <View style={styles.cardContent}>
-            <LabelValue label="Accuracy:" value="--" />
-            <LabelValue label="Current Streak:" value="0" />
+            <LabelValue
+              label="Accuracy:"
+              value={formatAccuracy(scaleDegreeStats.accuracy, scaleDegreeStats.totalAttempts)}
+            />
+            <LabelValue label="Current Streak:" value={scaleDegreeStats.streak.toString()} />
           </View>
           <View style={styles.progressContainer}>
-            <ProgressBar progress={0.43} />
-            <Text style={styles.progressLabel}>3/7 unlocked</Text>
+            <ProgressBar progress={unlockedDegreesCount / totalDegrees} />
+            <Text style={styles.progressLabel}>
+              {unlockedDegreesCount}/{totalDegrees} unlocked
+            </Text>
           </View>
           <View style={styles.cardAction}>
             <BracketButton
-              label="COMING SOON"
-              onPress={() => {}}
-              color={colors.textMuted}
+              label="TRAIN"
+              onPress={() => router.push('/exercise/scale-degrees')}
+              color={colors.accentGreen}
             />
           </View>
         </Card>
