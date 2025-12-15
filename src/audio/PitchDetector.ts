@@ -6,7 +6,7 @@
  * and a custom YIN pitch detection algorithm implementation.
  */
 
-import { AudioRecorder } from 'react-native-audio-api';
+import { AudioRecorder, AudioManager } from 'react-native-audio-api';
 import { Platform, PermissionsAndroid } from 'react-native';
 import {
   PitchResult,
@@ -207,9 +207,9 @@ class PitchDetectorClass {
     this.setState('requesting');
 
     try {
-      // Request microphone permission on Android
-      // iOS handles permission automatically when AudioRecorder starts
+      // Platform-specific setup
       if (Platform.OS === 'android') {
+        // Request microphone permission on Android
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
           {
@@ -222,6 +222,13 @@ class PitchDetectorClass {
         if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
           throw new Error('Microphone permission not granted');
         }
+      } else if (Platform.OS === 'ios') {
+        // iOS requires audio session to be configured for recording
+        AudioManager.setAudioSessionOptions({
+          iosCategory: 'playAndRecord',
+          iosMode: 'measurement', // Best for pitch detection
+          iosOptions: ['defaultToSpeaker', 'allowBluetooth'],
+        });
       }
 
       // Increment session ID to invalidate any stale callbacks
