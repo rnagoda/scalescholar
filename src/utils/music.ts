@@ -79,6 +79,26 @@ export const STARTER_INTERVALS: Interval[] = [
 ];
 
 /**
+ * All trainable intervals in unlock order
+ */
+export const ALL_INTERVALS: Interval[] = [
+  // Starter intervals
+  Interval.MINOR_THIRD,
+  Interval.MAJOR_THIRD,
+  Interval.PERFECT_FOURTH,
+  Interval.PERFECT_FIFTH,
+  // Unlockable intervals
+  Interval.MINOR_SECOND,
+  Interval.MAJOR_SECOND,
+  Interval.TRITONE,
+  Interval.MINOR_SIXTH,
+  Interval.MAJOR_SIXTH,
+  Interval.MINOR_SEVENTH,
+  Interval.MAJOR_SEVENTH,
+  Interval.OCTAVE,
+];
+
+/**
  * All intervals that can be unlocked
  */
 export const UNLOCKABLE_INTERVALS: Interval[] = [
