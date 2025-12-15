@@ -7,3 +7,4 @@ export { LabelValue } from './LabelValue';
 export { SectionHeader } from './SectionHeader';
 export { AppFooter } from './AppFooter';
 export { SettingRow, SettingToggle, SettingOption, SettingNumber } from './SettingRow';
+export { CentsMeter } from './CentsMeter';

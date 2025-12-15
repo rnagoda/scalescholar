@@ -474,3 +474,58 @@ export function generateKeyContext(
       return [generateChord(keyRootMidi, 'MAJOR')];
   }
 }
+
+// ============================================
+// PITCH DETECTION UTILITIES
+// ============================================
+
+/**
+ * Note names for pitch detection display
+ */
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+/**
+ * Convert MIDI note number to note name (e.g., 69 -> "A4")
+ */
+export function midiToNoteName(midiNote: number): string {
+  const noteIndex = midiNote % 12;
+  const octave = Math.floor(midiNote / 12) - 1;
+  return `${NOTE_NAMES[noteIndex]}${octave}`;
+}
+
+/**
+ * Convert frequency to exact MIDI value (not rounded)
+ * Used for calculating cents deviation
+ */
+export function frequencyToExactMidi(
+  frequency: number,
+  a4Freq: number = DEFAULT_A4_FREQUENCY
+): number {
+  return 12 * Math.log2(frequency / a4Freq) + A4_MIDI;
+}
+
+/**
+ * Convert frequency to note name (e.g., 440 -> "A4")
+ */
+export function frequencyToNoteName(
+  frequency: number,
+  a4Freq: number = DEFAULT_A4_FREQUENCY
+): string {
+  const midiNote = frequencyToMidi(frequency, a4Freq);
+  return midiToNoteName(midiNote);
+}
+
+/**
+ * Calculate cents deviation from nearest note
+ * Returns value from -50 to +50
+ * Negative = flat, Positive = sharp
+ */
+export function frequencyToCents(
+  frequency: number,
+  a4Freq: number = DEFAULT_A4_FREQUENCY
+): number {
+  const exactMidi = frequencyToExactMidi(frequency, a4Freq);
+  const nearestMidi = Math.round(exactMidi);
+  const centsDiff = (exactMidi - nearestMidi) * 100;
+  return Math.round(centsDiff);
+}
