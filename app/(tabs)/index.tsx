@@ -14,6 +14,7 @@ import {
   AppFooter,
 } from '@/src/components/common';
 import { useProgressStore } from '@/src/stores/useProgressStore';
+import { useVoiceProfileStore } from '@/src/stores/useVoiceProfileStore';
 import { ALL_INTERVALS, ALL_SCALE_DEGREES, ALL_CHORD_QUALITIES } from '@/src/utils/music';
 
 export default function HomeScreen() {
@@ -30,6 +31,15 @@ export default function HomeScreen() {
     refreshChordProgress,
   } = useProgressStore();
 
+  const {
+    hasProfile,
+    profile,
+    isInitialized: voiceInitialized,
+    initialize: initializeVoice,
+    getProfileSummary,
+    getRangeOctaves,
+  } = useVoiceProfileStore();
+
   useEffect(() => {
     if (!isInitialized) {
       initialize();
@@ -37,6 +47,9 @@ export default function HomeScreen() {
       refreshIntervalProgress();
       refreshScaleDegreeProgress();
       refreshChordProgress();
+    }
+    if (!voiceInitialized) {
+      initializeVoice();
     }
   }, []);
 
@@ -150,6 +163,44 @@ export default function HomeScreen() {
           </View>
         </Card>
 
+        {/* Voice Trainer Card */}
+        <Card>
+          <Text style={styles.cardTitle}>Voice Trainer</Text>
+          {hasProfile && profile ? (
+            <>
+              <View style={styles.cardContent}>
+                <LabelValue label="Range:" value={getProfileSummary() ?? '--'} />
+                <LabelValue label="Octaves:" value={getRangeOctaves().toString()} />
+              </View>
+              <View style={styles.cardAction}>
+                <BracketButton
+                  label="REASSESS"
+                  onPress={() => router.push('/exercise/voice-range-assessment' as Href)}
+                  color={colors.textSecondary}
+                />
+                <BracketButton
+                  label="TRAIN"
+                  onPress={() => router.push('/exercise/voice-note-match' as Href)}
+                  color={colors.accentGreen}
+                />
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={styles.toolDescription}>
+                Train your voice to hit notes accurately. First, let's find your vocal range.
+              </Text>
+              <View style={styles.cardAction}>
+                <BracketButton
+                  label="GET STARTED"
+                  onPress={() => router.push('/exercise/voice-range-assessment' as Href)}
+                  color={colors.accentGreen}
+                />
+              </View>
+            </>
+          )}
+        </Card>
+
         <Card>
           <Text style={styles.cardTitle}>Pitch Detector</Text>
           <Text style={styles.toolDescription}>
@@ -202,8 +253,11 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   cardAction: {
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
     marginTop: spacing.sm,
+    gap: spacing.md,
   },
   toolDescription: {
     ...typography.label,
