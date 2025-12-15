@@ -18,6 +18,7 @@ import { midiToFrequency, midiToNoteName } from './music';
  */
 export const INSTRUMENTS: Instrument[] = [
   { id: 'guitar', name: 'Guitar', stringCount: 6 },
+  { id: 'bass', name: 'Bass', stringCount: 4 },
   { id: 'violin', name: 'Violin', stringCount: 4 },
   { id: 'ukulele', name: 'Ukulele', stringCount: 4 },
   { id: 'banjo', name: 'Banjo', stringCount: 5 },
@@ -71,6 +72,21 @@ const GUITAR_TUNINGS: InstrumentTuning[] = [
   createTuning('guitar-open-g', 'guitar', 'Open G', 'OPEN G', [38, 43, 50, 55, 59, 62]),
   createTuning('guitar-open-d', 'guitar', 'Open D', 'OPEN D', [38, 45, 50, 54, 57, 62]),
   createTuning('guitar-dadgad', 'guitar', 'DADGAD', 'DADGAD', [38, 45, 50, 55, 57, 62]),
+];
+
+// ============================================
+// BASS TUNINGS (4, 5, or 6 strings)
+// ============================================
+// 4-string Standard: E1=28, A1=33, D2=38, G2=43
+// 5-string adds low B: B0=23
+// 6-string adds low B and high C: C3=48
+
+const BASS_TUNINGS: InstrumentTuning[] = [
+  createTuning('bass-standard', 'bass', 'Standard (4-string)', 'STD', [28, 33, 38, 43]),
+  createTuning('bass-5-string', 'bass', '5-String (BEADG)', '5-STR', [23, 28, 33, 38, 43]),
+  createTuning('bass-drop-d', 'bass', 'Drop D', 'DROP D', [26, 33, 38, 43]),
+  createTuning('bass-half-step', 'bass', 'Half-Step Down', 'Eb STD', [27, 32, 37, 42]),
+  createTuning('bass-full-step', 'bass', 'Full-Step Down', 'D STD', [26, 31, 36, 41]),
 ];
 
 // ============================================
@@ -128,6 +144,7 @@ const MANDOLIN_TUNINGS: InstrumentTuning[] = [
  */
 export const TUNINGS_BY_INSTRUMENT: Record<InstrumentType, InstrumentTuning[]> = {
   guitar: GUITAR_TUNINGS,
+  bass: BASS_TUNINGS,
   violin: VIOLIN_TUNINGS,
   ukulele: UKULELE_TUNINGS,
   banjo: BANJO_TUNINGS,
@@ -139,6 +156,7 @@ export const TUNINGS_BY_INSTRUMENT: Record<InstrumentType, InstrumentTuning[]> =
  */
 export const ALL_TUNINGS: InstrumentTuning[] = [
   ...GUITAR_TUNINGS,
+  ...BASS_TUNINGS,
   ...VIOLIN_TUNINGS,
   ...UKULELE_TUNINGS,
   ...BANJO_TUNINGS,
@@ -150,6 +168,7 @@ export const ALL_TUNINGS: InstrumentTuning[] = [
  */
 export const DEFAULT_TUNING_IDS: Record<InstrumentType, string> = {
   guitar: 'guitar-standard',
+  bass: 'bass-standard',
   violin: 'violin-standard',
   ukulele: 'ukulele-standard',
   banjo: 'banjo-open-g',

@@ -1,13 +1,13 @@
 /**
  * Instrument Tuning Type Definitions
  *
- * Supports multiple stringed instruments: Guitar, Violin, Ukulele, Banjo, Mandolin
+ * Supports multiple stringed instruments: Guitar, Bass, Violin, Ukulele, Banjo, Mandolin
  */
 
 /**
  * Supported instrument types
  */
-export type InstrumentType = 'guitar' | 'violin' | 'ukulele' | 'banjo' | 'mandolin';
+export type InstrumentType = 'guitar' | 'bass' | 'violin' | 'ukulele' | 'banjo' | 'mandolin';
 
 /**
  * Instrument metadata
