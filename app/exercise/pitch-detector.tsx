@@ -26,17 +26,20 @@ export default function PitchDetectorExercise() {
   const router = useRouter();
 
   // Mode, instrument, and tuning state
-  const [mode, setMode] = useState<PitchDetectorMode>('free');
+  const [mode, setMode] = useState<PitchDetectorMode>('voice');
   const [selectedInstrument, setSelectedInstrument] = useState<InstrumentType>(DEFAULT_INSTRUMENT);
   const [selectedTuningId, setSelectedTuningId] = useState(() => getDefaultTuning(DEFAULT_INSTRUMENT).id);
 
   const {
     state,
     currentPitch,
+    smoothedPitch,
     errorMessage,
     config,
     startListening,
     stopListening,
+    setSmoothingMode,
+    setCurrentTuning,
     reset,
   } = usePitchDetectorStore();
 
@@ -46,11 +49,17 @@ export default function PitchDetectorExercise() {
     [selectedTuningId, selectedInstrument]
   );
 
+  // Sync tuning to store for hysteresis
+  useEffect(() => {
+    setCurrentTuning(mode === 'instrument' ? currentTuning : null);
+  }, [currentTuning, mode, setCurrentTuning]);
+
   // Detect which string is being played (instrument mode only)
+  // Use smoothed pitch for more stable string detection
   const stringDetection = useMemo(() => {
-    if (mode !== 'instrument' || !currentPitch) return null;
-    return detectString(currentPitch.frequency, currentTuning, config.a4Frequency);
-  }, [mode, currentPitch, currentTuning, config.a4Frequency]);
+    if (mode !== 'instrument' || !smoothedPitch) return null;
+    return detectString(smoothedPitch.frequency, currentTuning, config.a4Frequency);
+  }, [mode, smoothedPitch, currentTuning, config.a4Frequency]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -74,7 +83,8 @@ export default function PitchDetectorExercise() {
 
   const handleModeChange = useCallback((newMode: PitchDetectorMode) => {
     setMode(newMode);
-  }, []);
+    setSmoothingMode(newMode);
+  }, [setSmoothingMode]);
 
   const handleInstrumentChange = useCallback((instrumentId: InstrumentType) => {
     setSelectedInstrument(instrumentId);
@@ -102,13 +112,13 @@ export default function PitchDetectorExercise() {
         return 'Requesting microphone access...';
       case 'listening':
         if (mode === 'instrument') {
-          return currentPitch
+          return smoothedPitch
             ? stringDetection?.isInRange
               ? 'Listening...'
               : 'Out of range - play a string'
             : 'Waiting for sound...';
         }
-        return currentPitch ? 'Listening...' : 'Waiting for sound...';
+        return smoothedPitch ? 'Listening...' : 'Waiting for sound...';
       case 'error':
         return errorMessage || 'An error occurred';
       default:
@@ -120,9 +130,10 @@ export default function PitchDetectorExercise() {
   const isListening = state === 'listening';
 
   // For instrument mode, use cents from string detection
+  // Otherwise use smoothed pitch cents for stable display
   const displayCents = mode === 'instrument' && stringDetection?.isInRange
     ? stringDetection.centsFromTarget
-    : currentPitch?.cents ?? null;
+    : smoothedPitch?.cents ?? null;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -152,10 +163,10 @@ export default function PitchDetectorExercise() {
           />
         )}
 
-        {/* Pitch Display */}
+        {/* Pitch Display - use smoothed pitch for stable display */}
         <View style={[styles.displaySection, mode === 'instrument' && styles.compactDisplay]}>
           <PitchDisplay
-            pitch={currentPitch}
+            pitch={smoothedPitch}
             isActive={isListening}
           />
         </View>
@@ -184,8 +195,8 @@ export default function PitchDetectorExercise() {
           </Text>
         </View>
 
-        {/* Info section - only in free mode */}
-        {mode === 'free' && (
+        {/* Info section - only in voice mode */}
+        {mode === 'voice' && (
           <View style={styles.infoSection}>
             <Text style={styles.infoText}>
               Sing or play a note to detect its pitch.
