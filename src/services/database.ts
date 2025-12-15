@@ -3,16 +3,28 @@ import * as SQLite from 'expo-sqlite';
 const DATABASE_NAME = 'scalescholar.db';
 
 let db: SQLite.SQLiteDatabase | null = null;
+let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 /**
  * Get or create the database connection
+ * Uses promise-based locking to prevent race conditions when multiple
+ * callers request the database simultaneously
  */
 export const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
   if (db) return db;
 
-  db = await SQLite.openDatabaseAsync(DATABASE_NAME);
-  await initializeSchema(db);
-  return db;
+  // If initialization is already in progress, wait for it
+  if (dbPromise) return dbPromise;
+
+  // Start initialization and store the promise
+  dbPromise = (async () => {
+    const database = await SQLite.openDatabaseAsync(DATABASE_NAME);
+    await initializeSchema(database);
+    db = database;
+    return database;
+  })();
+
+  return dbPromise;
 };
 
 /**
@@ -65,5 +77,6 @@ export const closeDatabase = async (): Promise<void> => {
   if (db) {
     await db.closeAsync();
     db = null;
+    dbPromise = null;
   }
 };
