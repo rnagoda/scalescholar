@@ -13,9 +13,9 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ mode, onModeChange }
   return (
     <View style={styles.container}>
       <BracketButton
-        label="FREE"
-        onPress={() => onModeChange('free')}
-        color={mode === 'free' ? colors.accentGreen : colors.textMuted}
+        label="VOICE"
+        onPress={() => onModeChange('voice')}
+        color={mode === 'voice' ? colors.accentGreen : colors.textMuted}
       />
       <BracketButton
         label="INSTRUMENT"

@@ -51,7 +51,7 @@ export interface InstrumentTuning {
 /**
  * Pitch detector mode
  */
-export type PitchDetectorMode = 'free' | 'instrument';
+export type PitchDetectorMode = 'voice' | 'instrument';
 
 /**
  * Result of string detection
