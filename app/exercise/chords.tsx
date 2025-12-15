@@ -8,6 +8,7 @@ import { ScreenHeader, BracketButton, Divider } from '@/src/components/common';
 import { PlayButton, AnswerButton } from '@/src/components/exercises';
 import { useChordStore } from '@/src/stores/useChordStore';
 import { useProgressStore } from '@/src/stores/useProgressStore';
+import { useSettingsStore } from '@/src/stores/useSettingsStore';
 import { AudioEngine } from '@/src/audio';
 import {
   ChordQuality,
@@ -44,6 +45,8 @@ export default function ChordsExercise() {
     getUnlockedChordQualities,
   } = useProgressStore();
 
+  const { questionsPerSession } = useSettingsStore();
+
   // Initialize progress store and start session
   useEffect(() => {
     const setup = async () => {
@@ -53,7 +56,7 @@ export default function ChordsExercise() {
       const unlockedQualities = getUnlockedChordQualities();
       startSession({
         availableQualities: unlockedQualities,
-        questionCount: 10,
+        questionCount: questionsPerSession,
       });
     };
     setup();
@@ -109,9 +112,9 @@ export default function ChordsExercise() {
     const unlockedQualities = getUnlockedChordQualities();
     startSession({
       availableQualities: unlockedQualities,
-      questionCount: 10,
+      questionCount: questionsPerSession,
     });
-  }, [startSession, getUnlockedChordQualities]);
+  }, [startSession, getUnlockedChordQualities, questionsPerSession]);
 
   // Record session when complete
   useEffect(() => {

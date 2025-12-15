@@ -109,21 +109,21 @@ Third exercise module for chord recognition.
 
 ---
 
-## Current: v0.6.0 — Settings & Polish
+## Completed: v0.6.0 — Settings & Polish
 
 User preferences and final MVP polish.
 
-- [ ] Settings screen UI
-- [ ] useSettingsStore with AsyncStorage persistence
-- [ ] Instrument sound toggle (Piano/Sine)
-- [ ] Interval mode selection (ascending/descending/mixed, melodic/harmonic)
-- [ ] Scale degree label preference
-- [ ] Reference key selection
-- [ ] Reference pitch (A4) adjustment
-- [ ] Questions per session setting
-- [ ] Auto-play next toggle
-- [ ] Haptic feedback toggle
-- [ ] About/Credits section
+- [x] Settings screen UI
+- [x] useSettingsStore with AsyncStorage persistence
+- [x] Instrument sound toggle (Piano/Sine)
+- [x] Interval mode selection (ascending/descending/mixed, melodic/harmonic)
+- [x] Scale degree label preference (Numbers/Solfege)
+- [x] Reference pitch (A4) adjustment (415-466 Hz options)
+- [x] Questions per session setting (5, 10, 15, 20)
+- [x] Auto-play next toggle
+- [x] Haptic feedback toggle
+- [x] About/Credits section
+- [x] Reset to Defaults functionality
 
 ---
 
@@ -166,6 +166,20 @@ Ideas for future development, not committed to timeline:
 ---
 
 ## Changelog
+
+### 2025-12-14 — v0.6.0 Settings & Polish
+
+- Created useSettingsStore with Zustand persist middleware for AsyncStorage
+- Built comprehensive Settings screen with all user preferences
+- Added instrument selection (Piano/Sine) with AudioEngine sync
+- Added interval trainer settings (direction: ascending/descending/mixed, playback: melodic/harmonic)
+- Added scale degree labels preference (Numbers/Solfege)
+- Added reference pitch A4 adjustment (415, 432, 440, 442, 444, 466 Hz)
+- Added questions per session setting (5, 10, 15, 20 options)
+- Added auto-play next and haptic feedback toggles
+- Created reusable SettingRow components (toggle, option cycling, number)
+- Integrated settings into all three exercise trainers
+- Added About/Credits section and Reset to Defaults functionality
 
 ### 2025-12-14 — v0.5.0 Chord Quality Trainer
 

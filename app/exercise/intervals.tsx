@@ -8,6 +8,7 @@ import { ScreenHeader, BracketButton, Divider } from '@/src/components/common';
 import { PlayButton, AnswerButton } from '@/src/components/exercises';
 import { useExerciseStore } from '@/src/stores/useExerciseStore';
 import { useProgressStore } from '@/src/stores/useProgressStore';
+import { useSettingsStore } from '@/src/stores/useSettingsStore';
 import { AudioEngine } from '@/src/audio';
 import { Interval, INTERVAL_SHORT_NAMES, INTERVAL_FULL_NAMES } from '@/src/utils/music';
 
@@ -41,6 +42,33 @@ export default function IntervalsExercise() {
     getUnlockedIntervals,
   } = useProgressStore();
 
+  const {
+    questionsPerSession,
+    intervalDirection,
+    intervalPlayback,
+  } = useSettingsStore();
+
+  // Convert settings to exercise config
+  const getDirectionConfig = () => {
+    switch (intervalDirection) {
+      case 'ascending':
+        return { ascending: true, descending: false };
+      case 'descending':
+        return { ascending: false, descending: true };
+      case 'mixed':
+        return { ascending: true, descending: true };
+    }
+  };
+
+  const getPlaybackConfig = () => {
+    switch (intervalPlayback) {
+      case 'melodic':
+        return { melodic: true, harmonic: false };
+      case 'harmonic':
+        return { melodic: false, harmonic: true };
+    }
+  };
+
   // Initialize progress store and start session
   useEffect(() => {
     const setup = async () => {
@@ -50,7 +78,9 @@ export default function IntervalsExercise() {
       const unlockedIntervals = getUnlockedIntervals();
       startSession({
         availableIntervals: unlockedIntervals,
-        questionCount: 10,
+        questionCount: questionsPerSession,
+        ...getDirectionConfig(),
+        ...getPlaybackConfig(),
       });
     };
     setup();
@@ -107,9 +137,11 @@ export default function IntervalsExercise() {
     const unlockedIntervals = getUnlockedIntervals();
     startSession({
       availableIntervals: unlockedIntervals,
-      questionCount: 10,
+      questionCount: questionsPerSession,
+      ...getDirectionConfig(),
+      ...getPlaybackConfig(),
     });
-  }, [startSession, getUnlockedIntervals]);
+  }, [startSession, getUnlockedIntervals, questionsPerSession, intervalDirection, intervalPlayback]);
 
   // Record session when complete
   useEffect(() => {
