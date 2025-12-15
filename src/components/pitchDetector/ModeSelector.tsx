@@ -18,9 +18,9 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ mode, onModeChange }
         color={mode === 'free' ? colors.accentGreen : colors.textMuted}
       />
       <BracketButton
-        label="GUITAR"
-        onPress={() => onModeChange('guitar')}
-        color={mode === 'guitar' ? colors.accentGreen : colors.textMuted}
+        label="INSTRUMENT"
+        onPress={() => onModeChange('instrument')}
+        color={mode === 'instrument' ? colors.accentGreen : colors.textMuted}
       />
     </View>
   );

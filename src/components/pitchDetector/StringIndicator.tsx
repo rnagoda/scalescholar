@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, fonts, spacing } from '../../theme';
-import { GuitarTuning } from '../../types/guitarTuning';
+import { InstrumentTuning } from '../../types/guitarTuning';
 
 interface StringIndicatorProps {
-  tuning: GuitarTuning;
+  tuning: InstrumentTuning;
   activeString: number | null;
   isActive: boolean;
 }
@@ -14,8 +14,12 @@ export const StringIndicator: React.FC<StringIndicatorProps> = ({
   activeString,
   isActive,
 }) => {
-  // Strings are stored low to high (6,5,4,3,2,1), display left to right
+  // Strings are stored low to high, display left to right (low to high)
+  // Reverse so highest string number (lowest pitch) is on the left
   const stringsToDisplay = [...tuning.strings].reverse();
+
+  // Calculate column width based on string count
+  const columnWidth = tuning.strings.length <= 4 ? 56 : 44;
 
   return (
     <View style={styles.container}>
@@ -24,7 +28,10 @@ export const StringIndicator: React.FC<StringIndicatorProps> = ({
         {stringsToDisplay.map((string) => {
           const isSelected = isActive && activeString === string.stringNumber;
           return (
-            <View key={string.stringNumber} style={styles.stringColumn}>
+            <View
+              key={string.stringNumber}
+              style={[styles.stringColumn, { width: columnWidth }]}
+            >
               <Text
                 style={[
                   styles.stringNumber,
@@ -45,7 +52,10 @@ export const StringIndicator: React.FC<StringIndicatorProps> = ({
           // Extract just the note letter (without octave) for display
           const noteLetter = string.noteName.replace(/[0-9]/g, '');
           return (
-            <View key={string.stringNumber} style={styles.stringColumn}>
+            <View
+              key={string.stringNumber}
+              style={[styles.stringColumn, { width: columnWidth }]}
+            >
               <Text
                 style={[
                   styles.noteName,
@@ -64,7 +74,10 @@ export const StringIndicator: React.FC<StringIndicatorProps> = ({
         {stringsToDisplay.map((string) => {
           const isSelected = isActive && activeString === string.stringNumber;
           return (
-            <View key={string.stringNumber} style={styles.stringColumn}>
+            <View
+              key={string.stringNumber}
+              style={[styles.stringColumn, { width: columnWidth }]}
+            >
               <Text
                 style={[
                   styles.indicator,
@@ -110,7 +123,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stringColumn: {
-    width: 44,
     alignItems: 'center',
   },
   stringNumber: {

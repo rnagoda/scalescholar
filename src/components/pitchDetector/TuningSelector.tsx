@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, fonts, spacing } from '../../theme';
 import { BracketButton } from '../common';
-import { GuitarTuning } from '../../types/guitarTuning';
+import { InstrumentTuning } from '../../types/guitarTuning';
 
 interface TuningSelectorProps {
-  tuning: GuitarTuning;
+  tuning: InstrumentTuning;
   onPrevious: () => void;
   onNext: () => void;
 }

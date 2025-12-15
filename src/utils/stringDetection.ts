@@ -1,10 +1,14 @@
 /**
  * String Detection Utility
  *
- * Detects which guitar string is being played based on the detected frequency.
+ * Detects which string is being played based on the detected frequency.
  */
 
-import { GuitarTuning, GuitarString, StringDetectionResult } from '../types/guitarTuning';
+import {
+  InstrumentTuning,
+  InstrumentString,
+  StringDetectionResult,
+} from '../types/guitarTuning';
 import { frequencyToExactMidi, DEFAULT_A4_FREQUENCY } from './music';
 
 /**
@@ -19,12 +23,12 @@ const STRING_DETECTION_TOLERANCE = 2.5;
  */
 export function detectString(
   frequency: number,
-  tuning: GuitarTuning,
+  tuning: InstrumentTuning,
   a4Freq: number = DEFAULT_A4_FREQUENCY
 ): StringDetectionResult {
   const exactMidi = frequencyToExactMidi(frequency, a4Freq);
 
-  let closestString: GuitarString | null = null;
+  let closestString: InstrumentString | null = null;
   let closestDistance = Infinity;
 
   // Find the closest string by MIDI distance

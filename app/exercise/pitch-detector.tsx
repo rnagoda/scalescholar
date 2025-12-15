@@ -12,22 +12,23 @@ import {
   GuitarTunerDisplay,
 } from '@/src/components/pitchDetector';
 import { usePitchDetectorStore } from '@/src/stores/usePitchDetectorStore';
-import { PitchDetectorMode } from '@/src/types/guitarTuning';
+import { PitchDetectorMode, InstrumentType } from '@/src/types/guitarTuning';
 import {
   getTuningById,
   getDefaultTuning,
   getNextTuning,
   getPreviousTuning,
-  DEFAULT_TUNING_ID,
-} from '@/src/utils/guitarTunings';
+  DEFAULT_INSTRUMENT,
+} from '@/src/utils/instrumentTunings';
 import { detectString } from '@/src/utils/stringDetection';
 
 export default function PitchDetectorExercise() {
   const router = useRouter();
 
-  // Mode and tuning state
+  // Mode, instrument, and tuning state
   const [mode, setMode] = useState<PitchDetectorMode>('free');
-  const [selectedTuningId, setSelectedTuningId] = useState(DEFAULT_TUNING_ID);
+  const [selectedInstrument, setSelectedInstrument] = useState<InstrumentType>(DEFAULT_INSTRUMENT);
+  const [selectedTuningId, setSelectedTuningId] = useState(() => getDefaultTuning(DEFAULT_INSTRUMENT).id);
 
   const {
     state,
@@ -41,13 +42,13 @@ export default function PitchDetectorExercise() {
 
   // Get current tuning
   const currentTuning = useMemo(
-    () => getTuningById(selectedTuningId) || getDefaultTuning(),
-    [selectedTuningId]
+    () => getTuningById(selectedTuningId) || getDefaultTuning(selectedInstrument),
+    [selectedTuningId, selectedInstrument]
   );
 
-  // Detect which string is being played (guitar mode only)
+  // Detect which string is being played (instrument mode only)
   const stringDetection = useMemo(() => {
-    if (mode !== 'guitar' || !currentPitch) return null;
+    if (mode !== 'instrument' || !currentPitch) return null;
     return detectString(currentPitch.frequency, currentTuning, config.a4Frequency);
   }, [mode, currentPitch, currentTuning, config.a4Frequency]);
 
@@ -75,15 +76,22 @@ export default function PitchDetectorExercise() {
     setMode(newMode);
   }, []);
 
+  const handleInstrumentChange = useCallback((instrumentId: InstrumentType) => {
+    setSelectedInstrument(instrumentId);
+    // Reset to default tuning for the new instrument
+    const defaultTuning = getDefaultTuning(instrumentId);
+    setSelectedTuningId(defaultTuning.id);
+  }, []);
+
   const handleNextTuning = useCallback(() => {
-    const nextTuning = getNextTuning(selectedTuningId);
+    const nextTuning = getNextTuning(selectedTuningId, selectedInstrument);
     setSelectedTuningId(nextTuning.id);
-  }, [selectedTuningId]);
+  }, [selectedTuningId, selectedInstrument]);
 
   const handlePreviousTuning = useCallback(() => {
-    const prevTuning = getPreviousTuning(selectedTuningId);
+    const prevTuning = getPreviousTuning(selectedTuningId, selectedInstrument);
     setSelectedTuningId(prevTuning.id);
-  }, [selectedTuningId]);
+  }, [selectedTuningId, selectedInstrument]);
 
   // Get status message based on state
   const getStatusMessage = () => {
@@ -93,7 +101,7 @@ export default function PitchDetectorExercise() {
       case 'requesting':
         return 'Requesting microphone access...';
       case 'listening':
-        if (mode === 'guitar') {
+        if (mode === 'instrument') {
           return currentPitch
             ? stringDetection?.isInRange
               ? 'Listening...'
@@ -111,8 +119,8 @@ export default function PitchDetectorExercise() {
   const isError = state === 'error';
   const isListening = state === 'listening';
 
-  // For guitar mode, use cents from string detection
-  const displayCents = mode === 'guitar' && stringDetection?.isInRange
+  // For instrument mode, use cents from string detection
+  const displayCents = mode === 'instrument' && stringDetection?.isInRange
     ? stringDetection.centsFromTarget
     : currentPitch?.cents ?? null;
 
@@ -131,19 +139,21 @@ export default function PitchDetectorExercise() {
       <Divider style={styles.divider} />
 
       <View style={styles.content}>
-        {/* Guitar Mode Display */}
-        {mode === 'guitar' && (
+        {/* Instrument Mode Display */}
+        {mode === 'instrument' && (
           <GuitarTunerDisplay
             tuning={currentTuning}
+            selectedInstrument={selectedInstrument}
             detectionResult={stringDetection}
             isListening={isListening}
+            onInstrumentChange={handleInstrumentChange}
             onPreviousTuning={handlePreviousTuning}
             onNextTuning={handleNextTuning}
           />
         )}
 
         {/* Pitch Display */}
-        <View style={[styles.displaySection, mode === 'guitar' && styles.compactDisplay]}>
+        <View style={[styles.displaySection, mode === 'instrument' && styles.compactDisplay]}>
           <PitchDisplay
             pitch={currentPitch}
             isActive={isListening}
