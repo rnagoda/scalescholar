@@ -15,7 +15,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.nagodasoft.scalescholar"
+      "bundleIdentifier": "com.nagodasoft.scalescholar",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Scale Scholar uses the microphone to detect pitch for ear training exercises."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +27,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.nagodasoft.scalescholar"
+      "package": "com.nagodasoft.scalescholar",
+      "permissions": ["RECORD_AUDIO"]
     },
     "web": {
       "bundler": "metro",

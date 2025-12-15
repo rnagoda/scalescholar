@@ -127,6 +127,23 @@ User preferences and final MVP polish.
 
 ---
 
+## Completed: v0.7.0 — Pitch Detector Tool
+
+Real-time pitch detection utility for tuning and pitch training.
+
+- [x] PitchDetector module using react-native-audio-api AudioRecorder
+- [x] YIN algorithm pitch detection via pitchfinder library
+- [x] Pitch detection utilities (frequencyToNoteName, frequencyToCents)
+- [x] usePitchDetectorStore with Zustand
+- [x] CentsMeter component (visual pitch deviation display)
+- [x] PitchDisplay component (note name and frequency)
+- [x] ListenButton component (microphone start/stop)
+- [x] Pitch detector exercise screen
+- [x] Microphone permissions (iOS and Android)
+- [x] Home screen integration
+
+---
+
 ## Milestone: v1.0.0 — MVP Release
 
 Final testing and app store submission.
@@ -152,10 +169,10 @@ Ideas for future development, not committed to timeline:
 - Practice mode (unscored)
 - Onboarding tutorial
 - UI sound effects (optional)
+- Pitch training exercises (sing the note, match pitch)
 
 ### Long-term possibilities
 
-- Pitch detection (sing/play input)
 - Melodic dictation (multi-note sequences)
 - Chord progression identification
 - Rhythm training module
@@ -166,6 +183,20 @@ Ideas for future development, not committed to timeline:
 ---
 
 ## Changelog
+
+### 2025-12-15 — v0.7.0 Pitch Detector Tool
+
+- Added PitchDetector module using react-native-audio-api AudioRecorder
+- Integrated pitchfinder library for YIN pitch detection algorithm
+- Extended music utilities with frequencyToNoteName, frequencyToCents
+- Created pitch detector type definitions
+- Built usePitchDetectorStore for pitch detector state management
+- Created CentsMeter component for visual pitch deviation display
+- Created PitchDisplay component showing note name and frequency
+- Created ListenButton component for microphone control
+- Built full pitch detector exercise screen
+- Added microphone permissions for iOS and Android
+- Added Pitch Detector card to home screen
 
 ### 2025-12-14 — v0.6.0 Settings & Polish
 

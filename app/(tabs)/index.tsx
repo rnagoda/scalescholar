@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, Href } from 'expo-router';
 
 import { colors, typography, spacing } from '@/src/theme';
 import {
@@ -150,6 +150,20 @@ export default function HomeScreen() {
           </View>
         </Card>
 
+        <Card>
+          <Text style={styles.cardTitle}>Pitch Detector</Text>
+          <Text style={styles.toolDescription}>
+            Detect pitch from your microphone and see how sharp or flat you are.
+          </Text>
+          <View style={styles.cardAction}>
+            <BracketButton
+              label="OPEN"
+              onPress={() => router.push('/exercise/pitch-detector' as Href)}
+              color={colors.accentGreen}
+            />
+          </View>
+        </Card>
+
         <AppFooter />
       </ScrollView>
     </SafeAreaView>
@@ -190,5 +204,10 @@ const styles = StyleSheet.create({
   cardAction: {
     alignItems: 'flex-end',
     marginTop: spacing.sm,
+  },
+  toolDescription: {
+    ...typography.label,
+    fontSize: 13,
+    marginBottom: spacing.md,
   },
 });
