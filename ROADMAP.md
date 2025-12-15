@@ -80,20 +80,22 @@ Track user progress and enable progressive difficulty.
 
 ---
 
-## Current: v0.4.0 — Scale Degree Trainer
+## Completed: v0.4.0 — Scale Degree Trainer
 
 Second exercise module for functional ear training.
 
-- [ ] Key context playback (tonic triad, scale, I-IV-V-I)
-- [ ] Scale degree question generator
-- [ ] Numbers vs. Solfege display option
-- [ ] Scale Degree exercise screen
-- [ ] Starter degrees: 1 (Do), 3 (Mi), 5 (Sol)
-- [ ] Unlockable degrees: 2, 4, 6, 7
+- [x] Key context playback (tonic triad, scale, I-IV-V-I cadence)
+- [x] Scale degree question generator with similarity avoidance
+- [x] Numbers vs. Solfege display option (infrastructure ready)
+- [x] Scale Degree exercise screen with full state machine
+- [x] Starter degrees: 1 (Do), 3 (Mi), 5 (Sol)
+- [x] Unlockable degrees: 2 (Re), 4 (Fa), 6 (La), 7 (Ti)
+- [x] Progress tracking integration (accuracy, streak, unlocks)
+- [x] Home screen integration with scale degree stats
 
 ---
 
-## Planned: v0.5.0 — Chord Quality Trainer
+## Current: v0.5.0 — Chord Quality Trainer
 
 Third exercise module for chord recognition.
 
@@ -162,6 +164,17 @@ Ideas for future development, not committed to timeline:
 ---
 
 ## Changelog
+
+### 2025-12-14 — v0.4.0 Scale Degree Trainer
+
+- Added ScaleDegree enum and constants (names, solfege, semitones)
+- Implemented key context playback (triad, scale, I-IV-V-I cadence)
+- Built useScaleDegreeStore with exercise state machine
+- Extended useProgressStore for scale degree tracking
+- Created full scale-degrees.tsx exercise screen
+- Added question generator with similarity avoidance
+- Integrated unlock system for scale degrees
+- Updated home screen to display scale degree progress
 
 ### 2024-12-14 — v0.3.0 Progress System & Unlocks
 

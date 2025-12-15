@@ -1,6 +1,13 @@
 import { Synthesizer, SynthType } from '../types/audio';
 import { SineSynth, PianoSynth } from './synths';
-import { midiToFrequency, DEFAULT_A4_FREQUENCY } from '../utils/music';
+import {
+  midiToFrequency,
+  DEFAULT_A4_FREQUENCY,
+  KeyContextType,
+  generateKeyContext,
+  scaleDegreeToMidi,
+  ScaleDegree,
+} from '../utils/music';
 
 /**
  * AudioEngine singleton
@@ -188,6 +195,78 @@ class AudioEngineClass {
       await this.synth.playNote(frequency, noteDuration);
       await this.delay(noteDuration * 1000 * 0.8);
     }
+  }
+
+  /**
+   * Play key context to establish tonality
+   * @param keyRootMidi - The root MIDI note of the key
+   * @param contextType - Type of context (triad, scale, or cadence)
+   */
+  async playKeyContext(
+    keyRootMidi: number,
+    contextType: KeyContextType = 'triad'
+  ): Promise<void> {
+    await this.initialize();
+    if (!this.synth) return;
+
+    const contextNotes = generateKeyContext(keyRootMidi, contextType);
+
+    for (const notes of contextNotes) {
+      if (contextType === 'scale') {
+        // Play scale melodically
+        for (const midi of notes) {
+          const freq = midiToFrequency(midi, this.a4Frequency);
+          await this.synth.playNote(freq, this.defaultNoteDuration * 0.4);
+          await this.delay(this.defaultNoteDuration * 400 * 0.6);
+        }
+      } else {
+        // Play chords
+        const frequencies = notes.map((midi) =>
+          midiToFrequency(midi, this.a4Frequency)
+        );
+        await this.synth.playChord(frequencies, this.defaultNoteDuration);
+        await this.delay(this.defaultNoteDuration * 1000 + 100);
+      }
+    }
+  }
+
+  /**
+   * Play a scale degree within a key context
+   * @param keyRootMidi - The root MIDI note of the key
+   * @param degree - The scale degree to play
+   * @param octaveOffset - Optional octave offset (0 = same octave as root)
+   */
+  async playScaleDegree(
+    keyRootMidi: number,
+    degree: ScaleDegree,
+    octaveOffset: number = 0
+  ): Promise<void> {
+    await this.initialize();
+    if (!this.synth) return;
+
+    const midiNote = scaleDegreeToMidi(degree, keyRootMidi, octaveOffset);
+    const frequency = midiToFrequency(midiNote, this.a4Frequency);
+    await this.synth.playNote(frequency, this.defaultNoteDuration);
+  }
+
+  /**
+   * Play key context followed by a scale degree
+   * This is the primary method for scale degree training
+   */
+  async playScaleDegreeWithContext(
+    keyRootMidi: number,
+    degree: ScaleDegree,
+    contextType: KeyContextType = 'triad',
+    octaveOffset: number = 0
+  ): Promise<void> {
+    // Play context first
+    await this.playKeyContext(keyRootMidi, contextType);
+
+    // Brief pause
+    await this.delay(300);
+
+    // Play the target scale degree
+    await this.playScaleDegree(keyRootMidi, degree, octaveOffset);
   }
 
   /**
