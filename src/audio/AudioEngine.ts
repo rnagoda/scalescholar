@@ -7,6 +7,8 @@ import {
   generateKeyContext,
   scaleDegreeToMidi,
   ScaleDegree,
+  ChordQuality,
+  generateChordFromQuality,
 } from '../utils/music';
 
 /**
@@ -267,6 +269,21 @@ class AudioEngineClass {
 
     // Play the target scale degree
     await this.playScaleDegree(keyRootMidi, degree, octaveOffset);
+  }
+
+  /**
+   * Play a chord by quality
+   * @param rootMidi - The root MIDI note of the chord
+   * @param quality - The chord quality (Major, Minor, etc.)
+   * @param duration - Optional duration in seconds
+   */
+  async playChordQuality(
+    rootMidi: number,
+    quality: ChordQuality,
+    duration?: number
+  ): Promise<void> {
+    const midiNotes = generateChordFromQuality(rootMidi, quality);
+    await this.playChordMidi(midiNotes, duration);
   }
 
   /**

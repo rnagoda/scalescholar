@@ -14,7 +14,7 @@ import {
   AppFooter,
 } from '@/src/components/common';
 import { useProgressStore } from '@/src/stores/useProgressStore';
-import { ALL_INTERVALS, ALL_SCALE_DEGREES } from '@/src/utils/music';
+import { ALL_INTERVALS, ALL_SCALE_DEGREES, ALL_CHORD_QUALITIES } from '@/src/utils/music';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -22,10 +22,12 @@ export default function HomeScreen() {
   const {
     intervalProgress,
     scaleDegreeProgress,
+    chordProgress,
     isInitialized,
     initialize,
     refreshIntervalProgress,
     refreshScaleDegreeProgress,
+    refreshChordProgress,
   } = useProgressStore();
 
   useEffect(() => {
@@ -34,6 +36,7 @@ export default function HomeScreen() {
     } else {
       refreshIntervalProgress();
       refreshScaleDegreeProgress();
+      refreshChordProgress();
     }
   }, []);
 
@@ -51,6 +54,11 @@ export default function HomeScreen() {
   const scaleDegreeStats = scaleDegreeProgress.stats;
   const unlockedDegreesCount = scaleDegreeProgress.unlockedDegrees.length;
   const totalDegrees = ALL_SCALE_DEGREES.length;
+
+  // Chord quality progress
+  const chordStats = chordProgress.stats;
+  const unlockedChordsCount = chordProgress.unlockedQualities.length;
+  const totalChords = ALL_CHORD_QUALITIES.length;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -121,18 +129,23 @@ export default function HomeScreen() {
         <Card>
           <Text style={styles.cardTitle}>Chord Quality Trainer</Text>
           <View style={styles.cardContent}>
-            <LabelValue label="Accuracy:" value="--" />
-            <LabelValue label="Current Streak:" value="0" />
+            <LabelValue
+              label="Accuracy:"
+              value={formatAccuracy(chordStats.accuracy, chordStats.totalAttempts)}
+            />
+            <LabelValue label="Current Streak:" value={chordStats.streak.toString()} />
           </View>
           <View style={styles.progressContainer}>
-            <ProgressBar progress={0.5} />
-            <Text style={styles.progressLabel}>2/4 unlocked</Text>
+            <ProgressBar progress={unlockedChordsCount / totalChords} />
+            <Text style={styles.progressLabel}>
+              {unlockedChordsCount}/{totalChords} unlocked
+            </Text>
           </View>
           <View style={styles.cardAction}>
             <BracketButton
-              label="COMING SOON"
-              onPress={() => {}}
-              color={colors.textMuted}
+              label="TRAIN"
+              onPress={() => router.push('/exercise/chords')}
+              color={colors.accentGreen}
             />
           </View>
         </Card>

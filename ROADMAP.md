@@ -95,19 +95,21 @@ Second exercise module for functional ear training.
 
 ---
 
-## Current: v0.5.0 — Chord Quality Trainer
+## Completed: v0.5.0 — Chord Quality Trainer
 
 Third exercise module for chord recognition.
 
-- [ ] Chord playback (simultaneous notes)
-- [ ] Chord quality question generator
-- [ ] Chord Quality exercise screen
-- [ ] Starter chords: Major, Minor
-- [ ] Unlockable chords: Diminished, Augmented
+- [x] Chord playback (simultaneous notes via AudioEngine)
+- [x] Chord quality question generator with same-quality avoidance
+- [x] Chord Quality exercise screen with full state machine
+- [x] Starter chords: Major, Minor
+- [x] Unlockable chords: Diminished, Augmented
+- [x] Progress tracking integration (accuracy, streak, unlocks)
+- [x] Home screen integration with chord quality stats
 
 ---
 
-## Planned: v0.6.0 — Settings & Polish
+## Current: v0.6.0 — Settings & Polish
 
 User preferences and final MVP polish.
 
@@ -164,6 +166,17 @@ Ideas for future development, not committed to timeline:
 ---
 
 ## Changelog
+
+### 2025-12-14 — v0.5.0 Chord Quality Trainer
+
+- Added ChordQuality enum with short/full names and intervals
+- Extended AudioEngine with playChordQuality method
+- Built useChordStore with exercise state machine
+- Extended useProgressStore for chord quality tracking
+- Created full chords.tsx exercise screen
+- Added question generator with same-quality avoidance
+- Integrated unlock system (starter: Major, Minor - unlockable: Dim, Aug)
+- Updated home screen to display chord quality progress
 
 ### 2025-12-14 — v0.4.0 Scale Degree Trainer
 

@@ -17,6 +17,9 @@ import {
   ScaleDegree,
   ALL_SCALE_DEGREES,
   STARTER_SCALE_DEGREES,
+  ChordQuality,
+  ALL_CHORD_QUALITIES,
+  STARTER_CHORD_QUALITIES,
 } from '../utils/music';
 
 interface IntervalProgress {
@@ -31,12 +34,21 @@ interface ScaleDegreeProgress {
   unlockedDegrees: ScaleDegree[];
 }
 
+interface ChordProgress {
+  stats: ExerciseStats;
+  itemStats: ItemStats[];
+  unlockedQualities: ChordQuality[];
+}
+
 interface ProgressState {
   // Interval trainer progress
   intervalProgress: IntervalProgress;
 
   // Scale degree trainer progress
   scaleDegreeProgress: ScaleDegreeProgress;
+
+  // Chord quality trainer progress
+  chordProgress: ChordProgress;
 
   // Loading state
   isLoading: boolean;
@@ -46,6 +58,7 @@ interface ProgressState {
   initialize: () => Promise<void>;
   refreshIntervalProgress: () => Promise<void>;
   refreshScaleDegreeProgress: () => Promise<void>;
+  refreshChordProgress: () => Promise<void>;
 
   // Record interval attempts
   recordIntervalAttempt: (
@@ -73,6 +86,19 @@ interface ProgressState {
     correctAnswers: number
   ) => Promise<string[]>;
 
+  // Record chord quality attempts
+  recordChordAttempt: (
+    quality: ChordQuality,
+    correct: boolean,
+    responseTimeMs?: number
+  ) => Promise<void>;
+
+  // Record chord quality session
+  recordChordSession: (
+    totalQuestions: number,
+    correctAnswers: number
+  ) => Promise<string[]>;
+
   // Check if interval is unlocked
   isIntervalUnlocked: (interval: Interval) => boolean;
 
@@ -84,6 +110,12 @@ interface ProgressState {
 
   // Get unlocked scale degrees
   getUnlockedScaleDegrees: () => ScaleDegree[];
+
+  // Check if chord quality is unlocked
+  isChordQualityUnlocked: (quality: ChordQuality) => boolean;
+
+  // Get unlocked chord qualities
+  getUnlockedChordQualities: () => ChordQuality[];
 }
 
 const DEFAULT_INTERVAL_PROGRESS: IntervalProgress = {
@@ -110,9 +142,22 @@ const DEFAULT_SCALE_DEGREE_PROGRESS: ScaleDegreeProgress = {
   unlockedDegrees: [...STARTER_SCALE_DEGREES],
 };
 
+const DEFAULT_CHORD_PROGRESS: ChordProgress = {
+  stats: {
+    totalAttempts: 0,
+    correctAttempts: 0,
+    accuracy: 0,
+    recentAccuracy: 0,
+    streak: 0,
+  },
+  itemStats: [],
+  unlockedQualities: [...STARTER_CHORD_QUALITIES],
+};
+
 export const useProgressStore = create<ProgressState>((set, get) => ({
   intervalProgress: DEFAULT_INTERVAL_PROGRESS,
   scaleDegreeProgress: DEFAULT_SCALE_DEGREE_PROGRESS,
+  chordProgress: DEFAULT_CHORD_PROGRESS,
   isLoading: false,
   isInitialized: false,
 
@@ -124,6 +169,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       await Promise.all([
         get().refreshIntervalProgress(),
         get().refreshScaleDegreeProgress(),
+        get().refreshChordProgress(),
       ]);
       set({ isInitialized: true });
     } catch (error) {
@@ -180,6 +226,31 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       });
     } catch (error) {
       console.error('Failed to refresh scale degree progress:', error);
+    }
+  },
+
+  refreshChordProgress: async () => {
+    try {
+      const [stats, itemStats, unlockedItems] = await Promise.all([
+        getExerciseStats('chords'),
+        getAllItemStats('chords'),
+        getUnlockedItems('chords'),
+      ]);
+
+      const unlockedQualities =
+        unlockedItems.length > 0
+          ? (unlockedItems as ChordQuality[])
+          : [...STARTER_CHORD_QUALITIES];
+
+      set({
+        chordProgress: {
+          stats,
+          itemStats,
+          unlockedQualities,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to refresh chord progress:', error);
     }
   },
 
@@ -271,5 +342,50 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
   getUnlockedScaleDegrees: (): ScaleDegree[] => {
     return get().scaleDegreeProgress.unlockedDegrees;
+  },
+
+  recordChordAttempt: async (
+    quality: ChordQuality,
+    correct: boolean,
+    responseTimeMs?: number
+  ) => {
+    try {
+      await saveAttempt('chords', quality, correct, responseTimeMs);
+    } catch (error) {
+      console.error('Failed to record chord attempt:', error);
+    }
+  },
+
+  recordChordSession: async (
+    totalQuestions: number,
+    correctAnswers: number
+  ): Promise<string[]> => {
+    try {
+      await saveSession('chords', totalQuestions, correctAnswers);
+
+      const allQualityIds = ALL_CHORD_QUALITIES;
+      const starterIds = STARTER_CHORD_QUALITIES;
+
+      const newUnlocks = await checkAndProcessUnlocks(
+        'chords',
+        allQualityIds,
+        starterIds
+      );
+
+      await get().refreshChordProgress();
+
+      return newUnlocks;
+    } catch (error) {
+      console.error('Failed to record chord session:', error);
+      return [];
+    }
+  },
+
+  isChordQualityUnlocked: (quality: ChordQuality): boolean => {
+    return get().chordProgress.unlockedQualities.includes(quality);
+  },
+
+  getUnlockedChordQualities: (): ChordQuality[] => {
+    return get().chordProgress.unlockedQualities;
   },
 }));

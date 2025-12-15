@@ -201,6 +201,111 @@ export function generateChord(rootMidi: number, type: ChordType): number[] {
 }
 
 // ============================================
+// CHORD QUALITIES (for Chord Quality Trainer)
+// ============================================
+
+/**
+ * Chord quality enum for the trainer
+ */
+export enum ChordQuality {
+  MAJOR = 'MAJOR',
+  MINOR = 'MINOR',
+  DIMINISHED = 'DIMINISHED',
+  AUGMENTED = 'AUGMENTED',
+}
+
+/**
+ * Short chord quality names for display
+ */
+export const CHORD_QUALITY_SHORT_NAMES: Record<ChordQuality, string> = {
+  [ChordQuality.MAJOR]: 'Maj',
+  [ChordQuality.MINOR]: 'Min',
+  [ChordQuality.DIMINISHED]: 'Dim',
+  [ChordQuality.AUGMENTED]: 'Aug',
+};
+
+/**
+ * Full chord quality names
+ */
+export const CHORD_QUALITY_FULL_NAMES: Record<ChordQuality, string> = {
+  [ChordQuality.MAJOR]: 'Major',
+  [ChordQuality.MINOR]: 'Minor',
+  [ChordQuality.DIMINISHED]: 'Diminished',
+  [ChordQuality.AUGMENTED]: 'Augmented',
+};
+
+/**
+ * Intervals from root for each chord quality (in semitones)
+ */
+export const CHORD_QUALITY_INTERVALS: Record<ChordQuality, readonly number[]> = {
+  [ChordQuality.MAJOR]: CHORD_TYPES.MAJOR,
+  [ChordQuality.MINOR]: CHORD_TYPES.MINOR,
+  [ChordQuality.DIMINISHED]: CHORD_TYPES.DIMINISHED,
+  [ChordQuality.AUGMENTED]: CHORD_TYPES.AUGMENTED,
+};
+
+/**
+ * Starter chord qualities (unlocked by default)
+ * Major and Minor - the most common chord types
+ */
+export const STARTER_CHORD_QUALITIES: ChordQuality[] = [
+  ChordQuality.MAJOR,
+  ChordQuality.MINOR,
+];
+
+/**
+ * All chord qualities in unlock order
+ */
+export const ALL_CHORD_QUALITIES: ChordQuality[] = [
+  // Starter qualities
+  ChordQuality.MAJOR,
+  ChordQuality.MINOR,
+  // Unlockable qualities
+  ChordQuality.DIMINISHED,
+  ChordQuality.AUGMENTED,
+];
+
+/**
+ * Get chord quality name
+ */
+export function getChordQualityName(
+  quality: ChordQuality,
+  short: boolean = true
+): string {
+  return short
+    ? CHORD_QUALITY_SHORT_NAMES[quality]
+    : CHORD_QUALITY_FULL_NAMES[quality];
+}
+
+/**
+ * Generate chord MIDI notes from root and quality
+ */
+export function generateChordFromQuality(
+  rootMidi: number,
+  quality: ChordQuality
+): number[] {
+  return CHORD_QUALITY_INTERVALS[quality].map((interval) => rootMidi + interval);
+}
+
+/**
+ * Generate a random chord quality from the given set
+ */
+export function randomChordQuality(qualities: ChordQuality[]): ChordQuality {
+  return qualities[Math.floor(Math.random() * qualities.length)];
+}
+
+/**
+ * Check if two chord qualities are the same
+ * (No "similar" concept for chord qualities - they're quite distinct)
+ */
+export function areChordQualitiesSame(
+  a: ChordQuality,
+  b: ChordQuality
+): boolean {
+  return a === b;
+}
+
+// ============================================
 // SCALE DEGREES
 // ============================================
 
