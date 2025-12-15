@@ -24,67 +24,108 @@ import {
 } from '../utils/music';
 
 /**
- * YIN Pitch Detection Algorithm (Optimized)
+ * YIN Pitch Detection Algorithm
  *
  * Implementation based on the paper:
  * "YIN, a fundamental frequency estimator for speech and music"
  * by Alain de Cheveigné and Hideki Kawahara
  *
- * Optimized to reduce computation by:
- * - Using a smaller analysis window
- * - Early exit when pitch is found
+ * Uses a fixed analysis window size for consistent performance.
+ * Window of 1024 samples at 44100Hz can detect down to ~43Hz (below C2).
  */
+
+// Fixed window size for consistent, fast processing
+const YIN_WINDOW_SIZE = 1024;
+
+// Pre-allocate buffers to avoid GC during audio processing
+let differenceBuffer: Float32Array | null = null;
+let cmndfBuffer: Float32Array | null = null;
+
+function ensureBuffers(): void {
+  if (!differenceBuffer || differenceBuffer.length !== YIN_WINDOW_SIZE) {
+    differenceBuffer = new Float32Array(YIN_WINDOW_SIZE);
+    cmndfBuffer = new Float32Array(YIN_WINDOW_SIZE);
+  }
+}
+
 function detectPitchYIN(
   audioData: Float32Array,
   sampleRate: number,
   threshold: number = 0.15
 ): number | null {
-  // Use smaller window for faster processing
-  const maxLag = Math.min(Math.floor(audioData.length / 2), 1024);
+  ensureBuffers();
+  const difference = differenceBuffer!;
+  const cmndf = cmndfBuffer!;
 
-  // Step 1 & 2 combined: Calculate difference and CMNDF on the fly
-  let runningSum = 0;
+  // Use fixed window size, but ensure we have enough data
+  const windowSize = Math.min(YIN_WINDOW_SIZE, Math.floor(audioData.length / 2));
+  if (windowSize < 64) return null; // Not enough data
 
-  for (let tau = 1; tau < maxLag; tau++) {
-    // Calculate difference for this tau
+  // Step 1: Calculate the difference function
+  difference[0] = 0;
+  for (let tau = 1; tau < windowSize; tau++) {
     let sum = 0;
-    for (let i = 0; i < maxLag; i++) {
+    for (let i = 0; i < windowSize; i++) {
       const delta = audioData[i] - audioData[i + tau];
       sum += delta * delta;
     }
+    difference[tau] = sum;
+  }
 
-    runningSum += sum;
-    const cmndf = sum / (runningSum / tau);
+  // Step 2: Calculate the cumulative mean normalized difference function (CMNDF)
+  cmndf[0] = 1;
+  let runningSum = 0;
 
-    // Step 3: Check threshold and find local minimum
-    if (tau > 1 && cmndf < threshold) {
-      // Look ahead for local minimum
-      let minTau = tau;
-      let minCmndf = cmndf;
+  for (let tau = 1; tau < windowSize; tau++) {
+    runningSum += difference[tau];
+    cmndf[tau] = difference[tau] / (runningSum / tau);
+  }
 
-      for (let t = tau + 1; t < Math.min(tau + 10, maxLag); t++) {
-        let nextSum = 0;
-        for (let i = 0; i < maxLag; i++) {
-          const delta = audioData[i] - audioData[i + t];
-          nextSum += delta * delta;
-        }
-        runningSum += nextSum;
-        const nextCmndf = nextSum / (runningSum / t);
-
-        if (nextCmndf < minCmndf) {
-          minCmndf = nextCmndf;
-          minTau = t;
-        } else {
-          break; // Found local minimum
-        }
+  // Step 3: Find the first tau that gives a minimum below threshold
+  let tauEstimate = -1;
+  for (let tau = 2; tau < windowSize; tau++) {
+    if (cmndf[tau] < threshold) {
+      // Find the local minimum
+      while (tau + 1 < windowSize && cmndf[tau + 1] < cmndf[tau]) {
+        tau++;
       }
-
-      // Convert tau to frequency
-      return sampleRate / minTau;
+      tauEstimate = tau;
+      break;
     }
   }
 
-  return null;
+  // No pitch found
+  if (tauEstimate === -1) {
+    return null;
+  }
+
+  // Step 4: Parabolic interpolation for better precision
+  let betterTau: number;
+  if (tauEstimate > 0 && tauEstimate < windowSize - 1) {
+    const s0 = cmndf[tauEstimate - 1];
+    const s1 = cmndf[tauEstimate];
+    const s2 = cmndf[tauEstimate + 1];
+
+    // Parabolic interpolation
+    const denominator = 2 * (2 * s1 - s2 - s0);
+    if (denominator !== 0) {
+      const adjustment = (s2 - s0) / denominator;
+      if (Math.abs(adjustment) < 1) {
+        betterTau = tauEstimate + adjustment;
+      } else {
+        betterTau = tauEstimate;
+      }
+    } else {
+      betterTau = tauEstimate;
+    }
+  } else {
+    betterTau = tauEstimate;
+  }
+
+  // Convert tau to frequency
+  const frequency = sampleRate / betterTau;
+
+  return frequency;
 }
 
 class PitchDetectorClass {
@@ -98,8 +139,10 @@ class PitchDetectorClass {
   // Session tracking for immediate callback rejection
   private sessionId: number = 0;
 
-  // Throttling - only process if not already processing
-  private isProcessing: boolean = false;
+  // Decoupled processing: store latest buffer and process on timer
+  private latestAudioData: Float32Array | null = null;
+  private processingTimer: ReturnType<typeof setInterval> | null = null;
+  private static readonly PROCESS_INTERVAL_MS = 50; // Process 20 times per second
 
   private onPitchDetected: PitchDetectedCallback | null = null;
   private onError: PitchDetectorErrorCallback | null = null;
@@ -183,58 +226,59 @@ class PitchDetectorClass {
 
       // Increment session ID to invalidate any stale callbacks
       const currentSession = ++this.sessionId;
-      this.isProcessing = false;
+      this.latestAudioData = null;
 
-      // Create audio recorder with smaller buffer for lower latency
+      // Create audio recorder - buffer needs to be 2x YIN window size minimum
+      // Using 2048 samples = ~46ms at 44100Hz, which balances latency vs detection
       this.recorder = new AudioRecorder({
         sampleRate: this.config.sampleRate,
-        bufferLengthInSamples: 2048, // Smaller buffer = lower latency
+        bufferLengthInSamples: 2048,
       });
 
-      // Set up audio callback
+      // Audio callback: just store the latest buffer (fast, non-blocking)
       this.recorder.onAudioReady((event) => {
         // Immediately reject if session changed (stopped)
         if (currentSession !== this.sessionId) {
           return;
         }
-
-        // Skip if already processing (drop frames to prevent backlog)
-        if (this.isProcessing) {
-          return;
-        }
-
-        // Double-check state
-        if (this.state !== 'listening') {
-          return;
-        }
-
-        this.isProcessing = true;
-
-        try {
-          // Get raw audio data from buffer
-          const audioData = event.buffer.getChannelData(0);
-
-          // Detect pitch using YIN algorithm
-          const frequency = detectPitchYIN(audioData, this.config.sampleRate);
-
-          // Check session again after processing (might have stopped during)
-          if (currentSession !== this.sessionId) {
-            return;
-          }
-
-          // If pitch detected and within valid range, create result
-          if (
-            frequency !== null &&
-            frequency >= this.config.minFrequency &&
-            frequency <= this.config.maxFrequency
-          ) {
-            const result = this.createPitchResult(frequency);
-            this.onPitchDetected?.(result);
-          }
-        } finally {
-          this.isProcessing = false;
-        }
+        // Just store the latest audio data - overwrites previous
+        this.latestAudioData = event.buffer.getChannelData(0);
       });
+
+      // Processing timer: runs independently at fixed rate
+      this.processingTimer = setInterval(() => {
+        // Check if still valid session
+        if (currentSession !== this.sessionId) {
+          return;
+        }
+
+        // Skip if no audio data yet
+        const audioData = this.latestAudioData;
+        if (!audioData) {
+          return;
+        }
+
+        // Clear the buffer so we don't reprocess same data
+        this.latestAudioData = null;
+
+        // Detect pitch using YIN algorithm
+        const frequency = detectPitchYIN(audioData, this.config.sampleRate);
+
+        // Check session again after processing
+        if (currentSession !== this.sessionId) {
+          return;
+        }
+
+        // If pitch detected and within valid range, create result
+        if (
+          frequency !== null &&
+          frequency >= this.config.minFrequency &&
+          frequency <= this.config.maxFrequency
+        ) {
+          const result = this.createPitchResult(frequency);
+          this.onPitchDetected?.(result);
+        }
+      }, PitchDetectorClass.PROCESS_INTERVAL_MS);
 
       // Start recording
       this.recorder.start();
@@ -257,8 +301,14 @@ class PitchDetectorClass {
     // Update state immediately for responsive UI
     this.setState('idle');
 
-    // Reset processing flag
-    this.isProcessing = false;
+    // Clear audio buffer
+    this.latestAudioData = null;
+
+    // Stop processing timer
+    if (this.processingTimer) {
+      clearInterval(this.processingTimer);
+      this.processingTimer = null;
+    }
 
     // Cleanup recorder
     if (this.recorder) {
