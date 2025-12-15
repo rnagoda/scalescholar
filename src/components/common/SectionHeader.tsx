@@ -1,10 +1,10 @@
 import React from 'react';
-import { Text, StyleSheet, ViewStyle } from 'react-native';
+import { Text, StyleSheet, TextStyle } from 'react-native';
 import { typography, spacing } from '../../theme';
 
 interface SectionHeaderProps {
   title: string;
-  style?: ViewStyle;
+  style?: TextStyle;
 }
 
 export const SectionHeader: React.FC<SectionHeaderProps> = ({

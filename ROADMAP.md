@@ -36,36 +36,35 @@ Project setup, design system, and core infrastructure.
 
 ---
 
-## Current: v0.2.0 — Audio Engine & Interval Trainer
+## Completed: v0.2.0 — Audio Engine & Interval Trainer
 
 Core audio synthesis and the first complete exercise module.
 
 ### Audio Engine
 
-- [ ] AudioEngine singleton with lazy initialization
-- [ ] Synthesizer interface definition
-- [ ] SineSynth implementation (pure tones)
-- [ ] PianoSynth implementation (piano-like tones)
-- [ ] ADSR envelope for click-free playback
-- [ ] Music theory utilities (`src/utils/music.ts`)
-  - [ ] MIDI to frequency conversion
-  - [ ] Note name parsing
-  - [ ] Interval calculations
+- [x] AudioEngine singleton with lazy initialization
+- [x] Synthesizer interface definition
+- [x] SineSynth implementation (pure tones)
+- [x] PianoSynth implementation (piano-like tones)
+- [x] ADSR envelope for click-free playback
+- [x] Music theory utilities (`src/utils/music.ts`)
+  - [x] MIDI to frequency conversion
+  - [x] Interval calculations
 
 ### Interval Trainer
 
-- [ ] Exercise state machine (Ready → Playing → Answering → Feedback)
-- [ ] Question generator with constraints
-- [ ] PlayButton component
-- [ ] AnswerButton component
-- [ ] Exercise screen UI
-- [ ] Feedback display (correct/incorrect)
-- [ ] Session completion screen
-- [ ] Starter intervals: P5, P4, M3, m3
+- [x] Exercise state machine (Ready → Playing → Answering → Feedback)
+- [x] Question generator with constraints
+- [x] PlayButton component
+- [x] AnswerButton component
+- [x] Exercise screen UI
+- [x] Feedback display (correct/incorrect)
+- [x] Session completion screen
+- [x] Starter intervals: P5, P4, M3, m3
 
 ---
 
-## Planned: v0.3.0 — Progress System & Unlocks
+## Current: v0.3.0 — Progress System & Unlocks
 
 Track user progress and enable progressive difficulty.
 
@@ -161,6 +160,17 @@ Ideas for future development, not committed to timeline:
 ---
 
 ## Changelog
+
+### 2024-12-14 — v0.2.0 Audio Engine & Interval Trainer
+
+- Built AudioEngine singleton with Web Audio API synthesis
+- Implemented SineSynth and PianoSynth (additive synthesis)
+- Added ADSR envelopes for click-free playback
+- Created music theory utilities (MIDI, frequencies, intervals)
+- Built exercise state machine with Zustand
+- Implemented question generator with similarity avoidance
+- Created PlayButton and AnswerButton components
+- Full interval trainer with feedback and session completion
 
 ### 2024-12-14 — v0.1.0 Foundation Complete
 

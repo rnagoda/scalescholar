@@ -1,0 +1,181 @@
+/**
+ * Music theory utilities for Scale Scholar
+ */
+
+// Standard A4 reference frequency (can be adjusted in settings)
+export const DEFAULT_A4_FREQUENCY = 440;
+
+// MIDI note number for A4
+const A4_MIDI = 69;
+
+// Middle C MIDI note number
+export const MIDDLE_C = 60;
+
+/**
+ * Interval definitions in semitones
+ */
+export enum Interval {
+  UNISON = 0,
+  MINOR_SECOND = 1,
+  MAJOR_SECOND = 2,
+  MINOR_THIRD = 3,
+  MAJOR_THIRD = 4,
+  PERFECT_FOURTH = 5,
+  TRITONE = 6,
+  PERFECT_FIFTH = 7,
+  MINOR_SIXTH = 8,
+  MAJOR_SIXTH = 9,
+  MINOR_SEVENTH = 10,
+  MAJOR_SEVENTH = 11,
+  OCTAVE = 12,
+}
+
+/**
+ * Short interval names for display
+ */
+export const INTERVAL_SHORT_NAMES: Record<Interval, string> = {
+  [Interval.UNISON]: 'P1',
+  [Interval.MINOR_SECOND]: 'm2',
+  [Interval.MAJOR_SECOND]: 'M2',
+  [Interval.MINOR_THIRD]: 'm3',
+  [Interval.MAJOR_THIRD]: 'M3',
+  [Interval.PERFECT_FOURTH]: 'P4',
+  [Interval.TRITONE]: 'TT',
+  [Interval.PERFECT_FIFTH]: 'P5',
+  [Interval.MINOR_SIXTH]: 'm6',
+  [Interval.MAJOR_SIXTH]: 'M6',
+  [Interval.MINOR_SEVENTH]: 'm7',
+  [Interval.MAJOR_SEVENTH]: 'M7',
+  [Interval.OCTAVE]: 'P8',
+};
+
+/**
+ * Full interval names
+ */
+export const INTERVAL_FULL_NAMES: Record<Interval, string> = {
+  [Interval.UNISON]: 'Unison',
+  [Interval.MINOR_SECOND]: 'Minor 2nd',
+  [Interval.MAJOR_SECOND]: 'Major 2nd',
+  [Interval.MINOR_THIRD]: 'Minor 3rd',
+  [Interval.MAJOR_THIRD]: 'Major 3rd',
+  [Interval.PERFECT_FOURTH]: 'Perfect 4th',
+  [Interval.TRITONE]: 'Tritone',
+  [Interval.PERFECT_FIFTH]: 'Perfect 5th',
+  [Interval.MINOR_SIXTH]: 'Minor 6th',
+  [Interval.MAJOR_SIXTH]: 'Major 6th',
+  [Interval.MINOR_SEVENTH]: 'Minor 7th',
+  [Interval.MAJOR_SEVENTH]: 'Major 7th',
+  [Interval.OCTAVE]: 'Octave',
+};
+
+/**
+ * Starter intervals for beginners (unlocked by default)
+ */
+export const STARTER_INTERVALS: Interval[] = [
+  Interval.MINOR_THIRD,
+  Interval.MAJOR_THIRD,
+  Interval.PERFECT_FOURTH,
+  Interval.PERFECT_FIFTH,
+];
+
+/**
+ * All intervals that can be unlocked
+ */
+export const UNLOCKABLE_INTERVALS: Interval[] = [
+  Interval.MINOR_SECOND,
+  Interval.MAJOR_SECOND,
+  Interval.TRITONE,
+  Interval.MINOR_SIXTH,
+  Interval.MAJOR_SIXTH,
+  Interval.MINOR_SEVENTH,
+  Interval.MAJOR_SEVENTH,
+  Interval.OCTAVE,
+];
+
+/**
+ * Convert MIDI note number to frequency in Hz
+ * Uses equal temperament tuning
+ */
+export function midiToFrequency(
+  midiNote: number,
+  a4Freq: number = DEFAULT_A4_FREQUENCY
+): number {
+  return a4Freq * Math.pow(2, (midiNote - A4_MIDI) / 12);
+}
+
+/**
+ * Convert frequency to MIDI note number (rounded)
+ */
+export function frequencyToMidi(
+  frequency: number,
+  a4Freq: number = DEFAULT_A4_FREQUENCY
+): number {
+  return Math.round(12 * Math.log2(frequency / a4Freq) + A4_MIDI);
+}
+
+/**
+ * Get the interval name from semitones
+ */
+export function getIntervalName(
+  semitones: number,
+  short: boolean = true
+): string {
+  const normalizedSemitones = Math.abs(semitones) % 13;
+  const interval = normalizedSemitones as Interval;
+  return short
+    ? INTERVAL_SHORT_NAMES[interval] || `${semitones}st`
+    : INTERVAL_FULL_NAMES[interval] || `${semitones} semitones`;
+}
+
+/**
+ * Generate a random MIDI note within a range
+ */
+export function randomMidiNote(minMidi: number, maxMidi: number): number {
+  return Math.floor(Math.random() * (maxMidi - minMidi + 1)) + minMidi;
+}
+
+/**
+ * Generate a random interval from the given set
+ */
+export function randomInterval(intervals: Interval[]): Interval {
+  return intervals[Math.floor(Math.random() * intervals.length)];
+}
+
+/**
+ * Check if two intervals are the same or similar
+ * (for preventing consecutive similar questions)
+ */
+export function areIntervalsSimilar(a: Interval, b: Interval): boolean {
+  return a === b || Math.abs(a - b) <= 1;
+}
+
+/**
+ * Major scale intervals from root (in semitones)
+ */
+export const MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
+
+/**
+ * Generate major scale MIDI notes from a root
+ */
+export function generateMajorScale(rootMidi: number): number[] {
+  return MAJOR_SCALE.map((interval) => rootMidi + interval);
+}
+
+/**
+ * Chord types defined by intervals from root
+ */
+export const CHORD_TYPES = {
+  MAJOR: [0, 4, 7],
+  MINOR: [0, 3, 7],
+  DIMINISHED: [0, 3, 6],
+  AUGMENTED: [0, 4, 8],
+} as const;
+
+export type ChordType = keyof typeof CHORD_TYPES;
+
+/**
+ * Generate chord MIDI notes from a root and type
+ */
+export function generateChord(rootMidi: number, type: ChordType): number[] {
+  return CHORD_TYPES[type].map((interval) => rootMidi + interval);
+}
