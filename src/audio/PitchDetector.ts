@@ -233,13 +233,24 @@ class PitchDetectorClass {
    * Stop listening
    */
   public stopListening(): void {
-    if (this.recorder) {
-      this.recorder.stop();
-      this.recorder.disconnect();
-      this.recorder = null;
-    }
-
+    // Update state immediately for responsive UI
     this.setState('idle');
+
+    // Cleanup recorder asynchronously to avoid blocking UI
+    if (this.recorder) {
+      const recorderToCleanup = this.recorder;
+      this.recorder = null;
+
+      // Run cleanup in next tick to not block UI
+      setTimeout(() => {
+        try {
+          recorderToCleanup.stop();
+          recorderToCleanup.disconnect();
+        } catch {
+          // Ignore cleanup errors
+        }
+      }, 0);
+    }
   }
 
   /**
