@@ -24,86 +24,67 @@ import {
 } from '../utils/music';
 
 /**
- * YIN Pitch Detection Algorithm
+ * YIN Pitch Detection Algorithm (Optimized)
  *
  * Implementation based on the paper:
  * "YIN, a fundamental frequency estimator for speech and music"
  * by Alain de Cheveigné and Hideki Kawahara
  *
- * @param audioData - Float32Array of audio samples
- * @param sampleRate - Sample rate of the audio
- * @param threshold - Probability threshold (default: 0.15)
- * @returns Detected frequency in Hz, or null if no pitch detected
+ * Optimized to reduce computation by:
+ * - Using a smaller analysis window
+ * - Early exit when pitch is found
  */
 function detectPitchYIN(
   audioData: Float32Array,
   sampleRate: number,
   threshold: number = 0.15
 ): number | null {
-  const bufferSize = audioData.length;
-  const halfBufferSize = Math.floor(bufferSize / 2);
+  // Use smaller window for faster processing
+  const maxLag = Math.min(Math.floor(audioData.length / 2), 1024);
 
-  // Step 1: Calculate the difference function
-  const difference = new Float32Array(halfBufferSize);
-  for (let tau = 0; tau < halfBufferSize; tau++) {
+  // Step 1 & 2 combined: Calculate difference and CMNDF on the fly
+  let runningSum = 0;
+
+  for (let tau = 1; tau < maxLag; tau++) {
+    // Calculate difference for this tau
     let sum = 0;
-    for (let i = 0; i < halfBufferSize; i++) {
+    for (let i = 0; i < maxLag; i++) {
       const delta = audioData[i] - audioData[i + tau];
       sum += delta * delta;
     }
-    difference[tau] = sum;
-  }
 
-  // Step 2: Calculate the cumulative mean normalized difference function (CMNDF)
-  const cmndf = new Float32Array(halfBufferSize);
-  cmndf[0] = 1;
-  let runningSum = 0;
+    runningSum += sum;
+    const cmndf = sum / (runningSum / tau);
 
-  for (let tau = 1; tau < halfBufferSize; tau++) {
-    runningSum += difference[tau];
-    cmndf[tau] = difference[tau] / (runningSum / tau);
-  }
+    // Step 3: Check threshold and find local minimum
+    if (tau > 1 && cmndf < threshold) {
+      // Look ahead for local minimum
+      let minTau = tau;
+      let minCmndf = cmndf;
 
-  // Step 3: Find the first tau that gives a minimum below threshold
-  let tauEstimate = -1;
-  for (let tau = 2; tau < halfBufferSize; tau++) {
-    if (cmndf[tau] < threshold) {
-      // Find the local minimum
-      while (tau + 1 < halfBufferSize && cmndf[tau + 1] < cmndf[tau]) {
-        tau++;
+      for (let t = tau + 1; t < Math.min(tau + 10, maxLag); t++) {
+        let nextSum = 0;
+        for (let i = 0; i < maxLag; i++) {
+          const delta = audioData[i] - audioData[i + t];
+          nextSum += delta * delta;
+        }
+        runningSum += nextSum;
+        const nextCmndf = nextSum / (runningSum / t);
+
+        if (nextCmndf < minCmndf) {
+          minCmndf = nextCmndf;
+          minTau = t;
+        } else {
+          break; // Found local minimum
+        }
       }
-      tauEstimate = tau;
-      break;
+
+      // Convert tau to frequency
+      return sampleRate / minTau;
     }
   }
 
-  // No pitch found
-  if (tauEstimate === -1) {
-    return null;
-  }
-
-  // Step 4: Parabolic interpolation for better precision
-  let betterTau: number;
-  if (tauEstimate > 0 && tauEstimate < halfBufferSize - 1) {
-    const s0 = cmndf[tauEstimate - 1];
-    const s1 = cmndf[tauEstimate];
-    const s2 = cmndf[tauEstimate + 1];
-
-    // Parabolic interpolation
-    const adjustment = (s2 - s0) / (2 * (2 * s1 - s2 - s0));
-    if (Math.abs(adjustment) < 1) {
-      betterTau = tauEstimate + adjustment;
-    } else {
-      betterTau = tauEstimate;
-    }
-  } else {
-    betterTau = tauEstimate;
-  }
-
-  // Convert tau to frequency
-  const frequency = sampleRate / betterTau;
-
-  return frequency;
+  return null;
 }
 
 class PitchDetectorClass {
@@ -113,6 +94,12 @@ class PitchDetectorClass {
 
   private config: PitchDetectorConfig = { ...DEFAULT_PITCH_DETECTOR_CONFIG };
   private state: PitchDetectorState = 'idle';
+
+  // Session tracking for immediate callback rejection
+  private sessionId: number = 0;
+
+  // Throttling - only process if not already processing
+  private isProcessing: boolean = false;
 
   private onPitchDetected: PitchDetectedCallback | null = null;
   private onError: PitchDetectorErrorCallback | null = null;
@@ -194,32 +181,58 @@ class PitchDetectorClass {
         }
       }
 
-      // Create audio recorder
+      // Increment session ID to invalidate any stale callbacks
+      const currentSession = ++this.sessionId;
+      this.isProcessing = false;
+
+      // Create audio recorder with smaller buffer for lower latency
       this.recorder = new AudioRecorder({
         sampleRate: this.config.sampleRate,
-        bufferLengthInSamples: this.config.bufferSize,
+        bufferLengthInSamples: 2048, // Smaller buffer = lower latency
       });
 
       // Set up audio callback
       this.recorder.onAudioReady((event) => {
+        // Immediately reject if session changed (stopped)
+        if (currentSession !== this.sessionId) {
+          return;
+        }
+
+        // Skip if already processing (drop frames to prevent backlog)
+        if (this.isProcessing) {
+          return;
+        }
+
+        // Double-check state
         if (this.state !== 'listening') {
           return;
         }
 
-        // Get raw audio data from buffer
-        const audioData = event.buffer.getChannelData(0);
+        this.isProcessing = true;
 
-        // Detect pitch using YIN algorithm
-        const frequency = detectPitchYIN(audioData, this.config.sampleRate);
+        try {
+          // Get raw audio data from buffer
+          const audioData = event.buffer.getChannelData(0);
 
-        // If pitch detected and within valid range, create result
-        if (
-          frequency !== null &&
-          frequency >= this.config.minFrequency &&
-          frequency <= this.config.maxFrequency
-        ) {
-          const result = this.createPitchResult(frequency);
-          this.onPitchDetected?.(result);
+          // Detect pitch using YIN algorithm
+          const frequency = detectPitchYIN(audioData, this.config.sampleRate);
+
+          // Check session again after processing (might have stopped during)
+          if (currentSession !== this.sessionId) {
+            return;
+          }
+
+          // If pitch detected and within valid range, create result
+          if (
+            frequency !== null &&
+            frequency >= this.config.minFrequency &&
+            frequency <= this.config.maxFrequency
+          ) {
+            const result = this.createPitchResult(frequency);
+            this.onPitchDetected?.(result);
+          }
+        } finally {
+          this.isProcessing = false;
         }
       });
 
@@ -238,23 +251,27 @@ class PitchDetectorClass {
    * Stop listening
    */
   public stopListening(): void {
+    // Increment session ID FIRST to immediately invalidate all callbacks
+    this.sessionId++;
+
     // Update state immediately for responsive UI
     this.setState('idle');
 
-    // Cleanup recorder asynchronously to avoid blocking UI
+    // Reset processing flag
+    this.isProcessing = false;
+
+    // Cleanup recorder
     if (this.recorder) {
       const recorderToCleanup = this.recorder;
       this.recorder = null;
 
-      // Run cleanup in next tick to not block UI
-      setTimeout(() => {
-        try {
-          recorderToCleanup.stop();
-          recorderToCleanup.disconnect();
-        } catch {
-          // Ignore cleanup errors
-        }
-      }, 0);
+      // Stop synchronously for immediate effect
+      try {
+        recorderToCleanup.stop();
+        recorderToCleanup.disconnect();
+      } catch {
+        // Ignore cleanup errors
+      }
     }
   }
 
