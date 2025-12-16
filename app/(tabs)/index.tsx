@@ -13,6 +13,7 @@ import {
 } from '@/src/components/common';
 import { useVoiceProfileStore } from '@/src/stores/useVoiceProfileStore';
 import { useProgressStore } from '@/src/stores/useProgressStore';
+import { useXPStore } from '@/src/stores/useXPStore';
 import { ALL_INTERVALS, ALL_SCALE_DEGREES, ALL_CHORD_QUALITIES } from '@/src/utils/music';
 
 /**
@@ -78,6 +79,17 @@ export default function HomeScreen() {
     refreshChordProgress,
   } = useProgressStore();
 
+  const {
+    totalXP,
+    currentLevel,
+    levelTitle,
+    levelProgress,
+    xpToNextLevel,
+    isInitialized: xpInitialized,
+    initialize: initializeXP,
+    refreshXP,
+  } = useXPStore();
+
   useEffect(() => {
     if (!voiceInitialized) {
       initializeVoice();
@@ -88,6 +100,11 @@ export default function HomeScreen() {
       refreshIntervalProgress();
       refreshScaleDegreeProgress();
       refreshChordProgress();
+    }
+    if (!xpInitialized) {
+      initializeXP();
+    } else {
+      refreshXP();
     }
   }, []);
 
@@ -120,6 +137,23 @@ export default function HomeScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* XP Level Display */}
+        <View style={styles.levelRow}>
+          <View style={styles.levelInfo}>
+            <Text style={styles.levelLabel}>LEVEL {currentLevel}</Text>
+            <Text style={styles.levelTitle}>{levelTitle}</Text>
+          </View>
+          <View style={styles.xpInfo}>
+            <Text style={styles.xpTotal}>{totalXP} XP</Text>
+            {xpToNextLevel > 0 && (
+              <Text style={styles.xpToNext}>{xpToNextLevel} to next</Text>
+            )}
+          </View>
+        </View>
+        <View style={styles.levelProgressRow}>
+          <AsciiProgressBar progress={levelProgress} width={30} />
+        </View>
+
         {/* Ear School */}
         <Card>
           <View style={styles.cardHeader}>
@@ -262,5 +296,43 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: spacing.xl,
     paddingVertical: spacing.md,
+  },
+  levelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
+  levelInfo: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: spacing.sm,
+  },
+  levelLabel: {
+    fontFamily: fonts.monoBold,
+    fontSize: 16,
+    color: colors.accentGreen,
+    letterSpacing: 1,
+  },
+  levelTitle: {
+    fontFamily: fonts.mono,
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  xpInfo: {
+    alignItems: 'flex-end',
+  },
+  xpTotal: {
+    fontFamily: fonts.monoBold,
+    fontSize: 14,
+    color: colors.textPrimary,
+  },
+  xpToNext: {
+    fontFamily: fonts.mono,
+    fontSize: 11,
+    color: colors.textMuted,
+  },
+  levelProgressRow: {
+    marginBottom: spacing.lg,
   },
 });

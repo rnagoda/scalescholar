@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 import { colors, typography, spacing, fonts } from '@/src/theme';
 import {
@@ -11,6 +12,7 @@ import {
   Divider,
   ProgressBar,
   AppFooter,
+  BracketButton,
 } from '@/src/components/common';
 import { useProgressStore } from '@/src/stores/useProgressStore';
 import {
@@ -30,6 +32,8 @@ const VOICE_EXERCISE_NAMES: Record<VoiceExerciseType, string> = {
 };
 
 export default function ProgressScreen() {
+  const router = useRouter();
+
   const {
     intervalProgress,
     isLoading,
@@ -82,7 +86,12 @@ export default function ProgressScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScreenHeader title="PROGRESS" />
+      <ScreenHeader
+        title="PROGRESS"
+        rightContent={
+          <BracketButton label="X" onPress={() => router.back()} />
+        }
+      />
       <Divider style={styles.divider} />
 
       <ScrollView

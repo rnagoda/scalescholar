@@ -68,7 +68,7 @@ export default function EarSchoolMenuScreen() {
       <ScreenHeader
         title="EAR SCHOOL"
         rightContent={
-          <BracketButton label="CLOSE" onPress={handleClose} />
+          <BracketButton label="X" onPress={handleClose} />
         }
       />
       <Divider style={styles.divider} />

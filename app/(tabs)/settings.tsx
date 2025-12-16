@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useRouter } from 'expo-router';
+
 import { colors, typography, spacing } from '@/src/theme';
 import {
   ScreenHeader,
@@ -32,6 +34,8 @@ import { SynthType } from '@/src/types/audio';
 const REFERENCE_PITCH_OPTIONS = [415, 432, 440, 442, 444, 466];
 
 export default function SettingsScreen() {
+  const router = useRouter();
+
   const {
     instrument,
     referencePitch,
@@ -93,7 +97,12 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScreenHeader title="SETTINGS" />
+      <ScreenHeader
+        title="SETTINGS"
+        rightContent={
+          <BracketButton label="X" onPress={() => router.back()} />
+        }
+      />
       <Divider style={styles.divider} />
 
       <ScrollView

@@ -107,6 +107,51 @@ const initializeSchema = async (database: SQLite.SQLiteDatabase): Promise<void> 
       duration_seconds INTEGER,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- XP events: track all XP awards
+    CREATE TABLE IF NOT EXISTS xp_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      source TEXT NOT NULL,
+      amount INTEGER NOT NULL,
+      details TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Create indexes for XP queries
+    CREATE INDEX IF NOT EXISTS idx_xp_events_source
+      ON xp_events(source);
+    CREATE INDEX IF NOT EXISTS idx_xp_events_created
+      ON xp_events(created_at);
+
+    -- Lesson progress: track lesson completion state
+    CREATE TABLE IF NOT EXISTS lesson_progress (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      lesson_id TEXT NOT NULL UNIQUE,
+      completed INTEGER DEFAULT 0,
+      blocks_completed INTEGER DEFAULT 0,
+      first_completed_at TEXT,
+      last_accessed_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Create index for lesson progress queries
+    CREATE INDEX IF NOT EXISTS idx_lesson_progress_lesson_id
+      ON lesson_progress(lesson_id);
+
+    -- Lesson block attempts: track individual block results
+    CREATE TABLE IF NOT EXISTS lesson_block_attempts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      lesson_id TEXT NOT NULL,
+      block_id TEXT NOT NULL,
+      correct INTEGER NOT NULL,
+      attempts INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Create indexes for lesson block queries
+    CREATE INDEX IF NOT EXISTS idx_lesson_block_attempts_lesson
+      ON lesson_block_attempts(lesson_id);
+    CREATE INDEX IF NOT EXISTS idx_lesson_block_attempts_block
+      ON lesson_block_attempts(block_id);
   `);
 };
 
