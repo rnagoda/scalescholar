@@ -6,13 +6,16 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { LessonBlock, isGradedBlock } from '../../types/lesson';
+import { LessonBlock } from '../../types/lesson';
 import { colors, fonts, spacing } from '../../theme';
 import {
   TextAudioBlock,
   AudioQuizBlock,
   FillBlankBlock,
   SortingBlock,
+  VisualQuizBlock,
+  TapBuildBlock,
+  DragDropBlock,
 } from './blocks';
 
 interface BlockRendererProps {
@@ -55,6 +58,18 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
         />
       );
 
+    case 'visual-quiz':
+      return (
+        <VisualQuizBlock
+          content={content.data}
+          onAnswer={onAnswer}
+          showFeedback={showFeedback}
+          isCorrect={isCorrect}
+          selectedAnswer={selectedAnswer as number | null}
+          onContinue={onContinue}
+        />
+      );
+
     case 'fill-blank':
       return (
         <FillBlankBlock
@@ -79,19 +94,28 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
         />
       );
 
-    case 'visual-quiz':
-    case 'drag-drop':
     case 'tap-build':
-      // Placeholder for blocks not yet implemented
       return (
-        <View style={styles.placeholder}>
-          <Text style={styles.placeholderTitle}>
-            {content.type.toUpperCase()}
-          </Text>
-          <Text style={styles.placeholderText}>
-            This block type is coming soon.
-          </Text>
-        </View>
+        <TapBuildBlock
+          content={content.data}
+          onAnswer={onAnswer}
+          showFeedback={showFeedback}
+          isCorrect={isCorrect}
+          selectedAnswer={selectedAnswer as number[] | null}
+          onContinue={onContinue}
+        />
+      );
+
+    case 'drag-drop':
+      return (
+        <DragDropBlock
+          content={content.data}
+          onAnswer={onAnswer}
+          showFeedback={showFeedback}
+          isCorrect={isCorrect}
+          selectedAnswer={selectedAnswer as Record<string, string> | null}
+          onContinue={onContinue}
+        />
       );
 
     default:

@@ -34,8 +34,29 @@ export class PianoSynth implements Synthesizer {
     this.envelope = envelope;
   }
 
-  private initialize(): boolean {
-    if (this.isInitialized && this.audioContext) return true;
+  private async initialize(): Promise<boolean> {
+    // If we have a context, check its state
+    if (this.audioContext) {
+      const state = this.audioContext.state;
+
+      if (state === 'running') {
+        return true;
+      }
+
+      if (state === 'suspended') {
+        try {
+          await this.audioContext.resume();
+          return true;
+        } catch (error) {
+          console.warn('Failed to resume audio context, recreating:', error);
+          // Fall through to recreate
+        }
+      }
+
+      // State is 'closed' or resume failed - need to recreate
+      this.audioContext = null;
+      this.isInitialized = false;
+    }
 
     try {
       this.audioContext = new AudioContext();
@@ -45,6 +66,14 @@ export class PianoSynth implements Synthesizer {
       console.error('Failed to initialize audio context:', error);
       return false;
     }
+  }
+
+  /**
+   * Force reinitialize audio context (useful after Bluetooth/audio route changes)
+   */
+  async reinitialize(): Promise<boolean> {
+    this.dispose();
+    return this.initialize();
   }
 
   private applyEnvelope(
@@ -65,7 +94,7 @@ export class PianoSynth implements Synthesizer {
   }
 
   async playNote(frequency: number, duration: number): Promise<void> {
-    const initialized = this.initialize();
+    const initialized = await this.initialize();
     if (!initialized || !this.audioContext) {
       console.warn('Audio not available, skipping playback');
       return;
@@ -109,7 +138,7 @@ export class PianoSynth implements Synthesizer {
   }
 
   async playChord(frequencies: number[], duration: number): Promise<void> {
-    const initialized = this.initialize();
+    const initialized = await this.initialize();
     if (!initialized || !this.audioContext) {
       console.warn('Audio not available, skipping playback');
       return;

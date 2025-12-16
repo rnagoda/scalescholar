@@ -37,6 +37,12 @@ export interface Synthesizer {
   stop(): void;
 
   /**
+   * Force reinitialize audio context
+   * Useful after Bluetooth or audio route changes on iOS
+   */
+  reinitialize(): Promise<boolean>;
+
+  /**
    * Clean up resources
    */
   dispose(): void;

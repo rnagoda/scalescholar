@@ -1,3 +1,4 @@
+import { AppState, AppStateStatus } from 'react-native';
 import { Synthesizer, SynthType } from '../types/audio';
 import { SineSynth, PianoSynth } from './synths';
 import {
@@ -23,9 +24,44 @@ class AudioEngineClass {
   private a4Frequency: number = DEFAULT_A4_FREQUENCY;
   private defaultNoteDuration: number = 0.8;
   private isInitialized = false;
+  private appStateSubscription: ReturnType<typeof AppState.addEventListener> | null = null;
+  private lastAppState: AppStateStatus = 'active';
 
   private constructor() {
-    // Private constructor for singleton
+    // Set up AppState listener to handle audio context invalidation
+    // when app goes to background/foreground or Bluetooth changes
+    this.setupAppStateListener();
+  }
+
+  /**
+   * Set up AppState listener to reinitialize audio when app returns to foreground
+   */
+  private setupAppStateListener(): void {
+    this.appStateSubscription = AppState.addEventListener(
+      'change',
+      this.handleAppStateChange.bind(this)
+    );
+  }
+
+  /**
+   * Handle app state changes - reinitialize audio on return to foreground
+   */
+  private async handleAppStateChange(nextAppState: AppStateStatus): Promise<void> {
+    // When coming back from background to active, reinitialize audio
+    if (
+      this.lastAppState.match(/inactive|background/) &&
+      nextAppState === 'active' &&
+      this.isInitialized &&
+      this.synth
+    ) {
+      console.log('App returned to foreground, reinitializing audio...');
+      try {
+        await this.synth.reinitialize();
+      } catch (error) {
+        console.warn('Failed to reinitialize audio on foreground:', error);
+      }
+    }
+    this.lastAppState = nextAppState;
   }
 
   /**
@@ -294,9 +330,24 @@ class AudioEngineClass {
   }
 
   /**
+   * Force reinitialize audio context
+   * Call this if audio playback stops working (e.g., after Bluetooth changes)
+   */
+  async reinitialize(): Promise<void> {
+    if (this.synth) {
+      await this.synth.reinitialize();
+    }
+  }
+
+  /**
    * Clean up resources
    */
   dispose(): void {
+    // Remove AppState listener
+    if (this.appStateSubscription) {
+      this.appStateSubscription.remove();
+      this.appStateSubscription = null;
+    }
     this.synth?.dispose();
     this.synth = null;
     this.isInitialized = false;
