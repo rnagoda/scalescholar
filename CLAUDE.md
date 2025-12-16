@@ -650,7 +650,9 @@ Follow a disciplined git workflow to maintain code quality and project history.
 
 ### Branch Strategy
 
-**Never commit directly to `main`.** All work happens on feature branches.
+**NEVER push directly to `main`. NEVER.** This includes documentation, small fixes, "quick changes" — everything. All changes to main happen through merged pull requests after testing and review.
+
+All work happens on feature branches:
 
 ```bash
 # Branch naming conventions
@@ -689,7 +691,7 @@ chore/upgrade-dependencies    # Maintenance tasks
    # Then create PR via GitHub
    ```
 
-4. **Merge via pull request** after review — squash or merge commit as appropriate
+4. **Merge via pull request** after testing and review — this is the ONLY way code gets into main
 
 ### Commit Message Format
 
