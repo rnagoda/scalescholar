@@ -304,7 +304,7 @@ INTERVALS                             [ CLOSE ]
 | Layer | Technology | Notes |
 |-------|------------|-------|
 | Framework | React Native with Expo | Expo managed workflow for faster development |
-| Audio | expo-audio | Expo's audio API for playback and synthesis |
+| Audio | react-native-audio-api | Web Audio API for React Native, supports synthesis and recording |
 | Navigation | Expo Router | File-based routing built on React Navigation |
 | State | Zustand | Keep stores small and focused |
 | Storage | AsyncStorage | Settings, simple preferences |
@@ -322,35 +322,45 @@ app/                        # Expo Router file-based routing
 │   ├── progress.tsx        # Progress screen
 │   └── settings.tsx        # Settings screen
 ├── exercise/               # Exercise screens (stack)
-│   ├── intervals.tsx
-│   ├── scale-degrees.tsx
-│   └── chords.tsx
+│   ├── music-school/       # Music School lesson player
+│   ├── intervals.tsx       # Interval trainer
+│   ├── scale-degrees.tsx   # Scale degree trainer
+│   ├── chords.tsx          # Chord quality trainer
+│   └── pitch-detector.tsx  # Pitch detector tool
 ├── _layout.tsx             # Root layout
 └── +not-found.tsx          # 404 screen
 src/
-├── components/             # Reusable UI components
-│   ├── common/             # Buttons, cards, etc.
-│   └── exercises/          # Exercise-specific components
+├── components/
+│   ├── common/             # Reusable UI (BracketButton, Card, etc.)
+│   ├── exercises/          # Ear School exercise components
+│   └── lessons/            # Music School lesson components
+│       ├── blocks/         # Block type components (audio-quiz, etc.)
+│       └── shared/         # Shared components (PianoKeyboard, etc.)
+├── content/
+│   └── lessons/            # 48 lesson content files
+│       ├── foundations/    # Track 1: Pitch, rhythm, expression
+│       ├── intervals/      # Track 2: All 12 intervals
+│       ├── scales-keys/    # Track 3: Major/minor scales and keys
+│       └── chords/         # Track 4: Triads and 7th chords
 ├── audio/                  # Audio engine and synthesis
 │   ├── AudioEngine.ts      # Main audio controller
-│   ├── synths/             # Instrument synthesizers
-│   │   ├── PianoSynth.ts
-│   │   └── SineSynth.ts
-│   └── utils/              # Frequency calculations, etc.
+│   └── synths/             # Instrument synthesizers
+│       ├── SineSynth.ts
+│       ├── PianoSynth.ts
+│       └── SampledPianoSynth.ts
 ├── stores/                 # Zustand stores
 │   ├── useSettingsStore.ts
 │   ├── useProgressStore.ts
-│   └── useExerciseStore.ts
+│   ├── useLessonStore.ts
+│   └── useXPStore.ts
 ├── services/               # Database, business logic
 │   ├── database.ts
-│   └── progressService.ts
+│   ├── lessonService.ts
+│   └── xpService.ts
 ├── utils/                  # Helper functions
-│   ├── music.ts            # Music theory utilities
-│   └── constants.ts
+│   └── music.ts            # Music theory utilities
 ├── types/                  # TypeScript type definitions
-│   └── index.ts
 └── theme/                  # Colors, typography, spacing
-    └── index.ts
 ```
 
 ## Important Design Decisions

@@ -1,6 +1,6 @@
 # Scale Scholar
 
-A mobile ear training app for iOS and Android that helps musicians develop the ability to recognize intervals, scale degrees, and chord qualities.
+A mobile ear training app for iOS and Android that helps musicians develop the ability to recognize intervals, scale degrees, and chord qualities through interactive lessons and exercises.
 
 ## Overview
 
@@ -8,12 +8,25 @@ Scale Scholar provides focused, progressive exercises with immediate feedback to
 
 ### Features
 
+#### Music School — Structured Learning
+- **48 lessons** across 4 tracks: Foundations, Intervals, Scales & Keys, and Chords
+- **7 block types**: text-audio, audio-quiz, visual-quiz, fill-blank, drag-drop, tap-build, sorting
+- **Cross-track unlocks**: Lessons unlock content in Ear School trainers
+- **XP system** with leveling (Beginner → Intermediate → Advanced → Scholar)
+
+#### Ear School — Practice Trainers
 - **Interval Trainer** — Learn to recognize the distance between two notes (ascending, descending, and harmonic)
 - **Scale Degree Trainer** — Identify notes by their position within a key (functional ear training)
 - **Chord Quality Trainer** — Distinguish between major, minor, diminished, and augmented chords
+
+#### Voice School — Pitch Training
+- **Pitch Detector** — Real-time pitch detection with visual feedback for tuning practice
+
+#### Core Features
 - **Progressive Unlocks** — Start with basics, unlock more content as you improve
-- **Progress Tracking** — Monitor accuracy, streaks, and improvement over time
-- **Customizable Settings** — Adjust instrument sound, reference pitch, session length, and more
+- **Progress Tracking** — Monitor accuracy, streaks, XP, and level progression
+- **Sampled Piano** — Salamander Grand Piano samples for realistic sound
+- **Customizable Settings** — Adjust instrument, reference pitch, session length, and more
 
 ### Design
 
@@ -24,7 +37,7 @@ Scale Scholar features a distinctive retro terminal aesthetic — dark backgroun
 | Layer | Technology |
 |-------|------------|
 | Framework | React Native with Expo |
-| Audio | expo-audio |
+| Audio | react-native-audio-api (Web Audio API for React Native) |
 | Navigation | Expo Router |
 | State | Zustand |
 | Storage | AsyncStorage + expo-sqlite |
@@ -89,13 +102,26 @@ app/                        # Expo Router file-based routing
 │   ├── progress.tsx        # Progress screen
 │   └── settings.tsx        # Settings screen
 ├── exercise/               # Exercise screens (stack)
+│   ├── music-school/       # Music School lesson screens
+│   ├── intervals.tsx       # Interval trainer
+│   ├── scale-degrees.tsx   # Scale degree trainer
+│   ├── chords.tsx          # Chord quality trainer
+│   └── pitch-detector.tsx  # Pitch detector tool
 ├── _layout.tsx             # Root layout
 └── +not-found.tsx          # 404 screen
 src/
 ├── components/
 │   ├── common/             # Reusable UI (BracketButton, Card, etc.)
-│   └── exercises/          # Exercise-specific components
+│   ├── exercises/          # Ear School exercise components
+│   └── lessons/            # Music School lesson components
+├── content/
+│   └── lessons/            # 48 lesson definitions across 4 tracks
+│       ├── foundations/    # Track 1: Pitch, rhythm, expression
+│       ├── intervals/      # Track 2: All 12 intervals
+│       ├── scales-keys/    # Track 3: Major/minor scales and keys
+│       └── chords/         # Track 4: Triads and 7th chords
 ├── audio/                  # Audio engine and synthesizers
+│   └── synths/             # SineSynth, PianoSynth, SampledPianoSynth
 ├── stores/                 # Zustand state management
 ├── services/               # Database, business logic
 ├── utils/                  # Helper functions, music theory

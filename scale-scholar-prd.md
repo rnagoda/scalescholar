@@ -7,6 +7,8 @@
 **Platform:** iOS and Android (React Native with Expo)
 **Target Release:** TBD
 
+> **Note:** This document was written during initial planning. See the **Implementation Status** section at the end for what has been built, including features beyond the original MVP scope.
+
 ### Vision Statement
 
 Scale Scholar is a mobile ear training app that helps musicians develop the ability to recognize intervals, scale degrees, and chord qualities through focused, progressive exercises with immediate feedback.
@@ -300,6 +302,49 @@ These features are out of scope for MVP but should be considered in architecture
 1. Should we include a brief onboarding/tutorial for first-time users?
 2. Should exercises have a "practice mode" (no scoring) vs. "test mode" (scored)?
 3. How should we handle the transition when a user changes reference key mid-progress?
+
+---
+
+## Implementation Status
+
+*Last updated: December 2025*
+
+### Completed (MVP + Beyond)
+
+#### Core Exercises (MVP Scope) ✅
+- **Interval Trainer** — All 12 intervals, ascending/descending/harmonic modes
+- **Scale Degree Trainer** — All 7 degrees with numbers/solfege labels
+- **Chord Quality Trainer** — Major, Minor, Diminished, Augmented, plus 7th chords
+
+#### Music School (Beyond MVP) ✅
+- **48 structured lessons** across 4 tracks:
+  - Foundations (pitch, rhythm, expression)
+  - Intervals (all 12 intervals with ear training)
+  - Scales & Keys (major/minor scales, key signatures)
+  - Chords (triads, 7th chords, progressions)
+- **7 interactive block types**: text-audio, audio-quiz, visual-quiz, fill-blank, drag-drop, tap-build, sorting
+- **Cross-track unlock system**: Lessons unlock Ear School content
+- **XP and leveling system**: 10 levels from Beginner to Scholar
+
+#### Voice School (Beyond MVP) ✅
+- **Pitch Detector** — Real-time pitch detection with visual cents meter
+
+#### Audio Engine ✅
+- **Sampled Piano** — Salamander Grand Piano samples with pitch shifting
+- **Synthesizers** — Piano (additive), Sine wave, Sampled Piano
+- **Velocity support** — Dynamic volume control
+
+#### Progress & Settings ✅
+- All settings from MVP spec implemented
+- SQLite database for progress tracking
+- XP breakdown on lesson completion
+- Reset Progress functionality
+
+### Not Yet Implemented
+- App store submission
+- Onboarding tutorial
+- Practice mode (unscored)
+- UI sound effects
 
 ---
 

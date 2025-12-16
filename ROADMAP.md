@@ -144,6 +144,33 @@ Real-time pitch detection utility for tuning and pitch training.
 
 ---
 
+## Completed: v0.8.0 — Music School & Audio Improvements
+
+Complete structured lesson curriculum and enhanced audio engine.
+
+### Music School
+
+- [x] 48 lessons across 4 tracks (Foundations, Intervals, Scales & Keys, Chords)
+- [x] 7 block types: text-audio, audio-quiz, visual-quiz, fill-blank, drag-drop, tap-build, sorting
+- [x] Cross-track unlock system (lessons unlock Ear School content)
+- [x] XP system with level progression (Beginner → Intermediate → Advanced → Scholar)
+- [x] Detailed XP breakdown on lesson completion
+- [x] Level-up celebration modal
+
+### Audio Improvements
+
+- [x] Sampled piano using Salamander Grand Piano samples
+- [x] Velocity/dynamics support for expressive playback
+- [x] 13 samples covering C3-C6 with pitch shifting (max 1.5 semitones)
+
+### Other Improvements
+
+- [x] Reset Progress button in Settings
+- [x] Adjusted level thresholds (2-5+ lessons per level)
+- [x] Various bug fixes and polish
+
+---
+
 ## Milestone: v1.0.0 — MVP Release
 
 Final testing and app store submission.
@@ -163,13 +190,12 @@ Ideas for future development, not committed to timeline:
 
 ### Near-term possibilities
 
-- Minor keys and modes
-- 7th chord types (Maj7, Min7, Dom7)
-- Chord inversions
-- Practice mode (unscored)
+- Voice training exercises (sing the note, match pitch using pitch detector)
+- Practice mode (unscored) for exercises
 - Onboarding tutorial
 - UI sound effects (optional)
-- Pitch training exercises (sing the note, match pitch)
+- Additional lesson content
+- Ear School exercise improvements
 
 ### Long-term possibilities
 
@@ -179,10 +205,26 @@ Ideas for future development, not committed to timeline:
 - Spaced repetition algorithm
 - User accounts and cloud sync
 - Leaderboards and challenges
+- App store release (iOS and Android)
 
 ---
 
 ## Changelog
+
+### 2025-12-16 — v0.8.0 Music School & Audio Improvements
+
+- Added 48 lessons across 4 tracks (Foundations, Intervals, Scales & Keys, Chords)
+- Created 7 block types: text-audio, audio-quiz, visual-quiz, fill-blank, drag-drop, tap-build, sorting
+- Implemented cross-track unlock system (lessons unlock intervals, scale degrees, chord types)
+- Added XP system with 10 levels (Beginner through Scholar)
+- Created detailed XP breakdown on lesson completion screen
+- Added level-up celebration modal with proper timing
+- Implemented sampled piano using Salamander Grand Piano samples
+- Added velocity/dynamics support to audio engine
+- Created custom YIN pitch detection implementation
+- Added Reset Progress button in Settings
+- Adjusted level thresholds for meaningful progression
+- Fixed various bugs: fill-blank alignment, block state reset, iOS audio session handling
 
 ### 2025-12-15 — v0.7.0 Pitch Detector Tool
 
