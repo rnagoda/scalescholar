@@ -64,15 +64,28 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
   };
 
   // Handle continue after feedback
-  const handleContinue = () => {
+  const handleContinue = async () => {
     // Stop any playing audio when moving to next block
     AudioEngine.stop();
     if (lessonState === 'complete') {
-      // Complete the lesson and navigate
-      completeLesson().then(onComplete);
+      // Complete the lesson (awards XP, may trigger level-up)
+      await completeLesson();
+      // If there's a level-up, the modal will be shown on the completion screen
+      // and onComplete will be called when the modal is dismissed
+      // If no level-up, navigate immediately
+      if (!useXPStore.getState().levelUpInfo) {
+        onComplete();
+      }
+      // If there IS levelUpInfo, the modal will show and handleLevelUpDismiss will call onComplete
     } else {
       nextBlock();
     }
+  };
+
+  // Handle level-up modal dismissal - navigate after celebration
+  const handleLevelUpDismiss = () => {
+    clearLevelUpInfo();
+    onComplete();
   };
 
   // Handle exit - stop audio and call onExit
@@ -127,7 +140,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
           </View>
         </View>
 
-        {/* Level Up Modal */}
+        {/* Level Up Modal - shown after user acknowledges lesson completion */}
         {levelUpInfo && (
           <LevelUpModal
             visible={!!levelUpInfo}
@@ -135,7 +148,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
             previousTitle={levelUpInfo.previousTitle}
             newLevel={levelUpInfo.newLevel}
             newTitle={levelUpInfo.newTitle}
-            onClose={clearLevelUpInfo}
+            onClose={handleLevelUpDismiss}
           />
         )}
       </View>
@@ -181,17 +194,6 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
         />
       </View>
 
-      {/* Level Up Modal */}
-      {levelUpInfo && (
-        <LevelUpModal
-          visible={!!levelUpInfo}
-          previousLevel={levelUpInfo.previousLevel}
-          previousTitle={levelUpInfo.previousTitle}
-          newLevel={levelUpInfo.newLevel}
-          newTitle={levelUpInfo.newTitle}
-          onClose={clearLevelUpInfo}
-        />
-      )}
     </View>
   );
 };

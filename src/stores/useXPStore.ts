@@ -18,6 +18,7 @@ import {
   getTotalXP,
   getXPState as getXPStateFromDb,
   getTodayXP,
+  resetAllXP as resetAllXPInDb,
 } from '../services/xpService';
 
 // Level-up info for celebration
@@ -63,6 +64,9 @@ interface XPStoreState extends XPState {
 
   // Clear level-up info (after celebration shown)
   clearLevelUpInfo: () => void;
+
+  // Reset all XP (for testing)
+  resetAllXP: () => Promise<void>;
 }
 
 const DEFAULT_XP_STATE: XPState = {
@@ -203,5 +207,20 @@ export const useXPStore = create<XPStoreState>((set, get) => ({
 
   clearLevelUpInfo: () => {
     set({ levelUpInfo: null });
+  },
+
+  resetAllXP: async () => {
+    try {
+      await resetAllXPInDb();
+      // Reset to default state
+      set({
+        ...DEFAULT_XP_STATE,
+        todayXP: 0,
+        lastXPGain: null,
+        levelUpInfo: null,
+      });
+    } catch (error) {
+      console.error('Failed to reset XP:', error);
+    }
   },
 }));
