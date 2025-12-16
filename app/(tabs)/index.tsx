@@ -206,12 +206,16 @@ export default function HomeScreen() {
         </Card>
 
         {/* Music School */}
-        <Card style={styles.cardDisabled}>
+        <Card>
           <View style={styles.cardHeader}>
-            <Text style={[styles.cardTitle, styles.textMuted]}>Music School</Text>
-            <Text style={styles.comingSoonLabel}>[ COMING SOON ]</Text>
+            <Text style={styles.cardTitle}>Music School</Text>
+            <BracketButton
+              label="OPEN"
+              onPress={() => router.push('/exercise/music-school-menu' as Href)}
+              color={colors.accentGreen}
+            />
           </View>
-          <Text style={[styles.cardDescription, styles.textMuted]}>
+          <Text style={styles.cardDescription}>
             Learn music theory fundamentals, reading notation, and more.
           </Text>
           <View style={styles.progressRow}>
