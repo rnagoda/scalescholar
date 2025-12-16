@@ -171,6 +171,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
       {/* Block content */}
       <View style={styles.content}>
         <BlockRenderer
+          key={currentBlock.id}
           block={currentBlock}
           onAnswer={handleAnswer}
           onContinue={handleContinue}

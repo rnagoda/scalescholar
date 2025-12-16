@@ -37,10 +37,13 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 }) => {
   const { content } = block;
 
+  // Use block.id as key to force re-mount when block changes
+  // This ensures useState initializers run fresh for each block
   switch (content.type) {
     case 'text-audio':
       return (
         <TextAudioBlock
+          key={block.id}
           content={content.data}
           onContinue={onContinue}
         />
@@ -49,6 +52,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     case 'audio-quiz':
       return (
         <AudioQuizBlock
+          key={block.id}
           content={content.data}
           onAnswer={onAnswer}
           showFeedback={showFeedback}
@@ -61,6 +65,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     case 'visual-quiz':
       return (
         <VisualQuizBlock
+          key={block.id}
           content={content.data}
           onAnswer={onAnswer}
           showFeedback={showFeedback}
@@ -73,6 +78,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     case 'fill-blank':
       return (
         <FillBlankBlock
+          key={block.id}
           content={content.data}
           onAnswer={onAnswer}
           showFeedback={showFeedback}
@@ -85,6 +91,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     case 'sorting':
       return (
         <SortingBlock
+          key={block.id}
           content={content.data}
           onAnswer={onAnswer}
           showFeedback={showFeedback}
@@ -97,6 +104,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     case 'tap-build':
       return (
         <TapBuildBlock
+          key={block.id}
           content={content.data}
           onAnswer={onAnswer}
           showFeedback={showFeedback}
@@ -109,6 +117,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     case 'drag-drop':
       return (
         <DragDropBlock
+          key={block.id}
           content={content.data}
           onAnswer={onAnswer}
           showFeedback={showFeedback}
