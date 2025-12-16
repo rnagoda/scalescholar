@@ -22,10 +22,6 @@ export const lesson: Lesson = {
         type: 'text-audio',
         data: {
           text: 'DYNAMICS describe how loud or soft music is played. Musicians use Italian words and symbols for dynamics. Let\'s learn the basics!',
-          audioType: 'note',
-          audioData: {
-            notes: [60],
-          },
         },
       },
     },
@@ -35,13 +31,7 @@ export const lesson: Lesson = {
       content: {
         type: 'text-audio',
         data: {
-          text: 'FORTE (f) means LOUD. When you see "f" in music, play with strength and power. Listen to this forte passage:',
-          audioType: 'scale',
-          audioData: {
-            notes: [60, 64, 67, 72],
-            scaleType: 'major',
-            rootNote: 60,
-          },
+          text: 'FORTE (f) means LOUD. When you see "f" in music, play with strength and power. Think of a marching band or a thundering orchestra!',
         },
       },
     },
@@ -51,13 +41,7 @@ export const lesson: Lesson = {
       content: {
         type: 'text-audio',
         data: {
-          text: 'PIANO (p) means SOFT. When you see "p" in music, play gently and quietly. Listen to this piano passage:',
-          audioType: 'scale',
-          audioData: {
-            notes: [60, 64, 67, 72],
-            scaleType: 'major',
-            rootNote: 60,
-          },
+          text: 'PIANO (p) means SOFT. When you see "p" in music, play gently and quietly. Think of a lullaby or a whisper.',
         },
       },
     },
@@ -68,10 +52,6 @@ export const lesson: Lesson = {
         type: 'text-audio',
         data: {
           text: 'MEZZO means "medium." MEZZO-FORTE (mf) is medium loud, and MEZZO-PIANO (mp) is medium soft. These are the most common dynamics in music.',
-          audioType: 'note',
-          audioData: {
-            notes: [60],
-          },
         },
       },
     },
