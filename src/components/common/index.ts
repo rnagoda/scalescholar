@@ -3,6 +3,7 @@ export { Card } from './Card';
 export { ScreenHeader } from './ScreenHeader';
 export { Divider } from './Divider';
 export { ProgressBar } from './ProgressBar';
+export { TerminalProgressBar } from './TerminalProgressBar';
 export { LabelValue } from './LabelValue';
 export { SectionHeader } from './SectionHeader';
 export { AppFooter } from './AppFooter';

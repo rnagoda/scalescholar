@@ -10,6 +10,7 @@ import {
   BracketButton,
   LabelValue,
   Divider,
+  TerminalProgressBar,
 } from '@/src/components/common';
 import { useVoiceProfileStore } from '@/src/stores/useVoiceProfileStore';
 import { useProgressStore } from '@/src/stores/useProgressStore';
@@ -18,47 +19,6 @@ import { ALL_INTERVALS, ALL_SCALE_DEGREES, ALL_CHORD_QUALITIES } from '@/src/uti
 import { TRACKS, TrackId } from '@/src/types/lesson';
 import { getTrackLessonCount } from '@/src/content/lessons';
 import { getCompletedLessonCount } from '@/src/services/lessonService';
-
-/**
- * Render ASCII-style progress bar
- * Uses block characters: ░ (empty) and █ (filled)
- * Default width increased to 32 characters for better visibility on tablets
- */
-const AsciiProgressBar: React.FC<{ progress: number; width?: number }> = ({
-  progress,
-  width = 32
-}) => {
-  const filledCount = Math.round(progress * width);
-  const emptyCount = width - filledCount;
-  const filled = '█'.repeat(filledCount);
-  const empty = '░'.repeat(emptyCount);
-  const percentage = Math.round(progress * 100);
-
-  return (
-    <Text style={asciiBarStyles.container}>
-      <Text style={asciiBarStyles.filled}>{filled}</Text>
-      <Text style={asciiBarStyles.empty}>{empty}</Text>
-      <Text style={asciiBarStyles.percentage}> {percentage}%</Text>
-    </Text>
-  );
-};
-
-const asciiBarStyles = StyleSheet.create({
-  container: {
-    fontFamily: fonts.mono,
-    fontSize: 12,
-  },
-  filled: {
-    color: colors.accentGreen,
-  },
-  empty: {
-    color: colors.textMuted,
-  },
-  percentage: {
-    color: colors.textSecondary,
-    fontSize: 11,
-  },
-});
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -177,7 +137,7 @@ export default function HomeScreen() {
           </View>
         </View>
         <View style={styles.levelProgressRow}>
-          <AsciiProgressBar progress={levelProgress} width={40} />
+          <TerminalProgressBar progress={levelProgress} />
         </View>
 
         {/* Ear School */}
@@ -194,7 +154,7 @@ export default function HomeScreen() {
             Train your ear to recognize intervals, scale degrees, and chord qualities.
           </Text>
           <View style={styles.progressRow}>
-            <AsciiProgressBar progress={earSchoolProgress} />
+            <TerminalProgressBar progress={earSchoolProgress} />
           </View>
         </Card>
 
@@ -227,7 +187,7 @@ export default function HomeScreen() {
             </Text>
           )}
           <View style={styles.progressRow}>
-            <AsciiProgressBar progress={voiceSchoolProgress} />
+            <TerminalProgressBar progress={voiceSchoolProgress} />
           </View>
         </Card>
 
@@ -245,7 +205,7 @@ export default function HomeScreen() {
             Learn music theory fundamentals, reading notation, and more.
           </Text>
           <View style={styles.progressRow}>
-            <AsciiProgressBar progress={musicSchoolProgress} />
+            <TerminalProgressBar progress={musicSchoolProgress} />
           </View>
         </Card>
 
