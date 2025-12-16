@@ -12,6 +12,9 @@ import {
   VoiceExerciseResult,
   VoiceAnalysisResult,
   DEFAULT_VOICE_THRESHOLDS,
+  VocalScaleType,
+  SCALE_INTERVALS,
+  SCALE_NAMES,
 } from '../types/voiceAnalyzer';
 import { VoiceAnalyzer, calculatePitchAccuracy, isPitchOnTarget } from '../audio';
 import { AudioEngine } from '../audio';
@@ -43,15 +46,23 @@ interface VoiceTrainerState {
   // For scales
   scaleNotes: number[];
   currentScaleIndex: number;
+  currentScaleType: VocalScaleType | null;
 
   // Session results
   sessionResults: VoiceExerciseResult[];
   sessionStartTime: number | null;
 
+  // Session config (for generating subsequent questions)
+  sessionConfig: {
+    availableNotes: number[];
+    scaleType?: VocalScaleType;
+  };
+
   // Actions
   startSession: (type: VoiceExerciseType, config?: {
     questionsPerSession?: number;
     availableNotes?: number[];
+    scaleType?: VocalScaleType;
   }) => void;
   playReference: () => Promise<void>;
   playScaleReference: () => Promise<void>;
@@ -67,6 +78,7 @@ interface VoiceTrainerState {
   getProgress: () => { current: number; total: number };
   getScore: () => { correct: number; total: number };
   getScaleProgress: () => { current: number; total: number };
+  getScaleTypeName: () => string;
 }
 
 // Default note range (middle C to G5) - will be overridden by voice profile
@@ -99,15 +111,20 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
   timeOnTarget: 0,
   scaleNotes: [],
   currentScaleIndex: 0,
+  currentScaleType: null,
   sessionResults: [],
   sessionStartTime: null,
+  sessionConfig: {
+    availableNotes: [],
+  },
 
   startSession: (type, config = {}) => {
     const questionsPerSession = config.questionsPerSession ?? 10;
+    const availableNotes = config.availableNotes ?? [];
+    const scaleType = config.scaleType;
 
     // Generate first question
-    const availableNotes = config.availableNotes ?? [];
-    const question = generateQuestion(type, availableNotes);
+    const question = generateQuestion(type, availableNotes, scaleType);
 
     set({
       exerciseType: type,
@@ -125,8 +142,13 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
       timeOnTarget: 0,
       scaleNotes: question.scaleNotes ?? [],
       currentScaleIndex: 0,
+      currentScaleType: question.scaleType ?? null,
       sessionResults: [],
       sessionStartTime: Date.now(),
+      sessionConfig: {
+        availableNotes,
+        scaleType,
+      },
     });
   },
 
@@ -336,7 +358,7 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
       questionIndex,
       questionsPerSession,
       exerciseType,
-      sessionResults,
+      sessionConfig,
     } = get();
 
     const nextIndex = questionIndex + 1;
@@ -347,9 +369,12 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
       return;
     }
 
-    // Generate next question using the comfortable range from recent results
-    // For simplicity, using default range for now
-    const question = generateQuestion(exerciseType, []);
+    // Generate next question using the saved session config
+    const question = generateQuestion(
+      exerciseType,
+      sessionConfig.availableNotes,
+      sessionConfig.scaleType
+    );
 
     set({
       state: 'ready',
@@ -365,6 +390,7 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
       timeOnTarget: 0,
       scaleNotes: question.scaleNotes ?? [],
       currentScaleIndex: 0,
+      currentScaleType: question.scaleType ?? null,
     });
   },
 
@@ -414,8 +440,12 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
       timeOnTarget: 0,
       scaleNotes: [],
       currentScaleIndex: 0,
+      currentScaleType: null,
       sessionResults: [],
       sessionStartTime: null,
+      sessionConfig: {
+        availableNotes: [],
+      },
     });
   },
 
@@ -434,6 +464,12 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
     const { scaleNotes, currentScaleIndex } = get();
     return { current: currentScaleIndex + 1, total: scaleNotes.length };
   },
+
+  getScaleTypeName: () => {
+    const { currentScaleType } = get();
+    if (!currentScaleType) return 'Scale';
+    return SCALE_NAMES[currentScaleType];
+  },
 }));
 
 /**
@@ -441,7 +477,8 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
  */
 function generateQuestion(
   type: VoiceExerciseType,
-  availableNotes: number[]
+  availableNotes: number[],
+  scaleType?: VocalScaleType
 ): VoiceExerciseQuestion {
   // Use available notes or default range
   const notes =
@@ -462,16 +499,29 @@ function generateQuestion(
     }
 
     case 'scale': {
-      // Generate a major scale starting from a random note in lower range
-      const lowerNotes = notes.filter((n) => n <= notes[Math.floor(notes.length / 2)]);
-      const rootNote = lowerNotes[Math.floor(Math.random() * lowerNotes.length)];
-      const majorScaleIntervals = [0, 2, 4, 5, 7, 9, 11, 12];
-      const scaleNotes = majorScaleIntervals.map((i) => rootNote + i);
+      // Use provided scale type or default to major
+      const selectedScaleType: VocalScaleType = scaleType ?? 'major';
+      const intervals = SCALE_INTERVALS[selectedScaleType];
+
+      // Calculate how much range the scale needs
+      const scaleRange = intervals[intervals.length - 1];
+
+      // Filter to notes that can be root of a complete scale within range
+      const maxRootNote = notes[notes.length - 1] - scaleRange;
+      const lowerNotes = notes.filter((n) => n <= maxRootNote);
+
+      // If no valid root notes, use the lowest available
+      const rootNote = lowerNotes.length > 0
+        ? lowerNotes[Math.floor(Math.random() * lowerNotes.length)]
+        : notes[0];
+
+      const scaleNotes = intervals.map((i) => rootNote + i);
 
       return {
         type: 'scale',
         targetNote: scaleNotes[0],
         scaleNotes,
+        scaleType: selectedScaleType,
       };
     }
 

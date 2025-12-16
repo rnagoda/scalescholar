@@ -1,23 +1,39 @@
-import React, { useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 import { colors, typography, spacing, fonts } from '@/src/theme';
-import { ScreenHeader, BracketButton, Divider, Card } from '@/src/components/common';
+import { ScreenHeader, BracketButton, Divider, Card, SectionHeader } from '@/src/components/common';
 import { VolumeMeter } from '@/src/components/voiceTrainer';
 import { useVoiceTrainerStore } from '@/src/stores/useVoiceTrainerStore';
 import { useVoiceProfileStore } from '@/src/stores/useVoiceProfileStore';
 import { midiToNoteName } from '@/src/utils/music';
-import { DEFAULT_VOICE_THRESHOLDS } from '@/src/types/voiceAnalyzer';
+import {
+  VocalScaleType,
+  SCALE_NAMES,
+  SCALES_BY_DIFFICULTY,
+  ScaleDifficulty,
+} from '@/src/types/voiceAnalyzer';
 
 // Time required on target to advance to next note (ms)
 const NOTE_HOLD_TIME = 500;
+
+// Difficulty level descriptions
+const DIFFICULTY_DESCRIPTIONS: Record<ScaleDifficulty, string> = {
+  beginner: 'Foundational scales for developing pitch accuracy',
+  intermediate: 'More complex patterns for stylistic versatility',
+  advanced: 'Challenging scales for agility and expression',
+};
 
 export default function VoiceScaleExercise() {
   const router = useRouter();
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastNoteAdvanceRef = useRef<number>(0);
+
+  // Track whether we're in scale selection mode
+  const [selectedScaleType, setSelectedScaleType] = useState<VocalScaleType | null>(null);
+  const [sessionStarted, setSessionStarted] = useState(false);
 
   const {
     profile,
@@ -31,6 +47,7 @@ export default function VoiceScaleExercise() {
     targetNote,
     scaleNotes,
     currentScaleIndex,
+    currentScaleType,
     currentPitch,
     currentAmplitude,
     currentAccuracy,
@@ -51,32 +68,14 @@ export default function VoiceScaleExercise() {
     getProgress,
     getScore,
     getScaleProgress,
+    getScaleTypeName,
   } = useVoiceTrainerStore();
 
-  // Initialize on mount
+  // Initialize profile on mount
   useEffect(() => {
-    const setup = async () => {
-      if (!profileInitialized) {
-        await initializeProfile();
-      }
-
-      const voiceProfile = useVoiceProfileStore.getState().profile;
-      const availableNotes: number[] = [];
-
-      if (voiceProfile) {
-        // Use comfortable range for scales
-        for (let n = voiceProfile.comfortableLow; n <= voiceProfile.comfortableHigh; n++) {
-          availableNotes.push(n);
-        }
-      }
-
-      startSession('scale', {
-        questionsPerSession: 5, // 5 scales per session
-        availableNotes,
-      });
-    };
-
-    setup();
+    if (!profileInitialized) {
+      initializeProfile();
+    }
 
     return () => {
       if (holdTimerRef.current) {
@@ -85,6 +84,28 @@ export default function VoiceScaleExercise() {
       resetSession();
     };
   }, []);
+
+  // Start session when scale type is selected
+  const handleSelectScale = useCallback((scaleType: VocalScaleType) => {
+    setSelectedScaleType(scaleType);
+
+    const voiceProfile = useVoiceProfileStore.getState().profile;
+    const availableNotes: number[] = [];
+
+    if (voiceProfile) {
+      // Use comfortable range for scales
+      for (let n = voiceProfile.comfortableLow; n <= voiceProfile.comfortableHigh; n++) {
+        availableNotes.push(n);
+      }
+    }
+
+    startSession('scale', {
+      questionsPerSession: 5, // 5 scales per session
+      availableNotes,
+      scaleType,
+    });
+    setSessionStarted(true);
+  }, [startSession]);
 
   // Auto-advance when on target for NOTE_HOLD_TIME
   useEffect(() => {
@@ -117,9 +138,17 @@ export default function VoiceScaleExercise() {
   }, [state, isOnTarget, timeOnTarget, advanceScaleNote, submitResult]);
 
   const handleClose = useCallback(() => {
-    resetSession();
+    if (sessionStarted) {
+      resetSession();
+    }
     router.back();
-  }, [resetSession, router]);
+  }, [resetSession, router, sessionStarted]);
+
+  const handleBackToSelection = useCallback(() => {
+    resetSession();
+    setSelectedScaleType(null);
+    setSessionStarted(false);
+  }, [resetSession]);
 
   const handlePlayScale = useCallback(async () => {
     await playScaleReference();
@@ -145,6 +174,41 @@ export default function VoiceScaleExercise() {
   const progress = getProgress();
   const score = getScore();
   const scaleProgress = getScaleProgress();
+  const scaleTypeName = getScaleTypeName();
+
+  // Render scale selection screen
+  const renderScaleSelection = () => {
+    const difficulties: ScaleDifficulty[] = ['beginner', 'intermediate', 'advanced'];
+
+    return (
+      <View style={styles.selectionContainer}>
+        <Text style={styles.selectionTitle}>Choose a Scale Type</Text>
+        <Text style={styles.selectionSubtitle}>
+          Practice singing scales to develop pitch accuracy, range, and agility
+        </Text>
+
+        {difficulties.map((difficulty) => (
+          <View key={difficulty} style={styles.difficultySection}>
+            <SectionHeader title={difficulty.toUpperCase()} />
+            <Text style={styles.difficultyDescription}>
+              {DIFFICULTY_DESCRIPTIONS[difficulty]}
+            </Text>
+            <View style={styles.scaleGrid}>
+              {SCALES_BY_DIFFICULTY[difficulty].map((scaleType) => (
+                <TouchableOpacity
+                  key={scaleType}
+                  style={styles.scaleOption}
+                  onPress={() => handleSelectScale(scaleType)}
+                >
+                  <Text style={styles.scaleOptionText}>{SCALE_NAMES[scaleType]}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        ))}
+      </View>
+    );
+  };
 
   // Render scale ladder
   const renderScaleLadder = () => {
@@ -196,6 +260,11 @@ export default function VoiceScaleExercise() {
 
   // Render based on state
   const renderContent = () => {
+    // Show scale selection if session not started
+    if (!sessionStarted) {
+      return renderScaleSelection();
+    }
+
     if (state === 'complete') {
       return (
         <View style={styles.completeContainer}>
@@ -266,7 +335,7 @@ export default function VoiceScaleExercise() {
 
         {/* Scale Ladder */}
         <View style={styles.ladderContainer}>
-          <Text style={styles.sectionLabel}>SCALE</Text>
+          <Text style={styles.sectionLabel}>{scaleTypeName.toUpperCase()} SCALE</Text>
           {renderScaleLadder()}
         </View>
 
@@ -366,6 +435,52 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     paddingBottom: spacing.xxxl,
   },
+  // Scale Selection
+  selectionContainer: {
+    flex: 1,
+  },
+  selectionTitle: {
+    fontFamily: fonts.monoBold,
+    fontSize: 20,
+    color: colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  selectionSubtitle: {
+    fontFamily: fonts.mono,
+    fontSize: 13,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+  },
+  difficultySection: {
+    marginBottom: spacing.lg,
+  },
+  difficultyDescription: {
+    fontFamily: fonts.mono,
+    fontSize: 12,
+    color: colors.textMuted,
+    marginBottom: spacing.md,
+  },
+  scaleGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  scaleOption: {
+    backgroundColor: colors.cardBackground,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    borderRadius: 4,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  scaleOptionText: {
+    fontFamily: fonts.mono,
+    fontSize: 14,
+    color: colors.textPrimary,
+  },
+  // Exercise
   exerciseContainer: {
     flex: 1,
   },
