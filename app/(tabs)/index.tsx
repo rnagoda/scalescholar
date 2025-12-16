@@ -52,65 +52,62 @@ export default function HomeScreen() {
       >
         {/* Ear School */}
         <Card>
-          <Text style={styles.cardTitle}>Ear School</Text>
-          <Text style={styles.cardDescription}>
-            Train your ear to recognize intervals, scale degrees, and chord qualities.
-          </Text>
-          <View style={styles.cardAction}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Ear School</Text>
             <BracketButton
               label="OPEN"
               onPress={() => router.push('/exercise/ear-school-menu' as Href)}
               color={colors.accentGreen}
             />
           </View>
+          <Text style={styles.cardDescription}>
+            Train your ear to recognize intervals, scale degrees, and chord qualities.
+          </Text>
         </Card>
 
         {/* Voice School */}
         <Card>
-          <Text style={styles.cardTitle}>Voice School</Text>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Voice School</Text>
+            {hasProfile && profile ? (
+              <BracketButton
+                label="OPEN"
+                onPress={() => router.push('/exercise/voice-menu' as Href)}
+                color={colors.accentGreen}
+              />
+            ) : (
+              <BracketButton
+                label="GET STARTED"
+                onPress={() => router.push('/exercise/voice-range-assessment' as Href)}
+                color={colors.accentGreen}
+              />
+            )}
+          </View>
           {hasProfile && profile ? (
-            <>
-              <View style={styles.cardContent}>
-                <LabelValue label="Range:" value={getProfileSummary() ?? '--'} />
-                <LabelValue label="Octaves:" value={getRangeOctaves().toString()} />
-              </View>
-              <View style={styles.cardAction}>
-                <BracketButton
-                  label="OPEN"
-                  onPress={() => router.push('/exercise/voice-menu' as Href)}
-                  color={colors.accentGreen}
-                />
-              </View>
-            </>
+            <View style={styles.cardContent}>
+              <LabelValue label="Range:" value={getProfileSummary() ?? '--'} />
+              <LabelValue label="Octaves:" value={getRangeOctaves().toString()} />
+            </View>
           ) : (
-            <>
-              <Text style={styles.cardDescription}>
-                Train your voice to hit notes accurately. First, let's find your vocal range.
-              </Text>
-              <View style={styles.cardAction}>
-                <BracketButton
-                  label="GET STARTED"
-                  onPress={() => router.push('/exercise/voice-range-assessment' as Href)}
-                  color={colors.accentGreen}
-                />
-              </View>
-            </>
+            <Text style={styles.cardDescription}>
+              Train your voice to hit notes accurately. First, let's find your vocal range.
+            </Text>
           )}
         </Card>
 
         {/* Pitch Detector */}
         <Card>
-          <Text style={styles.cardTitle}>Pitch Detector</Text>
-          <Text style={styles.cardDescription}>
-            Detect pitch from your microphone and see how sharp or flat you are.
-          </Text>
-          <View style={styles.cardAction}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Pitch Detector</Text>
             <BracketButton
               label="OPEN"
               onPress={() => router.push('/exercise/pitch-detector' as Href)}
               color={colors.accentGreen}
             />
           </View>
+          <Text style={styles.cardDescription}>
+            Detect pitch from your microphone and see how sharp or flat you are.
+          </Text>
         </Card>
 
         <AppFooter />
@@ -134,24 +131,20 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
   },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
   cardTitle: {
     ...typography.cardTitle,
-    marginBottom: spacing.sm,
   },
   cardDescription: {
     ...typography.label,
     fontSize: 13,
     color: colors.textSecondary,
     lineHeight: 20,
-    marginBottom: spacing.md,
   },
-  cardContent: {
-    marginBottom: spacing.md,
-  },
-  cardAction: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginTop: spacing.sm,
-  },
+  cardContent: {},
 });
