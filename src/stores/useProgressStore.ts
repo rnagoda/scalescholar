@@ -21,6 +21,7 @@ import {
   ALL_CHORD_QUALITIES,
   STARTER_CHORD_QUALITIES,
 } from '../utils/music';
+import { useXPStore } from './useXPStore';
 
 interface IntervalProgress {
   stats: ExerciseStats;
@@ -261,6 +262,9 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
   ) => {
     try {
       await saveAttempt('intervals', interval.toString(), correct, responseTimeMs);
+      if (correct) {
+        await useXPStore.getState().awardEarSchoolCorrect();
+      }
     } catch (error) {
       console.error('Failed to record interval attempt:', error);
     }
@@ -273,6 +277,9 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     try {
       await saveSession('intervals', totalQuestions, correctAnswers);
 
+      // Award session completion XP
+      await useXPStore.getState().awardEarSchoolSession();
+
       const allIntervalIds = ALL_INTERVALS.map((i) => i.toString());
       const starterIds = STARTER_INTERVALS.map((i) => i.toString());
 
@@ -281,6 +288,11 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         allIntervalIds,
         starterIds
       );
+
+      // Award XP for each new unlock
+      for (const unlock of newUnlocks) {
+        await useXPStore.getState().awardNewUnlock(`Interval: ${unlock}`);
+      }
 
       await get().refreshIntervalProgress();
 
@@ -298,6 +310,9 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
   ) => {
     try {
       await saveAttempt('scale-degrees', degree.toString(), correct, responseTimeMs);
+      if (correct) {
+        await useXPStore.getState().awardEarSchoolCorrect();
+      }
     } catch (error) {
       console.error('Failed to record scale degree attempt:', error);
     }
@@ -310,6 +325,9 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     try {
       await saveSession('scale-degrees', totalQuestions, correctAnswers);
 
+      // Award session completion XP
+      await useXPStore.getState().awardEarSchoolSession();
+
       const allDegreeIds = ALL_SCALE_DEGREES.map((d) => d.toString());
       const starterIds = STARTER_SCALE_DEGREES.map((d) => d.toString());
 
@@ -318,6 +336,11 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         allDegreeIds,
         starterIds
       );
+
+      // Award XP for each new unlock
+      for (const unlock of newUnlocks) {
+        await useXPStore.getState().awardNewUnlock(`Scale Degree: ${unlock}`);
+      }
 
       await get().refreshScaleDegreeProgress();
 
@@ -351,6 +374,9 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
   ) => {
     try {
       await saveAttempt('chords', quality, correct, responseTimeMs);
+      if (correct) {
+        await useXPStore.getState().awardEarSchoolCorrect();
+      }
     } catch (error) {
       console.error('Failed to record chord attempt:', error);
     }
@@ -363,6 +389,9 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     try {
       await saveSession('chords', totalQuestions, correctAnswers);
 
+      // Award session completion XP
+      await useXPStore.getState().awardEarSchoolSession();
+
       const allQualityIds = ALL_CHORD_QUALITIES;
       const starterIds = STARTER_CHORD_QUALITIES;
 
@@ -371,6 +400,11 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         allQualityIds,
         starterIds
       );
+
+      // Award XP for each new unlock
+      for (const unlock of newUnlocks) {
+        await useXPStore.getState().awardNewUnlock(`Chord: ${unlock}`);
+      }
 
       await get().refreshChordProgress();
 

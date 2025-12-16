@@ -85,7 +85,7 @@ export default function VoiceMenuScreen() {
         <ScreenHeader
           title="VOICE TRAINER"
           rightContent={
-            <BracketButton label="CLOSE" onPress={handleClose} />
+            <BracketButton label="X" onPress={handleClose} />
           }
         />
         <Divider style={styles.divider} />
