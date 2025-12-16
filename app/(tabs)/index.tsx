@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, Href } from 'expo-router';
 
-import { colors, typography, spacing } from '@/src/theme';
+import { colors, typography, spacing, fonts } from '@/src/theme';
 import {
   ScreenHeader,
   Card,
@@ -38,8 +38,8 @@ export default function HomeScreen() {
         title="SCALE SCHOLAR"
         rightContent={
           <BracketButton
-            label="?"
-            onPress={() => router.push('/settings')}
+            label="TUNE"
+            onPress={() => router.push('/exercise/pitch-detector' as Href)}
           />
         }
       />
@@ -95,18 +95,16 @@ export default function HomeScreen() {
           )}
         </Card>
 
-        {/* Pitch Detector */}
-        <Card>
+        {/* Music School */}
+        <Card style={styles.cardDisabled}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Pitch Detector</Text>
-            <BracketButton
-              label="OPEN"
-              onPress={() => router.push('/exercise/pitch-detector' as Href)}
-              color={colors.accentGreen}
-            />
+            <View style={styles.titleWithBadge}>
+              <Text style={[styles.cardTitle, styles.textMuted]}>Music School</Text>
+              <Text style={styles.comingSoonBadge}>SOON</Text>
+            </View>
           </View>
-          <Text style={styles.cardDescription}>
-            Detect pitch from your microphone and see how sharp or flat you are.
+          <Text style={[styles.cardDescription, styles.textMuted]}>
+            Learn music theory fundamentals, reading notation, and more.
           </Text>
         </Card>
 
@@ -147,4 +145,21 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   cardContent: {},
+  cardDisabled: {
+    opacity: 0.6,
+  },
+  titleWithBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  textMuted: {
+    color: colors.textMuted,
+  },
+  comingSoonBadge: {
+    fontFamily: fonts.mono,
+    fontSize: 10,
+    color: colors.accentPink,
+    letterSpacing: 1,
+  },
 });
