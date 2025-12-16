@@ -174,13 +174,8 @@ export default function HomeScreen() {
               </View>
               <View style={styles.cardAction}>
                 <BracketButton
-                  label="REASSESS"
-                  onPress={() => router.push('/exercise/voice-range-assessment' as Href)}
-                  color={colors.textSecondary}
-                />
-                <BracketButton
                   label="TRAIN"
-                  onPress={() => router.push('/exercise/voice-note-match' as Href)}
+                  onPress={() => router.push('/exercise/voice-menu' as Href)}
                   color={colors.accentGreen}
                 />
               </View>

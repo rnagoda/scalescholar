@@ -54,8 +54,10 @@ interface VoiceTrainerState {
     availableNotes?: number[];
   }) => void;
   playReference: () => Promise<void>;
+  playScaleReference: () => Promise<void>;
   startListening: () => Promise<void>;
   stopListening: () => void;
+  advanceScaleNote: () => boolean; // Returns true if scale complete
   submitResult: () => void;
   nextQuestion: () => void;
   completeSession: () => Promise<void>;
@@ -64,6 +66,7 @@ interface VoiceTrainerState {
   // Getters
   getProgress: () => { current: number; total: number };
   getScore: () => { correct: number; total: number };
+  getScaleProgress: () => { current: number; total: number };
 }
 
 // Default note range (middle C to G5) - will be overridden by voice profile
@@ -138,6 +141,26 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
       await AudioEngine.playMidiNote(targetNote ?? 60, 1.5);
     } catch (error) {
       console.error('Failed to play reference:', error);
+    }
+
+    set({ state: 'ready' });
+  },
+
+  playScaleReference: async () => {
+    const { scaleNotes, state } = get();
+    if (scaleNotes.length === 0 || state === 'playing') return;
+
+    set({ state: 'playing' });
+
+    try {
+      // Play each note in the scale with short duration
+      for (const note of scaleNotes) {
+        await AudioEngine.playMidiNote(note, 0.4);
+        // Small gap between notes
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    } catch (error) {
+      console.error('Failed to play scale reference:', error);
     }
 
     set({ state: 'ready' });
@@ -240,6 +263,31 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
       currentFrequency: null,
       currentAmplitude: null,
     });
+  },
+
+  advanceScaleNote: () => {
+    const { scaleNotes, currentScaleIndex } = get();
+
+    const nextIndex = currentScaleIndex + 1;
+
+    // Check if scale is complete
+    if (nextIndex >= scaleNotes.length) {
+      return true; // Scale complete
+    }
+
+    // Advance to next note
+    const nextNote = scaleNotes[nextIndex];
+    set({
+      currentScaleIndex: nextIndex,
+      targetNote: nextNote,
+      targetFrequency: midiToFrequency(nextNote),
+      currentAccuracy: 0,
+      isOnTarget: false,
+      timeOnTarget: 0,
+    });
+    timeOnTargetStart = null;
+
+    return false; // Scale not complete
   },
 
   submitResult: () => {
@@ -380,6 +428,11 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
     const { sessionResults } = get();
     const correct = sessionResults.filter((r) => r.success).length;
     return { correct, total: sessionResults.length };
+  },
+
+  getScaleProgress: () => {
+    const { scaleNotes, currentScaleIndex } = get();
+    return { current: currentScaleIndex + 1, total: scaleNotes.length };
   },
 }));
 
