@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { TapBuildContent } from '../../../types/lesson';
 import { colors, fonts, spacing, typography } from '../../../theme';
 import { BracketButton } from '../../common/BracketButton';
@@ -132,7 +132,11 @@ export const TapBuildBlock: React.FC<TapBuildBlockProps> = ({
   const canAnswer = !showFeedback;
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Instruction */}
       <Text style={styles.instruction}>{content.instruction}</Text>
 
@@ -216,15 +220,18 @@ export const TapBuildBlock: React.FC<TapBuildBlockProps> = ({
           </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: {
     alignItems: 'center',
     paddingVertical: spacing.lg,
+    paddingBottom: spacing.xxxl,
   },
   instruction: {
     ...typography.body,

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { DragDropContent } from '../../../types/lesson';
 import { colors, fonts, spacing, typography } from '../../../theme';
 import { BracketButton } from '../../common/BracketButton';
@@ -151,7 +151,11 @@ export const DragDropBlock: React.FC<DragDropBlockProps> = ({
   }, []);
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Instruction */}
       <Text style={styles.instruction}>{content.instruction}</Text>
 
@@ -275,15 +279,18 @@ export const DragDropBlock: React.FC<DragDropBlockProps> = ({
           </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: {
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.md,
+    paddingBottom: spacing.xxxl,
   },
   instruction: {
     ...typography.body,

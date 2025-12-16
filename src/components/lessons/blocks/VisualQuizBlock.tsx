@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
 import { VisualQuizContent } from '../../../types/lesson';
 import { colors, fonts, spacing, typography } from '../../../theme';
 import { AnswerButton } from '../../exercises';
@@ -107,7 +107,11 @@ export const VisualQuizBlock: React.FC<VisualQuizBlockProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Question */}
       <Text style={styles.question}>{content.question}</Text>
 
@@ -151,16 +155,19 @@ export const VisualQuizBlock: React.FC<VisualQuizBlockProps> = ({
           </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: {
     alignItems: 'center',
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxxl,
   },
   question: {
     ...typography.body,

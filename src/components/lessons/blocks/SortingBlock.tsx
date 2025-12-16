@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { colors, fonts, spacing } from '../../../theme';
 import { SortingContent } from '../../../types/lesson';
 import { BracketButton } from '../../common';
@@ -76,7 +76,11 @@ export const SortingBlock: React.FC<SortingBlockProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Instruction */}
       <View style={styles.instructionContainer}>
         <Text style={styles.instruction}>{content.instruction}</Text>
@@ -162,14 +166,17 @@ export const SortingBlock: React.FC<SortingBlockProps> = ({
           </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: {
     padding: spacing.lg,
+    paddingBottom: spacing.xxxl,
   },
   instructionContainer: {
     marginBottom: spacing.xl,

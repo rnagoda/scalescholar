@@ -34,6 +34,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
 
 const styles = StyleSheet.create({
   track: {
+    width: '100%',
     height: 8,
     borderRadius: 4,
     overflow: 'hidden',

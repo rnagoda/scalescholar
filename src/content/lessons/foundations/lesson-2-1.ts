@@ -27,6 +27,7 @@ export const lesson: Lesson = {
             notes: [60, 60, 60, 60], // Four steady C notes
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.5, // Medium tempo for intro
           },
         },
       },
@@ -37,12 +38,13 @@ export const lesson: Lesson = {
       content: {
         type: 'text-audio',
         data: {
-          text: 'TEMPO is how fast or slow the beat goes. A slow tempo feels relaxed. Listen to this slow beat:',
+          text: 'TEMPO is how fast or slow the beat goes. A slow tempo feels relaxed, like a gentle walk. Listen to this SLOW beat:',
           audioType: 'scale',
           audioData: {
             notes: [60, 60, 60, 60],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.9, // Very slow - noticeable gaps between beats
           },
         },
       },
@@ -53,12 +55,13 @@ export const lesson: Lesson = {
       content: {
         type: 'text-audio',
         data: {
-          text: 'A fast tempo feels energetic and exciting. Listen to this fast beat:',
+          text: 'A fast tempo feels energetic, like running! Listen to this FAST beat:',
           audioType: 'scale',
           audioData: {
             notes: [60, 60, 60, 60, 60, 60, 60, 60],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.15, // Very fast - rapid succession
           },
         },
       },
@@ -75,6 +78,7 @@ export const lesson: Lesson = {
             notes: [60, 60, 60, 60, 60, 60],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.15, // Fast tempo
           },
           options: ['Slow tempo', 'Fast tempo'],
           correctIndex: 1,
@@ -94,6 +98,7 @@ export const lesson: Lesson = {
             notes: [60, 60, 60, 60],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.9, // Slow tempo
           },
           options: ['Slow tempo', 'Fast tempo'],
           correctIndex: 0,

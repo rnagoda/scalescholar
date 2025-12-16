@@ -22,10 +22,7 @@ export const lesson: Lesson = {
         type: 'text-audio',
         data: {
           text: 'Music is organized into groups of beats called MEASURES. A TIME SIGNATURE tells you how many beats are in each measure. Let\'s explore the most common ones!',
-          audioType: 'note',
-          audioData: {
-            notes: [60],
-          },
+          // No audio for intro - the following screens will demonstrate the time signatures
         },
       },
     },
@@ -38,9 +35,11 @@ export const lesson: Lesson = {
           text: '4/4 time has 4 beats per measure. It\'s the most common time signature - you hear it in rock, pop, and jazz. Count along: 1-2-3-4, 1-2-3-4...',
           audioType: 'scale',
           audioData: {
+            // Two measures of 4 beats each: C-D-E-F, C-D-E-F
             notes: [60, 62, 64, 65, 60, 62, 64, 65],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.5, // Moderate tempo for counting along
           },
         },
       },
@@ -54,9 +53,11 @@ export const lesson: Lesson = {
           text: '3/4 time has 3 beats per measure. It\'s the time signature of waltzes! Count along: 1-2-3, 1-2-3...',
           audioType: 'scale',
           audioData: {
+            // Two measures of 3 beats each (waltz pattern): C-E-G, C-E-G
             notes: [60, 64, 67, 60, 64, 67],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.5, // Same tempo for comparison
           },
         },
       },
@@ -73,6 +74,7 @@ export const lesson: Lesson = {
             notes: [60, 62, 64, 65, 60, 62, 64, 65],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.5,
           },
           options: ['3 beats (3/4 time)', '4 beats (4/4 time)'],
           correctIndex: 1,
@@ -89,9 +91,11 @@ export const lesson: Lesson = {
           question: 'Listen to this waltz pattern. How many beats per measure?',
           audioType: 'scale',
           audioData: {
+            // Waltz pattern with stronger first beat
             notes: [60, 64, 64, 60, 64, 64],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.5,
           },
           options: ['3 beats (3/4 time)', '4 beats (4/4 time)'],
           correctIndex: 0,

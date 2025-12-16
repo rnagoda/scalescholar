@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { colors, fonts, spacing } from '../../../theme';
 import { FillBlankContent } from '../../../types/lesson';
 import { BracketButton } from '../../common';
@@ -96,7 +96,11 @@ export const FillBlankBlock: React.FC<FillBlankBlockProps> = ({
   const activeBlank = activeBlankIndex !== null ? content.blanks[activeBlankIndex] : null;
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Text with blanks */}
       <View style={styles.textContainer}>
         <Text style={styles.textWrapper}>{renderTextWithBlanks()}</Text>
@@ -141,14 +145,18 @@ export const FillBlankBlock: React.FC<FillBlankBlockProps> = ({
           </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: {
     padding: spacing.lg,
+    paddingBottom: spacing.xxxl,
+    flexGrow: 1,
   },
   textContainer: {
     flex: 1,
@@ -157,7 +165,7 @@ const styles = StyleSheet.create({
   textWrapper: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    alignItems: 'center',
+    alignItems: 'baseline', // Fix vertical alignment
   },
   text: {
     fontFamily: fonts.mono,
@@ -167,10 +175,11 @@ const styles = StyleSheet.create({
   },
   blank: {
     paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
+    paddingVertical: 2, // Reduce padding to align better with text
     borderRadius: 4,
     borderWidth: 1,
     marginHorizontal: spacing.xs,
+    transform: [{ translateY: -2 }], // Fine-tune vertical position
   },
   blankDefault: {
     borderColor: colors.textMuted,

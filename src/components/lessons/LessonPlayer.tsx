@@ -10,8 +10,10 @@ import { View, Text, StyleSheet } from 'react-native';
 import { colors, fonts, spacing } from '../../theme';
 import { Lesson, isGradedBlock } from '../../types/lesson';
 import { useLessonStore } from '../../stores/useLessonStore';
-import { ProgressBar, BracketButton, Card } from '../common';
+import { useXPStore } from '../../stores/useXPStore';
+import { ProgressBar, BracketButton, Card, LevelUpModal } from '../common';
 import { BlockRenderer } from './BlockRenderer';
+import { AudioEngine } from '../../audio/AudioEngine';
 
 interface LessonPlayerProps {
   lesson: Lesson;
@@ -41,6 +43,9 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
     getProgress,
   } = useLessonStore();
 
+  // XP store for level-up celebration
+  const { levelUpInfo, clearLevelUpInfo } = useXPStore();
+
   // Start lesson on mount
   useEffect(() => {
     startLesson(lesson);
@@ -51,6 +56,8 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
 
   // Handle answer selection
   const handleAnswer = (answer: unknown) => {
+    // Stop any playing audio immediately when answer is submitted
+    AudioEngine.stop();
     selectAnswer(answer);
     // Auto-submit for most block types
     submitAnswer();
@@ -58,12 +65,20 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
 
   // Handle continue after feedback
   const handleContinue = () => {
+    // Stop any playing audio when moving to next block
+    AudioEngine.stop();
     if (lessonState === 'complete') {
       // Complete the lesson and navigate
       completeLesson().then(onComplete);
     } else {
       nextBlock();
     }
+  };
+
+  // Handle exit - stop audio and call onExit
+  const handleExit = () => {
+    AudioEngine.stop();
+    onExit();
   };
 
   // Completion screen
@@ -111,6 +126,18 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
             />
           </View>
         </View>
+
+        {/* Level Up Modal */}
+        {levelUpInfo && (
+          <LevelUpModal
+            visible={!!levelUpInfo}
+            previousLevel={levelUpInfo.previousLevel}
+            previousTitle={levelUpInfo.previousTitle}
+            newLevel={levelUpInfo.newLevel}
+            newTitle={levelUpInfo.newTitle}
+            onClose={clearLevelUpInfo}
+          />
+        )}
       </View>
     );
   }
@@ -136,7 +163,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
           <Text style={styles.blockCounter}>
             {currentBlockIndex + 1} / {lesson.blocks.length}
           </Text>
-          <BracketButton label="X" onPress={onExit} />
+          <BracketButton label="X" onPress={handleExit} />
         </View>
         <ProgressBar progress={progress} style={styles.progressBar} />
       </View>
@@ -152,6 +179,18 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
           selectedAnswer={selectedAnswer}
         />
       </View>
+
+      {/* Level Up Modal */}
+      {levelUpInfo && (
+        <LevelUpModal
+          visible={!!levelUpInfo}
+          previousLevel={levelUpInfo.previousLevel}
+          previousTitle={levelUpInfo.previousTitle}
+          newLevel={levelUpInfo.newLevel}
+          newTitle={levelUpInfo.newTitle}
+          onClose={clearLevelUpInfo}
+        />
+      )}
     </View>
   );
 };

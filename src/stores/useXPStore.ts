@@ -20,6 +20,14 @@ import {
   getTodayXP,
 } from '../services/xpService';
 
+// Level-up info for celebration
+interface LevelUpInfo {
+  previousLevel: number;
+  previousTitle: string;
+  newLevel: number;
+  newTitle: string;
+}
+
 interface XPStoreState extends XPState {
   // Today's XP for daily tracking
   todayXP: number;
@@ -30,6 +38,9 @@ interface XPStoreState extends XPState {
 
   // Last XP gain for animation/display
   lastXPGain: number | null;
+
+  // Level-up info for celebration modal
+  levelUpInfo: LevelUpInfo | null;
 
   // Actions
   initialize: () => Promise<void>;
@@ -49,6 +60,9 @@ interface XPStoreState extends XPState {
 
   // Clear last XP gain (after animation)
   clearLastXPGain: () => void;
+
+  // Clear level-up info (after celebration shown)
+  clearLevelUpInfo: () => void;
 }
 
 const DEFAULT_XP_STATE: XPState = {
@@ -65,6 +79,7 @@ export const useXPStore = create<XPStoreState>((set, get) => ({
   isLoading: false,
   isInitialized: false,
   lastXPGain: null,
+  levelUpInfo: null,
 
   initialize: async () => {
     if (get().isInitialized) return;
@@ -108,10 +123,17 @@ export const useXPStore = create<XPStoreState>((set, get) => ({
     try {
       await awardXPToDb(source, amount, details);
 
-      // Update local state optimistically
+      // Get current state before update
+      const previousLevel = get().currentLevel;
+      const previousTitle = get().levelTitle;
       const currentTotal = get().totalXP;
+
+      // Calculate new state
       const newTotal = currentTotal + amount;
       const level = getLevelFromXP(newTotal);
+
+      // Check if level-up occurred
+      const didLevelUp = level.level > previousLevel;
 
       set({
         totalXP: newTotal,
@@ -121,6 +143,15 @@ export const useXPStore = create<XPStoreState>((set, get) => ({
         xpToNextLevel: getXPToNextLevel(newTotal),
         todayXP: get().todayXP + amount,
         lastXPGain: amount,
+        // Set level-up info if level increased
+        levelUpInfo: didLevelUp
+          ? {
+              previousLevel,
+              previousTitle,
+              newLevel: level.level,
+              newTitle: level.title,
+            }
+          : get().levelUpInfo, // Keep existing if no level-up
       });
     } catch (error) {
       console.error('Failed to add XP:', error);
@@ -168,5 +199,9 @@ export const useXPStore = create<XPStoreState>((set, get) => ({
 
   clearLastXPGain: () => {
     set({ lastXPGain: null });
+  },
+
+  clearLevelUpInfo: () => {
+    set({ levelUpInfo: null });
   },
 }));

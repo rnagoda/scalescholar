@@ -8,3 +8,4 @@ export { SectionHeader } from './SectionHeader';
 export { AppFooter } from './AppFooter';
 export { SettingRow, SettingToggle, SettingOption, SettingNumber, SettingSlider } from './SettingRow';
 export { CentsMeter } from './CentsMeter';
+export { LevelUpModal } from './LevelUpModal';

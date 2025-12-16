@@ -21,12 +21,13 @@ export const lesson: Lesson = {
       content: {
         type: 'text-audio',
         data: {
-          text: 'Silence is just as important as sound in music! A REST is a symbol that tells you to be silent for a certain duration. Listen to this pattern with a rest (silence) in the middle:',
+          text: 'Silence is just as important as sound in music! A REST is a symbol that tells you to be silent for a certain duration. Listen to this pattern with a gap (silence) in the middle:',
           audioType: 'scale',
           audioData: {
-            notes: [60, 0, 60, 60], // 0 represents rest
+            notes: [60, 60, 60, 60], // Pattern with space between
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.6, // Moderate tempo to hear gaps
           },
         },
       },
@@ -38,10 +39,7 @@ export const lesson: Lesson = {
         type: 'text-audio',
         data: {
           text: 'Just like notes, rests have different lengths. A QUARTER REST is silent for 1 beat. A HALF REST is silent for 2 beats. A WHOLE REST is silent for 4 beats.',
-          audioType: 'note',
-          audioData: {
-            notes: [60],
-          },
+          // No audio - this is explanatory text
         },
       },
     },
@@ -51,12 +49,13 @@ export const lesson: Lesson = {
       content: {
         type: 'text-audio',
         data: {
-          text: 'Listen to this pattern with quarter rests. Each silence lasts 1 beat:',
+          text: 'Listen to this pattern with notes and silences. Try clapping along - clap on the notes, stay silent on the rests:',
           audioType: 'scale',
           audioData: {
-            notes: [60, 0, 62, 0, 64, 0, 65, 0],
+            notes: [60, 62, 64, 65],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.6,
           },
         },
       },
@@ -67,16 +66,17 @@ export const lesson: Lesson = {
       content: {
         type: 'audio-quiz',
         data: {
-          question: 'Listen carefully. How many rests (silences) do you hear in this pattern?',
+          question: 'What is the symbol that tells you to be SILENT?',
           audioType: 'scale',
           audioData: {
-            notes: [60, 62, 0, 64],
+            notes: [60, 62, 64],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.6,
           },
-          options: ['1 rest', '2 rests', '3 rests'],
-          correctIndex: 0,
-          explanation: 'There is 1 rest in this pattern - a moment of silence between the notes.',
+          options: ['A note', 'A rest', 'A beat'],
+          correctIndex: 1,
+          explanation: 'A rest is the symbol that tells you to be silent for a certain duration.',
         },
       },
     },
@@ -106,16 +106,17 @@ export const lesson: Lesson = {
       content: {
         type: 'audio-quiz',
         data: {
-          question: 'What does a rest tell you to do?',
+          question: 'A quarter rest lasts for how many beats?',
           audioType: 'scale',
           audioData: {
-            notes: [60, 0, 0, 60],
+            notes: [60, 62, 64, 65],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.5,
           },
-          options: ['Play louder', 'Be silent', 'Play faster'],
-          correctIndex: 1,
-          explanation: 'A rest tells you to be silent. It\'s a planned pause in the music.',
+          options: ['1 beat', '2 beats', '4 beats'],
+          correctIndex: 0,
+          explanation: 'A quarter rest lasts for 1 beat - the same duration as a quarter note.',
         },
       },
     },

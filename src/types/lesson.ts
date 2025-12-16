@@ -45,6 +45,7 @@ export interface TextAudioContent {
     chordType?: string;
     scaleType?: string;
     rootNote?: number;
+    noteDuration?: number; // Duration for each note in seconds (for tempo control)
   };
 }
 
@@ -59,6 +60,7 @@ export interface AudioQuizContent {
     chordType?: string;
     scaleType?: string;
     rootNote?: number;
+    noteDuration?: number; // Duration for each note in seconds (for tempo control)
   };
   options: string[];
   correctIndex: number;

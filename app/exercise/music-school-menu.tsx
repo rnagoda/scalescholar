@@ -4,10 +4,10 @@
  * Track selection for Music School lessons.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, Href } from 'expo-router';
+import { useRouter, Href, useFocusEffect } from 'expo-router';
 
 import { colors, typography, spacing, fonts } from '@/src/theme';
 import {
@@ -35,9 +35,12 @@ export default function MusicSchoolMenuScreen() {
     chords: { total: 0, completed: 0 },
   });
 
-  useEffect(() => {
-    loadProgress();
-  }, []);
+  // Reload progress every time screen gains focus
+  useFocusEffect(
+    useCallback(() => {
+      loadProgress();
+    }, [])
+  );
 
   const loadProgress = async () => {
     const progress: Record<TrackId, TrackProgress> = {

@@ -106,7 +106,7 @@ export const useLessonStore = create<LessonStoreState>((set, get) => ({
         selectedAnswer: null,
         isCorrect: null,
         showExplanation: false,
-        correctCount: existingAttempts.filter((a) => a.correct).length,
+        correctCount: 0, // Start fresh each session - don't carry over from previous attempts
         totalGradedBlocks: gradedBlocks,
         isLoading: false,
       });

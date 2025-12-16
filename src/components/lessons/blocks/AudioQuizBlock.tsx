@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { colors, fonts, spacing } from '../../../theme';
 import { AudioQuizContent } from '../../../types/lesson';
 import { PlayButton, AnswerButton } from '../../exercises';
@@ -36,12 +36,14 @@ export const AudioQuizBlock: React.FC<AudioQuizBlockProps> = ({
     setIsPlaying(true);
 
     try {
-      const { notes, chordType, scaleType, rootNote } = content.audioData;
+      const { notes, chordType, scaleType, rootNote, noteDuration } = content.audioData;
+      // Default duration is 0.4s, can be overridden for tempo control
+      const duration = noteDuration ?? 0.4;
 
       switch (content.audioType) {
         case 'note':
           if (notes && notes.length > 0) {
-            await AudioEngine.playMidiNote(notes[0], 1.0);
+            await AudioEngine.playMidiNote(notes[0], noteDuration ?? 1.0);
           }
           break;
 
@@ -66,7 +68,7 @@ export const AudioQuizBlock: React.FC<AudioQuizBlockProps> = ({
             // Convert to intervals from first note for playScale
             const rootMidi = notes[0];
             const intervals = notes.map(n => n - rootMidi);
-            await AudioEngine.playScale(rootMidi, intervals, 0.4);
+            await AudioEngine.playScale(rootMidi, intervals, duration);
           }
           break;
       }
@@ -94,7 +96,11 @@ export const AudioQuizBlock: React.FC<AudioQuizBlockProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Question */}
       <View style={styles.questionContainer}>
         <Text style={styles.question}>{content.question}</Text>
@@ -144,14 +150,17 @@ export const AudioQuizBlock: React.FC<AudioQuizBlockProps> = ({
           </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: {
     padding: spacing.lg,
+    paddingBottom: spacing.xxxl,
   },
   questionContainer: {
     marginBottom: spacing.lg,

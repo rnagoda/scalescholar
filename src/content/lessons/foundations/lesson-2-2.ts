@@ -21,10 +21,11 @@ export const lesson: Lesson = {
       content: {
         type: 'text-audio',
         data: {
-          text: 'Notes can be held for different lengths of time. A WHOLE NOTE is held the longest - it lasts for 4 beats. Listen:',
+          text: 'Notes can be held for different lengths of time. A WHOLE NOTE is held the longest - it lasts for 4 beats. Listen to this long, sustained note:',
           audioType: 'note',
           audioData: {
             notes: [60],
+            noteDuration: 2.0, // Long sustained note to represent whole note
           },
         },
       },
@@ -41,6 +42,7 @@ export const lesson: Lesson = {
             notes: [60, 62],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 1.0, // Each half note is 2 beats
           },
         },
       },
@@ -57,6 +59,7 @@ export const lesson: Lesson = {
             notes: [60, 62, 64, 65],
             scaleType: 'major',
             rootNote: 60,
+            noteDuration: 0.5, // Each quarter note is 1 beat
           },
         },
       },
