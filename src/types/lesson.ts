@@ -46,6 +46,7 @@ export interface TextAudioContent {
     scaleType?: string;
     rootNote?: number;
     noteDuration?: number; // Duration for each note in seconds (for tempo control)
+    velocity?: number; // Velocity/volume from 0.0 to 1.0 (for dynamics)
   };
 }
 
@@ -61,6 +62,7 @@ export interface AudioQuizContent {
     scaleType?: string;
     rootNote?: number;
     noteDuration?: number; // Duration for each note in seconds (for tempo control)
+    velocity?: number; // Velocity/volume from 0.0 to 1.0 (for dynamics)
   };
   options: string[];
   correctIndex: number;

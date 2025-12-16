@@ -71,50 +71,63 @@ export class SineSynth implements Synthesizer {
 
   /**
    * Apply ADSR envelope to a gain node
+   * Velocity affects attack time (higher velocity = faster attack for more percussive sound)
    */
   private applyEnvelope(
     gainNode: GainNode,
     startTime: number,
-    duration: number
+    duration: number,
+    velocity: number = 0.7
   ): void {
     const { attack, decay, sustain, release } = this.envelope;
     const gain = gainNode.gain;
+
+    // Faster attack for higher velocities (more percussive)
+    const velocityAttack = attack * (1.5 - velocity * 0.5);
 
     // Start at 0
     gain.setValueAtTime(0, startTime);
 
     // Attack: ramp to 1
-    gain.linearRampToValueAtTime(1, startTime + attack);
+    gain.linearRampToValueAtTime(1, startTime + velocityAttack);
 
     // Decay: ramp to sustain level
-    gain.linearRampToValueAtTime(sustain, startTime + attack + decay);
+    gain.linearRampToValueAtTime(sustain, startTime + velocityAttack + decay);
 
     // Hold at sustain level until release
     const releaseStart = startTime + duration - release;
-    gain.setValueAtTime(sustain, Math.max(releaseStart, startTime + attack + decay));
+    gain.setValueAtTime(sustain, Math.max(releaseStart, startTime + velocityAttack + decay));
 
     // Release: ramp to 0
     gain.linearRampToValueAtTime(0, startTime + duration);
   }
 
-  async playNote(frequency: number, duration: number): Promise<void> {
+  async playNote(frequency: number, duration: number, velocity: number = 0.7): Promise<void> {
     const initialized = await this.initialize();
     if (!initialized || !this.audioContext) {
       console.warn('Audio not available, skipping playback');
       return;
     }
 
+    // Clamp velocity to valid range
+    const clampedVelocity = Math.max(0, Math.min(1, velocity));
+
     const oscillator = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
+    const velocityGain = this.audioContext.createGain();
 
     oscillator.type = 'sine';
     oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
 
+    // Apply velocity as a gain multiplier
+    velocityGain.gain.setValueAtTime(clampedVelocity, this.audioContext.currentTime);
+
     oscillator.connect(gainNode);
-    gainNode.connect(this.audioContext.destination);
+    gainNode.connect(velocityGain);
+    velocityGain.connect(this.audioContext.destination);
 
     const startTime = this.audioContext.currentTime;
-    this.applyEnvelope(gainNode, startTime, duration);
+    this.applyEnvelope(gainNode, startTime, duration, clampedVelocity);
 
     oscillator.start(startTime);
     oscillator.stop(startTime + duration);
@@ -135,12 +148,15 @@ export class SineSynth implements Synthesizer {
     });
   }
 
-  async playChord(frequencies: number[], duration: number): Promise<void> {
+  async playChord(frequencies: number[], duration: number, velocity: number = 0.7): Promise<void> {
     const initialized = await this.initialize();
     if (!initialized || !this.audioContext) {
       console.warn('Audio not available, skipping playback');
       return;
     }
+
+    // Clamp velocity to valid range
+    const clampedVelocity = Math.max(0, Math.min(1, velocity));
 
     // Play all notes simultaneously
     const playPromises = frequencies.map((freq) => {
@@ -150,16 +166,16 @@ export class SineSynth implements Synthesizer {
       oscillator.type = 'sine';
       oscillator.frequency.setValueAtTime(freq, this.audioContext!.currentTime);
 
-      // Reduce volume for chords to prevent clipping
+      // Reduce volume for chords to prevent clipping, apply velocity
       const chordGain = this.audioContext!.createGain();
-      chordGain.gain.setValueAtTime(1 / frequencies.length, this.audioContext!.currentTime);
+      chordGain.gain.setValueAtTime(clampedVelocity / frequencies.length, this.audioContext!.currentTime);
 
       oscillator.connect(gainNode);
       gainNode.connect(chordGain);
       chordGain.connect(this.audioContext!.destination);
 
       const startTime = this.audioContext!.currentTime;
-      this.applyEnvelope(gainNode, startTime, duration);
+      this.applyEnvelope(gainNode, startTime, duration, clampedVelocity);
 
       oscillator.start(startTime);
       oscillator.stop(startTime + duration);

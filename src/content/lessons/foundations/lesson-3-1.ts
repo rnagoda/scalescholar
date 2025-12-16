@@ -31,7 +31,15 @@ export const lesson: Lesson = {
       content: {
         type: 'text-audio',
         data: {
-          text: 'FORTE (f) means LOUD. When you see "f" in music, play with strength and power. Think of a marching band or a thundering orchestra!',
+          text: 'FORTE (f) means LOUD. When you see "f" in music, play with strength and power. Listen to this forte passage:',
+          audioType: 'scale',
+          audioData: {
+            notes: [60, 64, 67, 72],
+            scaleType: 'major',
+            rootNote: 60,
+            noteDuration: 0.5,
+            velocity: 1.0, // Maximum velocity for forte
+          },
         },
       },
     },
@@ -41,7 +49,15 @@ export const lesson: Lesson = {
       content: {
         type: 'text-audio',
         data: {
-          text: 'PIANO (p) means SOFT. When you see "p" in music, play gently and quietly. Think of a lullaby or a whisper.',
+          text: 'PIANO (p) means SOFT. When you see "p" in music, play gently and quietly. Listen to this piano passage:',
+          audioType: 'scale',
+          audioData: {
+            notes: [60, 64, 67, 72],
+            scaleType: 'major',
+            rootNote: 60,
+            noteDuration: 0.5,
+            velocity: 0.25, // Low velocity for piano (soft)
+          },
         },
       },
     },
@@ -51,7 +67,15 @@ export const lesson: Lesson = {
       content: {
         type: 'text-audio',
         data: {
-          text: 'MEZZO means "medium." MEZZO-FORTE (mf) is medium loud, and MEZZO-PIANO (mp) is medium soft. These are the most common dynamics in music.',
+          text: 'MEZZO means "medium." MEZZO-FORTE (mf) is medium loud, and MEZZO-PIANO (mp) is medium soft. Listen to mezzo-forte:',
+          audioType: 'scale',
+          audioData: {
+            notes: [60, 64, 67, 72],
+            scaleType: 'major',
+            rootNote: 60,
+            noteDuration: 0.5,
+            velocity: 0.6, // Medium velocity for mezzo-forte
+          },
         },
       },
     },
