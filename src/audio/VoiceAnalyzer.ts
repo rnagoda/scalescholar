@@ -21,6 +21,7 @@ import {
   frequencyToNoteName,
   frequencyToCents,
 } from '../utils/music';
+import { PitchSmoother, SmoothingConfig } from '../utils/pitchSmoothing';
 
 /**
  * YIN Pitch Detection Algorithm (same as PitchDetector)
@@ -156,6 +157,15 @@ function calculateAmplitude(buffer: Float32Array): AmplitudeResult {
 }
 
 /**
+ * Voice-optimized smoothing configuration
+ * More aggressive smoothing than default to reduce jitter on voice input
+ */
+const VOICE_SMOOTHING_CONFIG: Partial<SmoothingConfig> = {
+  medianWindowSize: 5,  // Larger window to filter outliers
+  emaAlpha: 0.25,       // Lower alpha = smoother but slightly slower response
+};
+
+/**
  * Voice Analyzer Singleton Class
  */
 class VoiceAnalyzerClass {
@@ -165,6 +175,9 @@ class VoiceAnalyzerClass {
   private config: PitchDetectorConfig = { ...DEFAULT_PITCH_DETECTOR_CONFIG };
   private state: VoiceAnalyzerState = 'idle';
   private sessionId: number = 0;
+
+  // Pitch smoothing
+  private pitchSmoother: PitchSmoother;
 
   // Input sensitivity (software gain multiplier)
   private inputSensitivity: number = 1.0;
@@ -179,7 +192,9 @@ class VoiceAnalyzerClass {
   private onError: ((error: string) => void) | null = null;
   private onStateChange: ((state: VoiceAnalyzerState) => void) | null = null;
 
-  private constructor() {}
+  private constructor() {
+    this.pitchSmoother = new PitchSmoother('voice', VOICE_SMOOTHING_CONFIG);
+  }
 
   public static getInstance(): VoiceAnalyzerClass {
     if (!VoiceAnalyzerClass.instance) {
@@ -202,6 +217,7 @@ class VoiceAnalyzerClass {
 
   public setA4Frequency(frequency: number): void {
     this.config.a4Frequency = frequency;
+    this.pitchSmoother.setA4Frequency(frequency);
   }
 
   public setInputSensitivity(sensitivity: number): void {
@@ -257,6 +273,7 @@ class VoiceAnalyzerClass {
 
       const currentSession = ++this.sessionId;
       this.latestAudioData = null;
+      this.pitchSmoother.reset();
 
       this.recorder = new AudioRecorder({
         sampleRate: this.config.sampleRate,
@@ -300,7 +317,9 @@ class VoiceAnalyzerClass {
           frequency >= this.config.minFrequency &&
           frequency <= this.config.maxFrequency
         ) {
-          pitch = this.createPitchResult(frequency);
+          // Create raw pitch result and apply smoothing
+          const rawPitch = this.createPitchResult(frequency);
+          pitch = this.pitchSmoother.process(rawPitch);
         }
 
         if (currentSession !== this.sessionId) return;
