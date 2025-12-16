@@ -11,6 +11,7 @@ import {
   LabelValue,
   ProgressBar,
   Divider,
+  SectionHeader,
   AppFooter,
 } from '@/src/components/common';
 import { useProgressStore } from '@/src/stores/useProgressStore';
@@ -91,8 +92,11 @@ export default function HomeScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* EAR SCHOOL */}
+        <SectionHeader title="EAR SCHOOL" />
+
         <Card>
-          <Text style={styles.cardTitle}>Interval Trainer</Text>
+          <Text style={styles.cardTitle}>Intervals</Text>
           <View style={styles.cardContent}>
             <LabelValue
               label="Accuracy:"
@@ -116,7 +120,7 @@ export default function HomeScreen() {
         </Card>
 
         <Card>
-          <Text style={styles.cardTitle}>Scale Degree Trainer</Text>
+          <Text style={styles.cardTitle}>Scale Degrees</Text>
           <View style={styles.cardContent}>
             <LabelValue
               label="Accuracy:"
@@ -140,7 +144,7 @@ export default function HomeScreen() {
         </Card>
 
         <Card>
-          <Text style={styles.cardTitle}>Chord Quality Trainer</Text>
+          <Text style={styles.cardTitle}>Chord Qualities</Text>
           <View style={styles.cardContent}>
             <LabelValue
               label="Accuracy:"
@@ -163,9 +167,11 @@ export default function HomeScreen() {
           </View>
         </Card>
 
-        {/* Voice Trainer Card */}
+        {/* VOICE SCHOOL */}
+        <SectionHeader title="VOICE SCHOOL" style={styles.sectionHeader} />
+
         <Card>
-          <Text style={styles.cardTitle}>Voice Trainer</Text>
+          <Text style={styles.cardTitle}>Voice Training</Text>
           {hasProfile && profile ? (
             <>
               <View style={styles.cardContent}>
@@ -195,6 +201,9 @@ export default function HomeScreen() {
             </>
           )}
         </Card>
+
+        {/* PITCH DETECTOR */}
+        <SectionHeader title="PITCH DETECTOR" style={styles.sectionHeader} />
 
         <Card>
           <Text style={styles.cardTitle}>Pitch Detector</Text>
@@ -258,5 +267,8 @@ const styles = StyleSheet.create({
     ...typography.label,
     fontSize: 13,
     marginBottom: spacing.md,
+  },
+  sectionHeader: {
+    marginTop: spacing.lg,
   },
 });
