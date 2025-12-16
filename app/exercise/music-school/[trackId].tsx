@@ -4,10 +4,10 @@
  * Displays lessons within a specific track organized by level.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams, Href } from 'expo-router';
+import { useRouter, useLocalSearchParams, Href, useFocusEffect } from 'expo-router';
 
 import { colors, typography, spacing, fonts } from '@/src/theme';
 import {
@@ -28,11 +28,14 @@ export default function TrackLessonBrowserScreen() {
 
   const track = getTrackById(trackId as TrackId);
 
-  useEffect(() => {
-    if (trackId) {
-      loadLessons();
-    }
-  }, [trackId]);
+  // Reload lessons and progress every time screen gains focus
+  useFocusEffect(
+    useCallback(() => {
+      if (trackId) {
+        loadLessons();
+      }
+    }, [trackId])
+  );
 
   const loadLessons = async () => {
     const trackLessons = getLessonsByTrack(trackId as TrackId);

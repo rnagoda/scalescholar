@@ -44,6 +44,9 @@ interface LessonStoreState {
   correctCount: number;
   totalGradedBlocks: number;
 
+  // XP breakdown for completion screen
+  earnedUnlocks: string[];
+
   // Loading state
   isLoading: boolean;
 
@@ -72,6 +75,7 @@ const INITIAL_STATE = {
   showExplanation: false,
   correctCount: 0,
   totalGradedBlocks: 0,
+  earnedUnlocks: [] as string[],
   isLoading: false,
 };
 
@@ -106,7 +110,7 @@ export const useLessonStore = create<LessonStoreState>((set, get) => ({
         selectedAnswer: null,
         isCorrect: null,
         showExplanation: false,
-        correctCount: existingAttempts.filter((a) => a.correct).length,
+        correctCount: 0, // Start fresh each session - don't carry over from previous attempts
         totalGradedBlocks: gradedBlocks,
         isLoading: false,
       });
@@ -230,12 +234,12 @@ export const useLessonStore = create<LessonStoreState>((set, get) => ({
     set({ isLoading: true });
 
     try {
-      await markLessonComplete(
+      const unlocks = await markLessonComplete(
         currentLesson.id,
         currentLesson.blocks.length
       );
 
-      set({ isLoading: false });
+      set({ isLoading: false, earnedUnlocks: unlocks });
     } catch (error) {
       console.error('Failed to complete lesson:', error);
       set({ isLoading: false });

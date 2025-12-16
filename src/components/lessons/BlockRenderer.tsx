@@ -6,13 +6,16 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { LessonBlock, isGradedBlock } from '../../types/lesson';
+import { LessonBlock } from '../../types/lesson';
 import { colors, fonts, spacing } from '../../theme';
 import {
   TextAudioBlock,
   AudioQuizBlock,
   FillBlankBlock,
   SortingBlock,
+  VisualQuizBlock,
+  TapBuildBlock,
+  DragDropBlock,
 } from './blocks';
 
 interface BlockRendererProps {
@@ -34,10 +37,13 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 }) => {
   const { content } = block;
 
+  // Use block.id as key to force re-mount when block changes
+  // This ensures useState initializers run fresh for each block
   switch (content.type) {
     case 'text-audio':
       return (
         <TextAudioBlock
+          key={block.id}
           content={content.data}
           onContinue={onContinue}
         />
@@ -46,6 +52,20 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     case 'audio-quiz':
       return (
         <AudioQuizBlock
+          key={block.id}
+          content={content.data}
+          onAnswer={onAnswer}
+          showFeedback={showFeedback}
+          isCorrect={isCorrect}
+          selectedAnswer={selectedAnswer as number | null}
+          onContinue={onContinue}
+        />
+      );
+
+    case 'visual-quiz':
+      return (
+        <VisualQuizBlock
+          key={block.id}
           content={content.data}
           onAnswer={onAnswer}
           showFeedback={showFeedback}
@@ -58,6 +78,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     case 'fill-blank':
       return (
         <FillBlankBlock
+          key={block.id}
           content={content.data}
           onAnswer={onAnswer}
           showFeedback={showFeedback}
@@ -70,6 +91,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     case 'sorting':
       return (
         <SortingBlock
+          key={block.id}
           content={content.data}
           onAnswer={onAnswer}
           showFeedback={showFeedback}
@@ -79,19 +101,30 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
         />
       );
 
-    case 'visual-quiz':
-    case 'drag-drop':
     case 'tap-build':
-      // Placeholder for blocks not yet implemented
       return (
-        <View style={styles.placeholder}>
-          <Text style={styles.placeholderTitle}>
-            {content.type.toUpperCase()}
-          </Text>
-          <Text style={styles.placeholderText}>
-            This block type is coming soon.
-          </Text>
-        </View>
+        <TapBuildBlock
+          key={block.id}
+          content={content.data}
+          onAnswer={onAnswer}
+          showFeedback={showFeedback}
+          isCorrect={isCorrect}
+          selectedAnswer={selectedAnswer as number[] | null}
+          onContinue={onContinue}
+        />
+      );
+
+    case 'drag-drop':
+      return (
+        <DragDropBlock
+          key={block.id}
+          content={content.data}
+          onAnswer={onAnswer}
+          showFeedback={showFeedback}
+          isCorrect={isCorrect}
+          selectedAnswer={selectedAnswer as Record<string, string> | null}
+          onContinue={onContinue}
+        />
       );
 
     default:

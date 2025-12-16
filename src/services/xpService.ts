@@ -142,3 +142,11 @@ export const getXPBreakdown = async (): Promise<Record<XPSource, number>> => {
 
   return breakdown;
 };
+
+/**
+ * Reset all XP data (for testing/debugging)
+ */
+export const resetAllXP = async (): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync(`DELETE FROM xp_events`);
+};

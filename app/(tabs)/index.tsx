@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, Href } from 'expo-router';
@@ -15,14 +15,18 @@ import { useVoiceProfileStore } from '@/src/stores/useVoiceProfileStore';
 import { useProgressStore } from '@/src/stores/useProgressStore';
 import { useXPStore } from '@/src/stores/useXPStore';
 import { ALL_INTERVALS, ALL_SCALE_DEGREES, ALL_CHORD_QUALITIES } from '@/src/utils/music';
+import { TRACKS, TrackId } from '@/src/types/lesson';
+import { getTrackLessonCount } from '@/src/content/lessons';
+import { getCompletedLessonCount } from '@/src/services/lessonService';
 
 /**
  * Render ASCII-style progress bar
  * Uses block characters: ░ (empty) and █ (filled)
+ * Default width increased to 32 characters for better visibility on tablets
  */
 const AsciiProgressBar: React.FC<{ progress: number; width?: number }> = ({
   progress,
-  width = 20
+  width = 32
 }) => {
   const filledCount = Math.round(progress * width);
   const emptyCount = width - filledCount;
@@ -90,6 +94,26 @@ export default function HomeScreen() {
     refreshXP,
   } = useXPStore();
 
+  // Music School progress state
+  const [musicSchoolProgress, setMusicSchoolProgress] = useState(0);
+
+  // Load Music School progress
+  const loadMusicSchoolProgress = async () => {
+    let totalLessons = 0;
+    let completedLessons = 0;
+
+    for (const track of TRACKS) {
+      const trackTotal = getTrackLessonCount(track.id);
+      const trackCompleted = await getCompletedLessonCount(track.id);
+      totalLessons += trackTotal;
+      completedLessons += trackCompleted;
+    }
+
+    if (totalLessons > 0) {
+      setMusicSchoolProgress(completedLessons / totalLessons);
+    }
+  };
+
   useEffect(() => {
     if (!voiceInitialized) {
       initializeVoice();
@@ -106,6 +130,8 @@ export default function HomeScreen() {
     } else {
       refreshXP();
     }
+    // Load Music School progress
+    loadMusicSchoolProgress();
   }, []);
 
   // Calculate Ear School progress (average of all three)
@@ -151,7 +177,7 @@ export default function HomeScreen() {
           </View>
         </View>
         <View style={styles.levelProgressRow}>
-          <AsciiProgressBar progress={levelProgress} width={30} />
+          <AsciiProgressBar progress={levelProgress} width={40} />
         </View>
 
         {/* Ear School */}
@@ -219,7 +245,7 @@ export default function HomeScreen() {
             Learn music theory fundamentals, reading notation, and more.
           </Text>
           <View style={styles.progressRow}>
-            <AsciiProgressBar progress={0} />
+            <AsciiProgressBar progress={musicSchoolProgress} />
           </View>
         </Card>
 

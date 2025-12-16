@@ -9,6 +9,9 @@ import { Lesson, TrackId, TRACKS } from '../../types/lesson';
 
 // Import lesson modules
 import * as foundationsLessons from './foundations';
+import * as intervalsLessons from './intervals';
+import * as scalesKeysLessons from './scales-keys';
+import * as chordsLessons from './chords';
 
 /**
  * All lessons indexed by ID for quick lookup
@@ -31,6 +34,27 @@ const LESSONS_BY_TRACK: Record<TrackId, Lesson[]> = {
 function initializeLessons() {
   // Register foundations lessons
   Object.values(foundationsLessons).forEach((lesson) => {
+    if (lesson && typeof lesson === 'object' && 'id' in lesson) {
+      registerLesson(lesson as Lesson);
+    }
+  });
+
+  // Register intervals lessons
+  Object.values(intervalsLessons).forEach((lesson) => {
+    if (lesson && typeof lesson === 'object' && 'id' in lesson) {
+      registerLesson(lesson as Lesson);
+    }
+  });
+
+  // Register scales-keys lessons
+  Object.values(scalesKeysLessons).forEach((lesson) => {
+    if (lesson && typeof lesson === 'object' && 'id' in lesson) {
+      registerLesson(lesson as Lesson);
+    }
+  });
+
+  // Register chords lessons
+  Object.values(chordsLessons).forEach((lesson) => {
     if (lesson && typeof lesson === 'object' && 'id' in lesson) {
       registerLesson(lesson as Lesson);
     }

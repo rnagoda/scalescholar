@@ -33,12 +33,15 @@ export const TextAudioBlock: React.FC<TextAudioBlockProps> = ({
     setIsPlaying(true);
 
     try {
-      const { notes, chordType, scaleType, rootNote } = content.audioData;
+      const { notes, chordType, scaleType, rootNote, noteDuration, velocity } = content.audioData;
+      // Default duration is 0.4s, can be overridden for tempo control
+      const duration = noteDuration ?? 0.4;
 
       switch (content.audioType) {
         case 'note':
           if (notes && notes.length > 0) {
-            await AudioEngine.playMidiNote(notes[0], 1.0);
+            // Single notes default to 1.0s for better audibility
+            await AudioEngine.playMidiNote(notes[0], noteDuration ?? 1.0, velocity);
           }
           break;
 
@@ -47,13 +50,13 @@ export const TextAudioBlock: React.FC<TextAudioBlockProps> = ({
             // Calculate interval and play melodically
             const interval = notes[1] - notes[0];
             const ascending = interval >= 0;
-            await AudioEngine.playInterval(notes[0], Math.abs(interval), ascending, true);
+            await AudioEngine.playInterval(notes[0], Math.abs(interval), ascending, true, velocity);
           }
           break;
 
         case 'chord':
           if (notes && notes.length >= 3) {
-            await AudioEngine.playChordMidi(notes, 1.5);
+            await AudioEngine.playChordMidi(notes, 1.5, velocity);
           }
           break;
 
@@ -63,7 +66,7 @@ export const TextAudioBlock: React.FC<TextAudioBlockProps> = ({
             // Convert to intervals from first note for playScale
             const rootMidi = notes[0];
             const intervals = notes.map(n => n - rootMidi);
-            await AudioEngine.playScale(rootMidi, intervals, 0.4);
+            await AudioEngine.playScale(rootMidi, intervals, duration, velocity);
           }
           break;
       }

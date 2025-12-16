@@ -29,6 +29,8 @@ import {
 } from '@/src/stores/useSettingsStore';
 import { AudioEngine } from '@/src/audio';
 import { SynthType } from '@/src/types/audio';
+import { resetAllLessonProgress } from '@/src/services/lessonService';
+import { useXPStore } from '@/src/stores/useXPStore';
 
 // Reference pitch options (common concert pitch variations)
 const REFERENCE_PITCH_OPTIONS = [415, 432, 440, 442, 444, 466];
@@ -57,6 +59,8 @@ export default function SettingsScreen() {
     setHapticFeedback,
     resetToDefaults,
   } = useSettingsStore();
+
+  const { resetAllXP } = useXPStore();
 
   // Sync instrument setting with AudioEngine
   useEffect(() => {
@@ -93,6 +97,14 @@ export default function SettingsScreen() {
     const currentIndex = REFERENCE_PITCH_OPTIONS.indexOf(pitch);
     const nextIndex = (currentIndex + 1) % REFERENCE_PITCH_OPTIONS.length;
     setReferencePitch(REFERENCE_PITCH_OPTIONS[nextIndex]);
+  };
+
+  // Reset all progress (lessons + XP)
+  const handleResetProgress = async () => {
+    await Promise.all([
+      resetAllLessonProgress(),
+      resetAllXP(),
+    ]);
   };
 
   return (
@@ -196,6 +208,18 @@ export default function SettingsScreen() {
           />
         </Card>
 
+        <SectionHeader title="DATA" />
+        <Card>
+          <View style={styles.dataRow}>
+            <Text style={styles.dataLabel}>Reset all lesson and XP progress</Text>
+            <BracketButton
+              label="RESET PROGRESS"
+              onPress={handleResetProgress}
+              color={colors.accentPink}
+            />
+          </View>
+        </Card>
+
         <SectionHeader title="ABOUT" />
         <Card>
           <Text style={styles.aboutTitle}>Scale Scholar</Text>
@@ -274,5 +298,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: spacing.lg,
     marginBottom: spacing.md,
+  },
+  dataRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  dataLabel: {
+    ...typography.label,
+    color: colors.textSecondary,
+    flex: 1,
   },
 });

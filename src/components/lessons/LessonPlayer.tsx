@@ -9,9 +9,12 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, fonts, spacing } from '../../theme';
 import { Lesson, isGradedBlock } from '../../types/lesson';
+import { XP_AMOUNTS } from '../../types/xp';
 import { useLessonStore } from '../../stores/useLessonStore';
-import { ProgressBar, BracketButton, Card } from '../common';
+import { useXPStore } from '../../stores/useXPStore';
+import { ProgressBar, BracketButton, Card, LevelUpModal } from '../common';
 import { BlockRenderer } from './BlockRenderer';
+import { AudioEngine } from '../../audio/AudioEngine';
 
 interface LessonPlayerProps {
   lesson: Lesson;
@@ -31,6 +34,8 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
     isCorrect,
     correctCount,
     totalGradedBlocks,
+    blockAttempts,
+    earnedUnlocks,
     isLoading,
     startLesson,
     selectAnswer,
@@ -40,6 +45,9 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
     getCurrentBlock,
     getProgress,
   } = useLessonStore();
+
+  // XP store for level-up celebration
+  const { levelUpInfo, clearLevelUpInfo } = useXPStore();
 
   // Start lesson on mount
   useEffect(() => {
@@ -51,19 +59,42 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
 
   // Handle answer selection
   const handleAnswer = (answer: unknown) => {
+    // Stop any playing audio immediately when answer is submitted
+    AudioEngine.stop();
     selectAnswer(answer);
     // Auto-submit for most block types
     submitAnswer();
   };
 
   // Handle continue after feedback
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    // Stop any playing audio when moving to next block
+    AudioEngine.stop();
     if (lessonState === 'complete') {
-      // Complete the lesson and navigate
-      completeLesson().then(onComplete);
+      // Complete the lesson (awards XP, may trigger level-up)
+      await completeLesson();
+      // If there's a level-up, the modal will be shown on the completion screen
+      // and onComplete will be called when the modal is dismissed
+      // If no level-up, navigate immediately
+      if (!useXPStore.getState().levelUpInfo) {
+        onComplete();
+      }
+      // If there IS levelUpInfo, the modal will show and handleLevelUpDismiss will call onComplete
     } else {
       nextBlock();
     }
+  };
+
+  // Handle level-up modal dismissal - navigate after celebration
+  const handleLevelUpDismiss = () => {
+    clearLevelUpInfo();
+    onComplete();
+  };
+
+  // Handle exit - stop audio and call onExit
+  const handleExit = () => {
+    AudioEngine.stop();
+    onExit();
   };
 
   // Completion screen
@@ -72,6 +103,16 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
       ? Math.round((correctCount / totalGradedBlocks) * 100)
       : 100;
 
+    // Calculate XP breakdown from block attempts
+    const firstTryCorrect = blockAttempts.filter(a => a.correct && a.firstTry).length;
+    const retryCorrect = blockAttempts.filter(a => a.correct && !a.firstTry).length;
+
+    const firstTryXP = firstTryCorrect * XP_AMOUNTS.LESSON_BLOCK_CORRECT_FIRST;
+    const retryXP = retryCorrect * XP_AMOUNTS.LESSON_BLOCK_CORRECT_RETRY;
+    const completionXP = XP_AMOUNTS.LESSON_COMPLETE;
+    const unlockXP = earnedUnlocks.length * XP_AMOUNTS.NEW_UNLOCK;
+    const totalXP = firstTryXP + retryXP + completionXP + unlockXP;
+
     return (
       <View style={styles.container}>
         <View style={styles.completeContainer}>
@@ -79,6 +120,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
           <Text style={styles.completeTitle}>Lesson Complete!</Text>
           <Text style={styles.lessonTitle}>{lesson.title}</Text>
 
+          {/* Results Card */}
           <Card style={styles.resultsCard}>
             <View style={styles.resultRow}>
               <Text style={styles.resultLabel}>Correct Answers</Text>
@@ -95,11 +137,49 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
                 {accuracy}%
               </Text>
             </View>
-            <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>XP Earned</Text>
-              <Text style={[styles.resultValue, { color: colors.accentGreen }]}>
-                +{lesson.xpReward}
-              </Text>
+          </Card>
+
+          {/* XP Breakdown Card */}
+          <Card style={styles.xpCard}>
+            <Text style={styles.xpTitle}>XP EARNED</Text>
+
+            <View style={styles.xpRow}>
+              <Text style={styles.xpLabel}>Lesson Complete</Text>
+              <Text style={styles.xpValue}>+{completionXP}</Text>
+            </View>
+
+            {firstTryXP > 0 && (
+              <View style={styles.xpRow}>
+                <Text style={styles.xpLabel}>
+                  First Try Correct ({firstTryCorrect}×{XP_AMOUNTS.LESSON_BLOCK_CORRECT_FIRST})
+                </Text>
+                <Text style={styles.xpValue}>+{firstTryXP}</Text>
+              </View>
+            )}
+
+            {retryXP > 0 && (
+              <View style={styles.xpRow}>
+                <Text style={styles.xpLabel}>
+                  Retry Correct ({retryCorrect}×{XP_AMOUNTS.LESSON_BLOCK_CORRECT_RETRY})
+                </Text>
+                <Text style={styles.xpValue}>+{retryXP}</Text>
+              </View>
+            )}
+
+            {unlockXP > 0 && (
+              <View style={styles.xpRow}>
+                <Text style={styles.xpLabel}>
+                  New Unlocks ({earnedUnlocks.length}×{XP_AMOUNTS.NEW_UNLOCK})
+                </Text>
+                <Text style={styles.xpValue}>+{unlockXP}</Text>
+              </View>
+            )}
+
+            <View style={styles.xpDivider} />
+
+            <View style={styles.xpRow}>
+              <Text style={styles.xpTotalLabel}>Total</Text>
+              <Text style={styles.xpTotalValue}>+{totalXP}</Text>
             </View>
           </Card>
 
@@ -111,6 +191,18 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
             />
           </View>
         </View>
+
+        {/* Level Up Modal - shown after user acknowledges lesson completion */}
+        {levelUpInfo && (
+          <LevelUpModal
+            visible={!!levelUpInfo}
+            previousLevel={levelUpInfo.previousLevel}
+            previousTitle={levelUpInfo.previousTitle}
+            newLevel={levelUpInfo.newLevel}
+            newTitle={levelUpInfo.newTitle}
+            onClose={handleLevelUpDismiss}
+          />
+        )}
       </View>
     );
   }
@@ -136,7 +228,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
           <Text style={styles.blockCounter}>
             {currentBlockIndex + 1} / {lesson.blocks.length}
           </Text>
-          <BracketButton label="X" onPress={onExit} />
+          <BracketButton label="X" onPress={handleExit} />
         </View>
         <ProgressBar progress={progress} style={styles.progressBar} />
       </View>
@@ -144,6 +236,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
       {/* Block content */}
       <View style={styles.content}>
         <BlockRenderer
+          key={currentBlock.id}
           block={currentBlock}
           onAnswer={handleAnswer}
           onContinue={handleContinue}
@@ -152,6 +245,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
           selectedAnswer={selectedAnswer}
         />
       </View>
+
     </View>
   );
 };
@@ -219,7 +313,7 @@ const styles = StyleSheet.create({
   },
   resultsCard: {
     width: '100%',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.md,
   },
   resultRow: {
     flexDirection: 'row',
@@ -236,6 +330,50 @@ const styles = StyleSheet.create({
     fontFamily: fonts.monoBold,
     fontSize: 18,
     color: colors.textPrimary,
+  },
+  // XP Breakdown Card
+  xpCard: {
+    width: '100%',
+    marginBottom: spacing.xl,
+  },
+  xpTitle: {
+    fontFamily: fonts.monoBold,
+    fontSize: 12,
+    letterSpacing: 1.5,
+    color: colors.textMuted,
+    marginBottom: spacing.md,
+  },
+  xpRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+  },
+  xpLabel: {
+    fontFamily: fonts.mono,
+    fontSize: 13,
+    color: colors.textSecondary,
+    flex: 1,
+  },
+  xpValue: {
+    fontFamily: fonts.monoBold,
+    fontSize: 14,
+    color: colors.accentGreen,
+  },
+  xpDivider: {
+    height: 1,
+    backgroundColor: colors.divider,
+    marginVertical: spacing.sm,
+  },
+  xpTotalLabel: {
+    fontFamily: fonts.monoBold,
+    fontSize: 14,
+    color: colors.textPrimary,
+  },
+  xpTotalValue: {
+    fontFamily: fonts.monoBold,
+    fontSize: 18,
+    color: colors.accentGreen,
   },
   completeActions: {
     marginTop: spacing.lg,

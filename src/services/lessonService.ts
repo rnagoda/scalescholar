@@ -14,6 +14,8 @@ import {
 } from '../types/lesson';
 import { useXPStore } from '../stores/useXPStore';
 import { XP_AMOUNTS } from '../types/xp';
+import { unlockItem } from './progressService';
+import { getLessonUnlocks } from '../content/unlockMappings';
 
 /**
  * Get lesson progress by lesson ID
@@ -125,7 +127,7 @@ export const updateLessonProgress = async (
 export const markLessonComplete = async (
   lessonId: string,
   totalBlocks: number
-): Promise<void> => {
+): Promise<string[]> => {
   const db = await getDatabase();
 
   // Check if already completed
@@ -145,10 +147,25 @@ export const markLessonComplete = async (
     totalBlocks
   );
 
-  // Award XP only on first completion
+  // Process unlocks and award XP only on first completion
+  const newUnlocks: string[] = [];
   if (isFirstCompletion) {
     await useXPStore.getState().awardLessonComplete(lessonId);
+
+    // Process cross-unlocks
+    const unlocks = getLessonUnlocks(lessonId);
+    for (const unlock of unlocks) {
+      await unlockItem(unlock.type, unlock.item);
+      newUnlocks.push(`${unlock.type}:${unlock.item}`);
+
+      // Award XP for each unlock
+      await useXPStore.getState().awardNewUnlock(
+        `${unlock.type}: ${unlock.item}`
+      );
+    }
   }
+
+  return newUnlocks;
 };
 
 /**

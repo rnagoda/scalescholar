@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { colors, fonts, spacing } from '../../../theme';
 import { FillBlankContent } from '../../../types/lesson';
 import { BracketButton } from '../../common';
@@ -56,47 +56,62 @@ export const FillBlankBlock: React.FC<FillBlankBlockProps> = ({
         const selection = selections[blankIndex];
         const isActive = activeBlankIndex === blankIndex;
 
-        let blankStyleName: 'blankDefault' | 'blankActive' | 'blankFilled' | 'blankCorrect' | 'blankIncorrect' = 'blankDefault';
+        let borderColor: string = colors.textMuted;
+        let backgroundColor: string = 'transparent';
         let textColor: string = colors.textMuted;
 
         if (showFeedback) {
           const isBlankCorrect = selection === blank.correctIndex;
-          blankStyleName = isBlankCorrect ? 'blankCorrect' : 'blankIncorrect';
+          borderColor = isBlankCorrect ? colors.accentGreen : colors.accentPink;
+          backgroundColor = isBlankCorrect ? colors.accentGreen + '20' : colors.accentPink + '20';
           textColor = isBlankCorrect ? colors.accentGreen : colors.accentPink;
         } else if (selection !== null) {
-          blankStyleName = 'blankFilled';
+          borderColor = colors.accentBlue;
+          backgroundColor = colors.accentBlue + '20';
           textColor = colors.accentBlue;
         } else if (isActive) {
-          blankStyleName = 'blankActive';
+          borderColor = colors.accentBlue;
+          backgroundColor = colors.accentBlue + '10';
           textColor = colors.accentBlue;
         }
 
+        // Use Text with onPress for inline flow (TouchableOpacity breaks inline layout)
         return (
-          <TouchableOpacity
+          <Text
             key={index}
-            style={[styles.blank, styles[blankStyleName]]}
+            style={[
+              styles.blankText,
+              {
+                color: textColor,
+                borderColor,
+                backgroundColor,
+                borderWidth: 1,
+                borderRadius: 4,
+                paddingHorizontal: 8,
+                paddingVertical: 2,
+                marginHorizontal: 4,
+              },
+            ]}
             onPress={() => !showFeedback && setActiveBlankIndex(blankIndex)}
-            disabled={showFeedback}
+            suppressHighlighting={false}
           >
-            <Text style={[styles.blankText, { color: textColor }]}>
-              {selection !== null ? blank.options[selection] : '______'}
-            </Text>
-          </TouchableOpacity>
+            {selection !== null ? blank.options[selection] : '______'}
+          </Text>
         );
       }
 
-      return (
-        <Text key={index} style={styles.text}>
-          {part}
-        </Text>
-      );
+      return part;
     });
   };
 
   const activeBlank = activeBlankIndex !== null ? content.blanks[activeBlankIndex] : null;
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Text with blanks */}
       <View style={styles.textContainer}>
         <Text style={styles.textWrapper}>{renderTextWithBlanks()}</Text>
@@ -141,56 +156,28 @@ export const FillBlankBlock: React.FC<FillBlankBlockProps> = ({
           </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: {
     padding: spacing.lg,
+    paddingBottom: spacing.xxxl,
+    flexGrow: 1,
   },
   textContainer: {
     flex: 1,
     justifyContent: 'center',
   },
   textWrapper: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-  },
-  text: {
     fontFamily: fonts.mono,
     fontSize: 16,
     color: colors.textPrimary,
     lineHeight: 32,
-  },
-  blank: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: 4,
-    borderWidth: 1,
-    marginHorizontal: spacing.xs,
-  },
-  blankDefault: {
-    borderColor: colors.textMuted,
-    borderStyle: 'dashed',
-  },
-  blankActive: {
-    borderColor: colors.accentBlue,
-    backgroundColor: colors.accentBlue + '10',
-  },
-  blankFilled: {
-    borderColor: colors.accentBlue,
-    backgroundColor: colors.accentBlue + '20',
-  },
-  blankCorrect: {
-    borderColor: colors.accentGreen,
-    backgroundColor: colors.accentGreen + '20',
-  },
-  blankIncorrect: {
-    borderColor: colors.accentPink,
-    backgroundColor: colors.accentPink + '20',
   },
   blankText: {
     fontFamily: fonts.monoBold,

@@ -21,20 +21,28 @@ export interface Synthesizer {
    * Play a single note at the given frequency
    * @param frequency - Frequency in Hz
    * @param duration - Duration in seconds
+   * @param velocity - Velocity/volume from 0.0 to 1.0 (default 0.7)
    */
-  playNote(frequency: number, duration: number): Promise<void>;
+  playNote(frequency: number, duration: number, velocity?: number): Promise<void>;
 
   /**
    * Play multiple notes simultaneously (chord)
    * @param frequencies - Array of frequencies in Hz
    * @param duration - Duration in seconds
+   * @param velocity - Velocity/volume from 0.0 to 1.0 (default 0.7)
    */
-  playChord(frequencies: number[], duration: number): Promise<void>;
+  playChord(frequencies: number[], duration: number, velocity?: number): Promise<void>;
 
   /**
    * Stop all currently playing sounds
    */
   stop(): void;
+
+  /**
+   * Force reinitialize audio context
+   * Useful after Bluetooth or audio route changes on iOS
+   */
+  reinitialize(): Promise<boolean>;
 
   /**
    * Clean up resources
@@ -54,4 +62,4 @@ export interface AudioEngineConfig {
 /**
  * Available synth types
  */
-export type SynthType = 'sine' | 'piano';
+export type SynthType = 'sine' | 'piano' | 'sampled-piano';
