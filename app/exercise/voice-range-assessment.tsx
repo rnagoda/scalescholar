@@ -3,16 +3,16 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-import { colors, typography, spacing } from '@/src/theme';
+import { colors, typography, spacing, fonts } from '@/src/theme';
 import { ScreenHeader, BracketButton, Divider, Card } from '@/src/components/common';
 import {
   VolumeMeter,
   AssessmentProgress,
-  RangeDisplay,
   NoteDisplay,
 } from '@/src/components/voiceTrainer';
 import { useVoiceProfileStore } from '@/src/stores/useVoiceProfileStore';
 import { midiToNoteName } from '@/src/utils/music';
+import { VRPAssessmentStep } from '@/src/types/voiceAnalyzer';
 
 export default function VoiceRangeAssessment() {
   const router = useRouter();
@@ -57,14 +57,37 @@ export default function VoiceRangeAssessment() {
     await startListening();
   }, [startListening]);
 
-  const handleStopListening = useCallback(() => {
-    stopListening();
-  }, [stopListening]);
-
   const handleSaveAndFinish = useCallback(async () => {
     await saveProfile();
     router.back();
   }, [saveProfile, router]);
+
+  const handleRestartAssessment = useCallback(() => {
+    resetAssessment();
+    startAssessment();
+  }, [resetAssessment, startAssessment]);
+
+  // Navigation helpers
+  const getPreviousStep = (step: VRPAssessmentStep): VRPAssessmentStep | null => {
+    switch (step) {
+      case 'lowest': return 'intro';
+      case 'highest': return 'lowest';
+      case 'comfortable_low': return 'highest';
+      case 'comfortable_high': return 'comfortable_low';
+      case 'results': return 'comfortable_high';
+      default: return null;
+    }
+  };
+
+  const handleGoBack = useCallback(() => {
+    const prevStep = getPreviousStep(assessmentStep);
+    if (prevStep) {
+      stopListening();
+      setAssessmentStep(prevStep);
+    }
+  }, [assessmentStep, stopListening, setAssessmentStep]);
+
+  const canGoBack = getPreviousStep(assessmentStep) !== null;
 
   // Render content based on current step
   const renderStepContent = () => {
@@ -105,14 +128,16 @@ export default function VoiceRangeAssessment() {
               isActive={detectedLowest !== null}
             />
 
-            {currentPitch !== null && (
-              <View style={styles.currentPitch}>
-                <Text style={styles.currentPitchLabel}>NOW</Text>
-                <Text style={styles.currentPitchValue}>
-                  {midiToNoteName(currentPitch)}
-                </Text>
-              </View>
-            )}
+            {/* Always show NOW section to prevent layout jumping */}
+            <View style={styles.currentPitch}>
+              <Text style={styles.currentPitchLabel}>NOW</Text>
+              <Text style={[
+                styles.currentPitchValue,
+                currentPitch === null && styles.currentPitchPlaceholder
+              ]}>
+                {currentPitch !== null ? midiToNoteName(currentPitch) : '--'}
+              </Text>
+            </View>
 
             <VolumeMeter
               amplitude={currentAmplitude !== null ? { rms: 0, db: currentAmplitude, peak: 0 } : null}
@@ -120,6 +145,12 @@ export default function VoiceRangeAssessment() {
             />
 
             <View style={styles.actionSection}>
+              <BracketButton
+                label="<--"
+                onPress={handleGoBack}
+                color={colors.textSecondary}
+              />
+
               {!isListening ? (
                 <BracketButton
                   label="START LISTENING"
@@ -128,17 +159,9 @@ export default function VoiceRangeAssessment() {
                 />
               ) : (
                 <BracketButton
-                  label="STOP"
-                  onPress={handleStopListening}
-                  color={colors.accentPink}
-                />
-              )}
-
-              {detectedLowest !== null && (
-                <BracketButton
                   label="CONFIRM LOWEST"
                   onPress={confirmLowest}
-                  color={colors.textPrimary}
+                  color={detectedLowest !== null ? colors.textPrimary : colors.textMuted}
                 />
               )}
             </View>
@@ -159,14 +182,16 @@ export default function VoiceRangeAssessment() {
               isActive={detectedHighest !== null}
             />
 
-            {currentPitch !== null && (
-              <View style={styles.currentPitch}>
-                <Text style={styles.currentPitchLabel}>NOW</Text>
-                <Text style={styles.currentPitchValue}>
-                  {midiToNoteName(currentPitch)}
-                </Text>
-              </View>
-            )}
+            {/* Always show NOW section to prevent layout jumping */}
+            <View style={styles.currentPitch}>
+              <Text style={styles.currentPitchLabel}>NOW</Text>
+              <Text style={[
+                styles.currentPitchValue,
+                currentPitch === null && styles.currentPitchPlaceholder
+              ]}>
+                {currentPitch !== null ? midiToNoteName(currentPitch) : '--'}
+              </Text>
+            </View>
 
             <VolumeMeter
               amplitude={currentAmplitude !== null ? { rms: 0, db: currentAmplitude, peak: 0 } : null}
@@ -174,6 +199,12 @@ export default function VoiceRangeAssessment() {
             />
 
             <View style={styles.actionSection}>
+              <BracketButton
+                label="<--"
+                onPress={handleGoBack}
+                color={colors.textSecondary}
+              />
+
               {!isListening ? (
                 <BracketButton
                   label="START LISTENING"
@@ -182,17 +213,9 @@ export default function VoiceRangeAssessment() {
                 />
               ) : (
                 <BracketButton
-                  label="STOP"
-                  onPress={handleStopListening}
-                  color={colors.accentPink}
-                />
-              )}
-
-              {detectedHighest !== null && (
-                <BracketButton
                   label="CONFIRM HIGHEST"
                   onPress={confirmHighest}
-                  color={colors.textPrimary}
+                  color={detectedHighest !== null ? colors.textPrimary : colors.textMuted}
                 />
               )}
             </View>
@@ -211,8 +234,19 @@ export default function VoiceRangeAssessment() {
             <NoteDisplay
               label="COMFORTABLE LOW"
               note={detectedComfortLow ?? currentPitch}
-              isActive={currentPitch !== null}
+              isActive={currentPitch !== null || detectedComfortLow !== null}
             />
+
+            {/* Always show NOW section to prevent layout jumping */}
+            <View style={styles.currentPitch}>
+              <Text style={styles.currentPitchLabel}>NOW</Text>
+              <Text style={[
+                styles.currentPitchValue,
+                currentPitch === null && styles.currentPitchPlaceholder
+              ]}>
+                {currentPitch !== null ? midiToNoteName(currentPitch) : '--'}
+              </Text>
+            </View>
 
             <VolumeMeter
               amplitude={currentAmplitude !== null ? { rms: 0, db: currentAmplitude, peak: 0 } : null}
@@ -220,6 +254,12 @@ export default function VoiceRangeAssessment() {
             />
 
             <View style={styles.actionSection}>
+              <BracketButton
+                label="<--"
+                onPress={handleGoBack}
+                color={colors.textSecondary}
+              />
+
               {!isListening ? (
                 <BracketButton
                   label="START LISTENING"
@@ -228,17 +268,11 @@ export default function VoiceRangeAssessment() {
                 />
               ) : (
                 <BracketButton
-                  label="STOP"
-                  onPress={handleStopListening}
-                  color={colors.accentPink}
+                  label="CONFIRM"
+                  onPress={confirmComfortableLow}
+                  color={colors.textPrimary}
                 />
               )}
-
-              <BracketButton
-                label="CONFIRM"
-                onPress={confirmComfortableLow}
-                color={colors.textPrimary}
-              />
             </View>
           </View>
         );
@@ -255,8 +289,19 @@ export default function VoiceRangeAssessment() {
             <NoteDisplay
               label="COMFORTABLE HIGH"
               note={detectedComfortHigh ?? currentPitch}
-              isActive={currentPitch !== null}
+              isActive={currentPitch !== null || detectedComfortHigh !== null}
             />
+
+            {/* Always show NOW section to prevent layout jumping */}
+            <View style={styles.currentPitch}>
+              <Text style={styles.currentPitchLabel}>NOW</Text>
+              <Text style={[
+                styles.currentPitchValue,
+                currentPitch === null && styles.currentPitchPlaceholder
+              ]}>
+                {currentPitch !== null ? midiToNoteName(currentPitch) : '--'}
+              </Text>
+            </View>
 
             <VolumeMeter
               amplitude={currentAmplitude !== null ? { rms: 0, db: currentAmplitude, peak: 0 } : null}
@@ -264,6 +309,12 @@ export default function VoiceRangeAssessment() {
             />
 
             <View style={styles.actionSection}>
+              <BracketButton
+                label="<--"
+                onPress={handleGoBack}
+                color={colors.textSecondary}
+              />
+
               {!isListening ? (
                 <BracketButton
                   label="START LISTENING"
@@ -272,17 +323,11 @@ export default function VoiceRangeAssessment() {
                 />
               ) : (
                 <BracketButton
-                  label="STOP"
-                  onPress={handleStopListening}
-                  color={colors.accentPink}
+                  label="CONFIRM"
+                  onPress={confirmComfortableHigh}
+                  color={colors.textPrimary}
                 />
               )}
-
-              <BracketButton
-                label="CONFIRM"
-                onPress={confirmComfortableHigh}
-                color={colors.textPrimary}
-              />
             </View>
           </View>
         );
@@ -328,7 +373,12 @@ export default function VoiceRangeAssessment() {
 
             <View style={styles.actionSection}>
               <BracketButton
-                label={isLoading ? 'SAVING...' : 'SAVE & START TRAINING'}
+                label="RESTART"
+                onPress={handleRestartAssessment}
+                color={colors.textSecondary}
+              />
+              <BracketButton
+                label={isLoading ? 'SAVING...' : 'SAVE & TRAIN'}
                 onPress={handleSaveAndFinish}
                 color={colors.accentGreen}
               />
@@ -405,6 +455,7 @@ const styles = StyleSheet.create({
   currentPitch: {
     alignItems: 'center',
     marginVertical: spacing.md,
+    minHeight: 50, // Ensure consistent height
   },
   currentPitchLabel: {
     ...typography.label,
@@ -413,9 +464,12 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   currentPitchValue: {
-    fontFamily: 'SpaceMono-Bold',
+    fontFamily: fonts.monoBold,
     fontSize: 32,
     color: colors.accentGreen,
+  },
+  currentPitchPlaceholder: {
+    color: colors.textMuted,
   },
   actionSection: {
     flexDirection: 'row',
@@ -441,12 +495,12 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   resultValue: {
-    fontFamily: 'SpaceMono-Bold',
+    fontFamily: fonts.monoBold,
     fontSize: 18,
     color: colors.accentGreen,
   },
   resultValueSecondary: {
-    fontFamily: 'SpaceMono-Bold',
+    fontFamily: fonts.monoBold,
     fontSize: 16,
     color: colors.textPrimary,
   },

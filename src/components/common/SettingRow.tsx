@@ -178,6 +178,118 @@ export const SettingNumber: React.FC<SettingNumberProps> = ({
   );
 };
 
+interface SettingSliderProps {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  onChange: (value: number) => void;
+  formatValue?: (value: number) => string;
+  disabled?: boolean;
+}
+
+/**
+ * A setting row with increment/decrement buttons for numeric values
+ * Uses bracket button style for retro aesthetic
+ */
+export const SettingSlider: React.FC<SettingSliderProps> = ({
+  label,
+  value,
+  min,
+  max,
+  step,
+  onChange,
+  formatValue = (v) => v.toString(),
+  disabled = false,
+}) => {
+  const handleDecrement = () => {
+    if (disabled) return;
+    const newValue = Math.max(min, value - step);
+    onChange(Math.round(newValue * 10) / 10); // Avoid floating point issues
+  };
+
+  const handleIncrement = () => {
+    if (disabled) return;
+    const newValue = Math.min(max, value + step);
+    onChange(Math.round(newValue * 10) / 10);
+  };
+
+  const canDecrement = value > min;
+  const canIncrement = value < max;
+
+  return (
+    <View style={sliderStyles.container}>
+      <Text style={[styles.label, disabled && styles.labelDisabled]}>
+        {label}
+      </Text>
+      <View style={sliderStyles.controls}>
+        <TouchableOpacity
+          onPress={handleDecrement}
+          disabled={disabled || !canDecrement}
+          activeOpacity={0.7}
+        >
+          <Text style={[
+            sliderStyles.button,
+            (!canDecrement || disabled) && sliderStyles.buttonDisabled,
+          ]}>
+            [ - ]
+          </Text>
+        </TouchableOpacity>
+        <Text style={[
+          sliderStyles.value,
+          disabled && styles.valueDisabled,
+        ]}>
+          {formatValue(value)}
+        </Text>
+        <TouchableOpacity
+          onPress={handleIncrement}
+          disabled={disabled || !canIncrement}
+          activeOpacity={0.7}
+        >
+          <Text style={[
+            sliderStyles.button,
+            (!canIncrement || disabled) && sliderStyles.buttonDisabled,
+          ]}>
+            [ + ]
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+const sliderStyles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  controls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  button: {
+    fontFamily: fonts.mono,
+    fontSize: 14,
+    color: colors.textSecondary,
+    paddingHorizontal: spacing.xs,
+  },
+  buttonDisabled: {
+    color: colors.textMuted,
+    opacity: 0.5,
+  },
+  value: {
+    fontFamily: fonts.monoBold,
+    fontSize: 14,
+    color: colors.accentGreen,
+    minWidth: 40,
+    textAlign: 'center',
+  },
+});
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',

@@ -19,6 +19,7 @@ import {
 } from '../services/voiceProfileService';
 import { VoiceAnalyzer } from '../audio';
 import { midiToNoteName } from '../utils/music';
+import { useSettingsStore } from './useSettingsStore';
 
 interface VoiceProfileState {
   // Profile state
@@ -151,22 +152,52 @@ export const useVoiceProfileStore = create<VoiceProfileState>((set, get) => ({
       VoiceAnalyzer.stopListening();
     }
 
-    set({
+    // Clear detected values when going back to re-do a step
+    const clearValues: Partial<VoiceProfileState> = {
       assessmentStep: step,
       isListening: false,
       currentPitch: null,
       currentAmplitude: null,
-    });
+    };
+
+    // Clear the relevant detected value when going back to that step
+    switch (step) {
+      case 'lowest':
+        clearValues.detectedLowest = null;
+        break;
+      case 'highest':
+        clearValues.detectedHighest = null;
+        break;
+      case 'comfortable_low':
+        clearValues.detectedComfortLow = null;
+        break;
+      case 'comfortable_high':
+        clearValues.detectedComfortHigh = null;
+        break;
+    }
+
+    set(clearValues);
   },
 
   startListening: async () => {
     const { assessmentStep, detectedLowest, detectedHighest, detectedSoftest, detectedLoudest } = get();
 
+    // Set listening true immediately before starting
+    set({ isListening: true, errorMessage: null });
+
+    // Apply input sensitivity from settings before starting
+    const inputSensitivity = useSettingsStore.getState().inputSensitivity;
+    VoiceAnalyzer.setInputSensitivity(inputSensitivity);
+
     try {
       await VoiceAnalyzer.startListening(
         (result: VoiceAnalysisResult) => {
-          const state = get();
-          if (!state.isListening) return;
+          // Check if we're still supposed to be listening
+          // Use VoiceAnalyzer's state as the source of truth
+          if (!VoiceAnalyzer.isListening()) return;
+
+          // Get current store state
+          const storeState = get();
 
           // Update current readings
           const currentPitch = result.pitch?.midiNote ?? null;
@@ -178,18 +209,25 @@ export const useVoiceProfileStore = create<VoiceProfileState>((set, get) => ({
           });
 
           // Track extremes based on current step
-          if (currentPitch !== null && currentAmplitude >= DEFAULT_VOICE_THRESHOLDS.minVoiceDb) {
-            switch (state.assessmentStep) {
+          // Filter to reasonable human vocal range: C2 (36) to C7 (96)
+          const MIN_VOCAL_MIDI = 36; // C2 (~65Hz)
+          const MAX_VOCAL_MIDI = 96; // C7 (~2093Hz)
+          const isInVocalRange = currentPitch !== null &&
+            currentPitch >= MIN_VOCAL_MIDI &&
+            currentPitch <= MAX_VOCAL_MIDI;
+
+          if (isInVocalRange && currentAmplitude >= DEFAULT_VOICE_THRESHOLDS.minVoiceDb) {
+            switch (storeState.assessmentStep) {
               case 'lowest':
-                // Track lowest pitch found
-                if (state.detectedLowest === null || currentPitch < state.detectedLowest) {
+                // Track lowest pitch found (must be lower than current detected)
+                if (storeState.detectedLowest === null || currentPitch < storeState.detectedLowest) {
                   set({ detectedLowest: currentPitch });
                 }
                 break;
 
               case 'highest':
-                // Track highest pitch found
-                if (state.detectedHighest === null || currentPitch > state.detectedHighest) {
+                // Track highest pitch found (must be higher than current detected)
+                if (storeState.detectedHighest === null || currentPitch > storeState.detectedHighest) {
                   set({ detectedHighest: currentPitch });
                 }
                 break;
@@ -206,10 +244,10 @@ export const useVoiceProfileStore = create<VoiceProfileState>((set, get) => ({
             }
 
             // Always track dynamic range
-            if (state.detectedSoftest === null || currentAmplitude < state.detectedSoftest) {
+            if (storeState.detectedSoftest === null || currentAmplitude < storeState.detectedSoftest) {
               set({ detectedSoftest: currentAmplitude });
             }
-            if (state.detectedLoudest === null || currentAmplitude > state.detectedLoudest) {
+            if (storeState.detectedLoudest === null || currentAmplitude > storeState.detectedLoudest) {
               set({ detectedLoudest: currentAmplitude });
             }
           }
@@ -220,10 +258,11 @@ export const useVoiceProfileStore = create<VoiceProfileState>((set, get) => ({
             isListening: false,
           });
         },
-        (state) => {
-          if (state === 'listening') {
-            set({ isListening: true, errorMessage: null });
-          } else if (state === 'error') {
+        (analyzerState) => {
+          // Handle error state from analyzer
+          if (analyzerState === 'error') {
+            set({ isListening: false });
+          } else if (analyzerState === 'idle') {
             set({ isListening: false });
           }
         }

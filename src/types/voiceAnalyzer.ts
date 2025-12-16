@@ -171,7 +171,7 @@ export interface VoiceDetectionThresholds {
  * Default voice detection thresholds
  */
 export const DEFAULT_VOICE_THRESHOLDS: VoiceDetectionThresholds = {
-  minVoiceDb: -40,      // Fairly sensitive
+  minVoiceDb: -50,      // More sensitive for varied microphone levels
   onTargetCents: 10,    // Within 10 cents = on target
   minTimeOnTarget: 1000, // 1 second on target
 };

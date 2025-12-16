@@ -237,6 +237,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     left: 0,
+    height: '100%',
     borderRadius: 4,
   },
   peakIndicator: {

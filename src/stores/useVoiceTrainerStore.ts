@@ -173,9 +173,10 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
     try {
       await VoiceAnalyzer.startListening(
         (result: VoiceAnalysisResult) => {
-          const state = get();
-          if (state.state !== 'listening') return;
+          // Use VoiceAnalyzer's state as the source of truth
+          if (!VoiceAnalyzer.isListening()) return;
 
+          const state = get();
           const { targetFrequency: target } = state;
           if (target === null) return;
 

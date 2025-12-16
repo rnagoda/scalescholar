@@ -12,11 +12,15 @@ import {
   SettingToggle,
   SettingOption,
   SettingNumber,
+  SettingSlider,
   BracketButton,
 } from '@/src/components/common';
 import {
   useSettingsStore,
   QUESTION_COUNT_OPTIONS,
+  MIN_INPUT_SENSITIVITY,
+  MAX_INPUT_SENSITIVITY,
+  INPUT_SENSITIVITY_STEP,
   IntervalDirection,
   IntervalPlayback,
   ScaleDegreeLabelType,
@@ -31,6 +35,7 @@ export default function SettingsScreen() {
   const {
     instrument,
     referencePitch,
+    inputSensitivity,
     questionsPerSession,
     autoPlayNext,
     intervalDirection,
@@ -39,6 +44,7 @@ export default function SettingsScreen() {
     hapticFeedback,
     setInstrument,
     setReferencePitch,
+    setInputSensitivity,
     setQuestionsPerSession,
     setAutoPlayNext,
     setIntervalDirection,
@@ -111,6 +117,22 @@ export default function SettingsScreen() {
             onChange={handleReferencePitchChange}
             suffix=" Hz"
           />
+        </Card>
+
+        <SectionHeader title="VOICE TRAINING" />
+        <Card>
+          <SettingSlider
+            label="Mic Sensitivity"
+            value={inputSensitivity}
+            min={MIN_INPUT_SENSITIVITY}
+            max={MAX_INPUT_SENSITIVITY}
+            step={INPUT_SENSITIVITY_STEP}
+            onChange={setInputSensitivity}
+            formatValue={(v) => `${v.toFixed(1)}x`}
+          />
+          <Text style={styles.settingHint}>
+            Increase if your mic is too quiet, decrease if too loud
+          </Text>
         </Card>
 
         <SectionHeader title="EXERCISE" />
@@ -215,6 +237,12 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.divider,
     marginVertical: spacing.xs,
+  },
+  settingHint: {
+    ...typography.label,
+    fontSize: 11,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
   },
   aboutTitle: {
     ...typography.cardTitle,

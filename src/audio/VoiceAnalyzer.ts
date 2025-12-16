@@ -166,6 +166,9 @@ class VoiceAnalyzerClass {
   private state: VoiceAnalyzerState = 'idle';
   private sessionId: number = 0;
 
+  // Input sensitivity (software gain multiplier)
+  private inputSensitivity: number = 1.0;
+
   // Decoupled processing
   private latestAudioData: Float32Array | null = null;
   private processingTimer: ReturnType<typeof setInterval> | null = null;
@@ -199,6 +202,15 @@ class VoiceAnalyzerClass {
 
   public setA4Frequency(frequency: number): void {
     this.config.a4Frequency = frequency;
+  }
+
+  public setInputSensitivity(sensitivity: number): void {
+    // Clamp to valid range (0.5 - 2.0)
+    this.inputSensitivity = Math.max(0.5, Math.min(2.0, sensitivity));
+  }
+
+  public getInputSensitivity(): number {
+    return this.inputSensitivity;
   }
 
   /**
@@ -235,6 +247,7 @@ class VoiceAnalyzerClass {
           throw new Error('Microphone permission not granted');
         }
       } else if (Platform.OS === 'ios') {
+        // iOS requires audio session to be configured for recording
         AudioManager.setAudioSessionOptions({
           iosCategory: 'playAndRecord',
           iosMode: 'measurement',
@@ -264,23 +277,30 @@ class VoiceAnalyzerClass {
 
         this.latestAudioData = null;
 
-        // Calculate amplitude (always available)
-        const amplitude = calculateAmplitude(audioData);
-
-        // Only process pitch if voice level is above threshold
-        let pitch: PitchResult | null = null;
-        if (amplitude.db >= DEFAULT_VOICE_THRESHOLDS.minVoiceDb) {
-          const frequency = detectPitchYIN(audioData, this.config.sampleRate);
-
-          if (currentSession !== this.sessionId) return;
-
-          if (
-            frequency !== null &&
-            frequency >= this.config.minFrequency &&
-            frequency <= this.config.maxFrequency
-          ) {
-            pitch = this.createPitchResult(frequency);
+        // Apply software gain for amplitude calculation if sensitivity != 1.0
+        let amplitudeData = audioData;
+        if (this.inputSensitivity !== 1.0) {
+          amplitudeData = new Float32Array(audioData.length);
+          for (let i = 0; i < audioData.length; i++) {
+            amplitudeData[i] = audioData[i] * this.inputSensitivity;
           }
+        }
+
+        // Calculate amplitude with gain applied
+        const amplitude = calculateAmplitude(amplitudeData);
+
+        // Always attempt pitch detection (threshold check moved to consumers)
+        let pitch: PitchResult | null = null;
+        const frequency = detectPitchYIN(audioData, this.config.sampleRate);
+
+        if (currentSession !== this.sessionId) return;
+
+        if (
+          frequency !== null &&
+          frequency >= this.config.minFrequency &&
+          frequency <= this.config.maxFrequency
+        ) {
+          pitch = this.createPitchResult(frequency);
         }
 
         if (currentSession !== this.sessionId) return;
