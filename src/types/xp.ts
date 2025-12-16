@@ -68,18 +68,21 @@ export const XP_AMOUNTS = {
 /**
  * Level thresholds and titles
  * Based on PRD: Beginner (1-3), Intermediate (4-6), Advanced (7-9), Scholar (10+)
+ *
+ * A typical lesson awards ~100-150 XP (50 completion + 60-90 from blocks).
+ * Level progression is designed so each level takes 2-5+ lessons.
  */
 export const XP_LEVELS: XPLevel[] = [
-  { level: 1, minXP: 0, maxXP: 100, title: 'Beginner' },
-  { level: 2, minXP: 100, maxXP: 250, title: 'Beginner' },
-  { level: 3, minXP: 250, maxXP: 500, title: 'Beginner' },
-  { level: 4, minXP: 500, maxXP: 800, title: 'Intermediate' },
-  { level: 5, minXP: 800, maxXP: 1150, title: 'Intermediate' },
-  { level: 6, minXP: 1150, maxXP: 1500, title: 'Intermediate' },
-  { level: 7, minXP: 1500, maxXP: 2000, title: 'Advanced' },
-  { level: 8, minXP: 2000, maxXP: 2600, title: 'Advanced' },
-  { level: 9, minXP: 2600, maxXP: 3500, title: 'Advanced' },
-  { level: 10, minXP: 3500, maxXP: Infinity, title: 'Scholar' },
+  { level: 1, minXP: 0, maxXP: 250, title: 'Beginner' },       // ~2-3 lessons
+  { level: 2, minXP: 250, maxXP: 600, title: 'Beginner' },     // ~3-4 lessons
+  { level: 3, minXP: 600, maxXP: 1100, title: 'Beginner' },    // ~4-5 lessons
+  { level: 4, minXP: 1100, maxXP: 1800, title: 'Intermediate' }, // ~5-6 lessons
+  { level: 5, minXP: 1800, maxXP: 2700, title: 'Intermediate' }, // ~6-7 lessons
+  { level: 6, minXP: 2700, maxXP: 3800, title: 'Intermediate' }, // ~7-8 lessons
+  { level: 7, minXP: 3800, maxXP: 5200, title: 'Advanced' },    // ~8-10 lessons
+  { level: 8, minXP: 5200, maxXP: 7000, title: 'Advanced' },    // ~10-12 lessons
+  { level: 9, minXP: 7000, maxXP: 9500, title: 'Advanced' },    // ~12-15 lessons
+  { level: 10, minXP: 9500, maxXP: Infinity, title: 'Scholar' }, // Mastery!
 ];
 
 /**

@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, fonts, spacing } from '../../theme';
 import { Lesson, isGradedBlock } from '../../types/lesson';
+import { XP_AMOUNTS } from '../../types/xp';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useXPStore } from '../../stores/useXPStore';
 import { ProgressBar, BracketButton, Card, LevelUpModal } from '../common';
@@ -33,6 +34,8 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
     isCorrect,
     correctCount,
     totalGradedBlocks,
+    blockAttempts,
+    earnedUnlocks,
     isLoading,
     startLesson,
     selectAnswer,
@@ -100,6 +103,16 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
       ? Math.round((correctCount / totalGradedBlocks) * 100)
       : 100;
 
+    // Calculate XP breakdown from block attempts
+    const firstTryCorrect = blockAttempts.filter(a => a.correct && a.firstTry).length;
+    const retryCorrect = blockAttempts.filter(a => a.correct && !a.firstTry).length;
+
+    const firstTryXP = firstTryCorrect * XP_AMOUNTS.LESSON_BLOCK_CORRECT_FIRST;
+    const retryXP = retryCorrect * XP_AMOUNTS.LESSON_BLOCK_CORRECT_RETRY;
+    const completionXP = XP_AMOUNTS.LESSON_COMPLETE;
+    const unlockXP = earnedUnlocks.length * XP_AMOUNTS.NEW_UNLOCK;
+    const totalXP = firstTryXP + retryXP + completionXP + unlockXP;
+
     return (
       <View style={styles.container}>
         <View style={styles.completeContainer}>
@@ -107,6 +120,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
           <Text style={styles.completeTitle}>Lesson Complete!</Text>
           <Text style={styles.lessonTitle}>{lesson.title}</Text>
 
+          {/* Results Card */}
           <Card style={styles.resultsCard}>
             <View style={styles.resultRow}>
               <Text style={styles.resultLabel}>Correct Answers</Text>
@@ -123,11 +137,49 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
                 {accuracy}%
               </Text>
             </View>
-            <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>XP Earned</Text>
-              <Text style={[styles.resultValue, { color: colors.accentGreen }]}>
-                +{lesson.xpReward}
-              </Text>
+          </Card>
+
+          {/* XP Breakdown Card */}
+          <Card style={styles.xpCard}>
+            <Text style={styles.xpTitle}>XP EARNED</Text>
+
+            <View style={styles.xpRow}>
+              <Text style={styles.xpLabel}>Lesson Complete</Text>
+              <Text style={styles.xpValue}>+{completionXP}</Text>
+            </View>
+
+            {firstTryXP > 0 && (
+              <View style={styles.xpRow}>
+                <Text style={styles.xpLabel}>
+                  First Try Correct ({firstTryCorrect}×{XP_AMOUNTS.LESSON_BLOCK_CORRECT_FIRST})
+                </Text>
+                <Text style={styles.xpValue}>+{firstTryXP}</Text>
+              </View>
+            )}
+
+            {retryXP > 0 && (
+              <View style={styles.xpRow}>
+                <Text style={styles.xpLabel}>
+                  Retry Correct ({retryCorrect}×{XP_AMOUNTS.LESSON_BLOCK_CORRECT_RETRY})
+                </Text>
+                <Text style={styles.xpValue}>+{retryXP}</Text>
+              </View>
+            )}
+
+            {unlockXP > 0 && (
+              <View style={styles.xpRow}>
+                <Text style={styles.xpLabel}>
+                  New Unlocks ({earnedUnlocks.length}×{XP_AMOUNTS.NEW_UNLOCK})
+                </Text>
+                <Text style={styles.xpValue}>+{unlockXP}</Text>
+              </View>
+            )}
+
+            <View style={styles.xpDivider} />
+
+            <View style={styles.xpRow}>
+              <Text style={styles.xpTotalLabel}>Total</Text>
+              <Text style={styles.xpTotalValue}>+{totalXP}</Text>
             </View>
           </Card>
 
@@ -261,7 +313,7 @@ const styles = StyleSheet.create({
   },
   resultsCard: {
     width: '100%',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.md,
   },
   resultRow: {
     flexDirection: 'row',
@@ -278,6 +330,50 @@ const styles = StyleSheet.create({
     fontFamily: fonts.monoBold,
     fontSize: 18,
     color: colors.textPrimary,
+  },
+  // XP Breakdown Card
+  xpCard: {
+    width: '100%',
+    marginBottom: spacing.xl,
+  },
+  xpTitle: {
+    fontFamily: fonts.monoBold,
+    fontSize: 12,
+    letterSpacing: 1.5,
+    color: colors.textMuted,
+    marginBottom: spacing.md,
+  },
+  xpRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+  },
+  xpLabel: {
+    fontFamily: fonts.mono,
+    fontSize: 13,
+    color: colors.textSecondary,
+    flex: 1,
+  },
+  xpValue: {
+    fontFamily: fonts.monoBold,
+    fontSize: 14,
+    color: colors.accentGreen,
+  },
+  xpDivider: {
+    height: 1,
+    backgroundColor: colors.divider,
+    marginVertical: spacing.sm,
+  },
+  xpTotalLabel: {
+    fontFamily: fonts.monoBold,
+    fontSize: 14,
+    color: colors.textPrimary,
+  },
+  xpTotalValue: {
+    fontFamily: fonts.monoBold,
+    fontSize: 18,
+    color: colors.accentGreen,
   },
   completeActions: {
     marginTop: spacing.lg,
