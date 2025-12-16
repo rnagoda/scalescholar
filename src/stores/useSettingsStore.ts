@@ -22,6 +22,9 @@ interface SettingsState {
   instrument: SynthType;
   referencePitch: number; // A4 frequency in Hz
 
+  // Voice training settings
+  inputSensitivity: number; // Microphone gain multiplier (0.5 - 2.0)
+
   // Exercise settings
   questionsPerSession: number;
   autoPlayNext: boolean;
@@ -39,6 +42,7 @@ interface SettingsState {
   // Actions
   setInstrument: (instrument: SynthType) => void;
   setReferencePitch: (pitch: number) => void;
+  setInputSensitivity: (sensitivity: number) => void;
   setQuestionsPerSession: (count: number) => void;
   setAutoPlayNext: (enabled: boolean) => void;
   setIntervalDirection: (direction: IntervalDirection) => void;
@@ -54,6 +58,7 @@ interface SettingsState {
 const DEFAULT_SETTINGS = {
   instrument: 'piano' as SynthType,
   referencePitch: 440,
+  inputSensitivity: 1.0,
   questionsPerSession: 10,
   autoPlayNext: false,
   intervalDirection: 'ascending' as IntervalDirection,
@@ -81,6 +86,13 @@ export const QUESTIONS_STEP = 5;
  */
 export const QUESTION_COUNT_OPTIONS = [5, 10, 15, 20, 25];
 
+/**
+ * Valid input sensitivity range (microphone gain)
+ */
+export const MIN_INPUT_SENSITIVITY = 0.5;
+export const MAX_INPUT_SENSITIVITY = 2.0;
+export const INPUT_SENSITIVITY_STEP = 0.1;
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
@@ -94,6 +106,14 @@ export const useSettingsStore = create<SettingsState>()(
           Math.min(MAX_REFERENCE_PITCH, pitch)
         );
         set({ referencePitch: clampedPitch });
+      },
+
+      setInputSensitivity: (sensitivity) => {
+        const clampedSensitivity = Math.max(
+          MIN_INPUT_SENSITIVITY,
+          Math.min(MAX_INPUT_SENSITIVITY, sensitivity)
+        );
+        set({ inputSensitivity: clampedSensitivity });
       },
 
       setQuestionsPerSession: (count) => {
@@ -122,6 +142,7 @@ export const useSettingsStore = create<SettingsState>()(
       partialize: (state) => ({
         instrument: state.instrument,
         referencePitch: state.referencePitch,
+        inputSensitivity: state.inputSensitivity,
         questionsPerSession: state.questionsPerSession,
         autoPlayNext: state.autoPlayNext,
         intervalDirection: state.intervalDirection,
