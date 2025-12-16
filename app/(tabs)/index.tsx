@@ -3,33 +3,19 @@ import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, Href } from 'expo-router';
 
-import { colors, typography, spacing } from '@/src/theme';
+import { colors, typography, spacing, fonts } from '@/src/theme';
 import {
   ScreenHeader,
   Card,
   BracketButton,
   LabelValue,
-  ProgressBar,
   Divider,
   AppFooter,
 } from '@/src/components/common';
-import { useProgressStore } from '@/src/stores/useProgressStore';
 import { useVoiceProfileStore } from '@/src/stores/useVoiceProfileStore';
-import { ALL_INTERVALS, ALL_SCALE_DEGREES, ALL_CHORD_QUALITIES } from '@/src/utils/music';
 
 export default function HomeScreen() {
   const router = useRouter();
-
-  const {
-    intervalProgress,
-    scaleDegreeProgress,
-    chordProgress,
-    isInitialized,
-    initialize,
-    refreshIntervalProgress,
-    refreshScaleDegreeProgress,
-    refreshChordProgress,
-  } = useProgressStore();
 
   const {
     hasProfile,
@@ -41,37 +27,10 @@ export default function HomeScreen() {
   } = useVoiceProfileStore();
 
   useEffect(() => {
-    if (!isInitialized) {
-      initialize();
-    } else {
-      refreshIntervalProgress();
-      refreshScaleDegreeProgress();
-      refreshChordProgress();
-    }
     if (!voiceInitialized) {
       initializeVoice();
     }
   }, []);
-
-  const formatAccuracy = (accuracy: number, totalAttempts: number): string => {
-    if (accuracy === 0 && totalAttempts === 0) return '--';
-    return `${Math.round(accuracy * 100)}%`;
-  };
-
-  // Interval progress
-  const intervalStats = intervalProgress.stats;
-  const unlockedIntervalsCount = intervalProgress.unlockedIntervals.length;
-  const totalIntervals = ALL_INTERVALS.length;
-
-  // Scale degree progress
-  const scaleDegreeStats = scaleDegreeProgress.stats;
-  const unlockedDegreesCount = scaleDegreeProgress.unlockedDegrees.length;
-  const totalDegrees = ALL_SCALE_DEGREES.length;
-
-  // Chord quality progress
-  const chordStats = chordProgress.stats;
-  const unlockedChordsCount = chordProgress.unlockedQualities.length;
-  const totalChords = ALL_CHORD_QUALITIES.length;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -79,8 +38,8 @@ export default function HomeScreen() {
         title="SCALE SCHOLAR"
         rightContent={
           <BracketButton
-            label="?"
-            onPress={() => router.push('/settings')}
+            label="TUNE"
+            onPress={() => router.push('/exercise/pitch-detector' as Href)}
           />
         }
       />
@@ -91,128 +50,62 @@ export default function HomeScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* Ear School */}
         <Card>
-          <Text style={styles.cardTitle}>Interval Trainer</Text>
-          <View style={styles.cardContent}>
-            <LabelValue
-              label="Accuracy:"
-              value={formatAccuracy(intervalStats.accuracy, intervalStats.totalAttempts)}
-            />
-            <LabelValue label="Current Streak:" value={intervalStats.streak.toString()} />
-          </View>
-          <View style={styles.progressContainer}>
-            <ProgressBar progress={unlockedIntervalsCount / totalIntervals} />
-            <Text style={styles.progressLabel}>
-              {unlockedIntervalsCount}/{totalIntervals} unlocked
-            </Text>
-          </View>
-          <View style={styles.cardAction}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Ear School</Text>
             <BracketButton
-              label="TRAIN"
-              onPress={() => router.push('/exercise/intervals')}
+              label="OPEN"
+              onPress={() => router.push('/exercise/ear-school-menu' as Href)}
               color={colors.accentGreen}
             />
           </View>
+          <Text style={styles.cardDescription}>
+            Train your ear to recognize intervals, scale degrees, and chord qualities.
+          </Text>
         </Card>
 
+        {/* Voice School */}
         <Card>
-          <Text style={styles.cardTitle}>Scale Degree Trainer</Text>
-          <View style={styles.cardContent}>
-            <LabelValue
-              label="Accuracy:"
-              value={formatAccuracy(scaleDegreeStats.accuracy, scaleDegreeStats.totalAttempts)}
-            />
-            <LabelValue label="Current Streak:" value={scaleDegreeStats.streak.toString()} />
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Voice School</Text>
+            {hasProfile && profile ? (
+              <BracketButton
+                label="OPEN"
+                onPress={() => router.push('/exercise/voice-menu' as Href)}
+                color={colors.accentGreen}
+              />
+            ) : (
+              <BracketButton
+                label="GET STARTED"
+                onPress={() => router.push('/exercise/voice-range-assessment' as Href)}
+                color={colors.accentGreen}
+              />
+            )}
           </View>
-          <View style={styles.progressContainer}>
-            <ProgressBar progress={unlockedDegreesCount / totalDegrees} />
-            <Text style={styles.progressLabel}>
-              {unlockedDegreesCount}/{totalDegrees} unlocked
-            </Text>
-          </View>
-          <View style={styles.cardAction}>
-            <BracketButton
-              label="TRAIN"
-              onPress={() => router.push('/exercise/scale-degrees')}
-              color={colors.accentGreen}
-            />
-          </View>
-        </Card>
-
-        <Card>
-          <Text style={styles.cardTitle}>Chord Quality Trainer</Text>
-          <View style={styles.cardContent}>
-            <LabelValue
-              label="Accuracy:"
-              value={formatAccuracy(chordStats.accuracy, chordStats.totalAttempts)}
-            />
-            <LabelValue label="Current Streak:" value={chordStats.streak.toString()} />
-          </View>
-          <View style={styles.progressContainer}>
-            <ProgressBar progress={unlockedChordsCount / totalChords} />
-            <Text style={styles.progressLabel}>
-              {unlockedChordsCount}/{totalChords} unlocked
-            </Text>
-          </View>
-          <View style={styles.cardAction}>
-            <BracketButton
-              label="TRAIN"
-              onPress={() => router.push('/exercise/chords')}
-              color={colors.accentGreen}
-            />
-          </View>
-        </Card>
-
-        {/* Voice Trainer Card */}
-        <Card>
-          <Text style={styles.cardTitle}>Voice Trainer</Text>
           {hasProfile && profile ? (
-            <>
-              <View style={styles.cardContent}>
-                <LabelValue label="Range:" value={getProfileSummary() ?? '--'} />
-                <LabelValue label="Octaves:" value={getRangeOctaves().toString()} />
-              </View>
-              <View style={styles.cardAction}>
-                <BracketButton
-                  label="REASSESS"
-                  onPress={() => router.push('/exercise/voice-range-assessment' as Href)}
-                  color={colors.textSecondary}
-                />
-                <BracketButton
-                  label="TRAIN"
-                  onPress={() => router.push('/exercise/voice-note-match' as Href)}
-                  color={colors.accentGreen}
-                />
-              </View>
-            </>
+            <View style={styles.cardContent}>
+              <LabelValue label="Range:" value={getProfileSummary() ?? '--'} />
+              <LabelValue label="Octaves:" value={getRangeOctaves().toString()} />
+            </View>
           ) : (
-            <>
-              <Text style={styles.toolDescription}>
-                Train your voice to hit notes accurately. First, let's find your vocal range.
-              </Text>
-              <View style={styles.cardAction}>
-                <BracketButton
-                  label="GET STARTED"
-                  onPress={() => router.push('/exercise/voice-range-assessment' as Href)}
-                  color={colors.accentGreen}
-                />
-              </View>
-            </>
+            <Text style={styles.cardDescription}>
+              Train your voice to hit notes accurately. First, let's find your vocal range.
+            </Text>
           )}
         </Card>
 
-        <Card>
-          <Text style={styles.cardTitle}>Pitch Detector</Text>
-          <Text style={styles.toolDescription}>
-            Detect pitch from your microphone and see how sharp or flat you are.
-          </Text>
-          <View style={styles.cardAction}>
-            <BracketButton
-              label="OPEN"
-              onPress={() => router.push('/exercise/pitch-detector' as Href)}
-              color={colors.accentGreen}
-            />
+        {/* Music School */}
+        <Card style={styles.cardDisabled}>
+          <View style={styles.cardHeader}>
+            <View style={styles.titleWithBadge}>
+              <Text style={[styles.cardTitle, styles.textMuted]}>Music School</Text>
+              <Text style={styles.comingSoonBadge}>SOON</Text>
+            </View>
           </View>
+          <Text style={[styles.cardDescription, styles.textMuted]}>
+            Learn music theory fundamentals, reading notation, and more.
+          </Text>
         </Card>
 
         <AppFooter />
@@ -236,32 +129,37 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
   },
-  cardTitle: {
-    ...typography.cardTitle,
-    marginBottom: spacing.md,
-  },
-  cardContent: {
-    marginBottom: spacing.md,
-  },
-  progressContainer: {
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: spacing.sm,
   },
-  progressLabel: {
-    ...typography.label,
-    fontSize: 12,
-    marginTop: spacing.xs,
-    textAlign: 'right',
+  cardTitle: {
+    ...typography.cardTitle,
   },
-  cardAction: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginTop: spacing.sm,
-    gap: spacing.md,
-  },
-  toolDescription: {
+  cardDescription: {
     ...typography.label,
     fontSize: 13,
-    marginBottom: spacing.md,
+    color: colors.textSecondary,
+    lineHeight: 20,
+  },
+  cardContent: {},
+  cardDisabled: {
+    opacity: 0.6,
+  },
+  titleWithBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  textMuted: {
+    color: colors.textMuted,
+  },
+  comingSoonBadge: {
+    fontFamily: fonts.mono,
+    fontSize: 10,
+    color: colors.accentPink,
+    letterSpacing: 1,
   },
 });

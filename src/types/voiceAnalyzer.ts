@@ -64,6 +64,95 @@ export type VoiceExerciseType =
   | 'sustain';    // Hold a note steady for duration
 
 /**
+ * Scale types for vocal training
+ * Ordered roughly by difficulty/complexity
+ */
+export type VocalScaleType =
+  // Beginner scales
+  | 'major'              // W-W-H-W-W-W-H - foundational scale
+  | 'natural_minor'      // W-H-W-W-H-W-W - relative minor
+  | 'major_pentatonic'   // 5 notes, no semitones - beginner-friendly
+  | 'minor_pentatonic'   // 5 notes - great for improvisation
+  // Intermediate scales
+  | 'harmonic_minor'     // Natural minor with raised 7th
+  | 'melodic_minor'      // Ascending: raised 6th and 7th
+  | 'dorian'             // Minor with raised 6th - jazz/folk
+  | 'mixolydian'         // Major with lowered 7th - blues/rock
+  // Advanced scales
+  | 'phrygian'           // Minor with lowered 2nd - flamenco
+  | 'lydian'             // Major with raised 4th - dreamy
+  | 'blues'              // 6 notes with blue note - expression
+  | 'chromatic';         // All 12 semitones - agility drill
+
+/**
+ * Scale intervals from root (in semitones)
+ */
+export const SCALE_INTERVALS: Record<VocalScaleType, number[]> = {
+  // Beginner
+  major: [0, 2, 4, 5, 7, 9, 11, 12],
+  natural_minor: [0, 2, 3, 5, 7, 8, 10, 12],
+  major_pentatonic: [0, 2, 4, 7, 9, 12],
+  minor_pentatonic: [0, 3, 5, 7, 10, 12],
+  // Intermediate
+  harmonic_minor: [0, 2, 3, 5, 7, 8, 11, 12],
+  melodic_minor: [0, 2, 3, 5, 7, 9, 11, 12],
+  dorian: [0, 2, 3, 5, 7, 9, 10, 12],
+  mixolydian: [0, 2, 4, 5, 7, 9, 10, 12],
+  // Advanced
+  phrygian: [0, 1, 3, 5, 7, 8, 10, 12],
+  lydian: [0, 2, 4, 6, 7, 9, 11, 12],
+  blues: [0, 3, 5, 6, 7, 10, 12],
+  chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+};
+
+/**
+ * Human-readable scale names
+ */
+export const SCALE_NAMES: Record<VocalScaleType, string> = {
+  major: 'Major',
+  natural_minor: 'Natural Minor',
+  major_pentatonic: 'Major Pentatonic',
+  minor_pentatonic: 'Minor Pentatonic',
+  harmonic_minor: 'Harmonic Minor',
+  melodic_minor: 'Melodic Minor',
+  dorian: 'Dorian',
+  mixolydian: 'Mixolydian',
+  phrygian: 'Phrygian',
+  lydian: 'Lydian',
+  blues: 'Blues',
+  chromatic: 'Chromatic',
+};
+
+/**
+ * Scale difficulty levels for progression
+ */
+export type ScaleDifficulty = 'beginner' | 'intermediate' | 'advanced';
+
+export const SCALE_DIFFICULTY: Record<VocalScaleType, ScaleDifficulty> = {
+  major: 'beginner',
+  natural_minor: 'beginner',
+  major_pentatonic: 'beginner',
+  minor_pentatonic: 'beginner',
+  harmonic_minor: 'intermediate',
+  melodic_minor: 'intermediate',
+  dorian: 'intermediate',
+  mixolydian: 'intermediate',
+  phrygian: 'advanced',
+  lydian: 'advanced',
+  blues: 'advanced',
+  chromatic: 'advanced',
+};
+
+/**
+ * Scales grouped by difficulty
+ */
+export const SCALES_BY_DIFFICULTY: Record<ScaleDifficulty, VocalScaleType[]> = {
+  beginner: ['major', 'natural_minor', 'major_pentatonic', 'minor_pentatonic'],
+  intermediate: ['harmonic_minor', 'melodic_minor', 'dorian', 'mixolydian'],
+  advanced: ['phrygian', 'lydian', 'blues', 'chromatic'],
+};
+
+/**
  * State of a voice exercise session
  */
 export type VoiceExerciseState =
@@ -85,6 +174,8 @@ export interface VoiceExerciseQuestion {
   endNote?: number;
   /** Notes for scale exercises */
   scaleNotes?: number[];
+  /** Scale type for scale exercises */
+  scaleType?: VocalScaleType;
   /** Duration to hold note in ms (for sustain) */
   duration?: number;
 }

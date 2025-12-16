@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, typography, spacing } from '@/src/theme';
+import { colors, typography, spacing, fonts } from '@/src/theme';
 import {
   ScreenHeader,
   Card,
@@ -19,6 +19,15 @@ import {
   INTERVAL_FULL_NAMES,
   ALL_INTERVALS,
 } from '@/src/utils/music';
+import { getVoiceTrainingStats } from '@/src/services/voiceProfileService';
+import { VoiceTrainingStats, VoiceExerciseType } from '@/src/types/voiceAnalyzer';
+
+const VOICE_EXERCISE_NAMES: Record<VoiceExerciseType, string> = {
+  note_match: 'Note Match',
+  scale: 'Scale Practice',
+  glide: 'Pitch Glide',
+  sustain: 'Sustain',
+};
 
 export default function ProgressScreen() {
   const {
@@ -29,13 +38,26 @@ export default function ProgressScreen() {
     refreshIntervalProgress,
   } = useProgressStore();
 
+  const [voiceStats, setVoiceStats] = useState<VoiceTrainingStats | null>(null);
+
   useEffect(() => {
     if (!isInitialized) {
       initialize();
     } else {
       refreshIntervalProgress();
     }
+    // Load voice training stats
+    loadVoiceStats();
   }, []);
+
+  const loadVoiceStats = async () => {
+    try {
+      const stats = await getVoiceTrainingStats();
+      setVoiceStats(stats);
+    } catch (error) {
+      console.error('Failed to load voice stats:', error);
+    }
+  };
 
   const { stats, itemStats, unlockedIntervals } = intervalProgress;
 
@@ -163,6 +185,57 @@ export default function ProgressScreen() {
                 attempts on unlocked intervals.
               </Text>
             </View>
+
+            {/* Voice Training Section */}
+            {voiceStats && voiceStats.totalAttempts > 0 && (
+              <>
+                <SectionHeader title="VOICE TRAINING" />
+                <Card>
+                  <LabelValue
+                    label="Total Attempts:"
+                    value={voiceStats.totalAttempts.toString()}
+                  />
+                  <LabelValue
+                    label="Average Accuracy:"
+                    value={`${Math.round(voiceStats.averageAccuracy)}%`}
+                  />
+                  <LabelValue
+                    label="Current Streak:"
+                    value={voiceStats.currentStreak.toString()}
+                  />
+                </Card>
+
+                {Object.keys(voiceStats.byExerciseType).length > 0 && (
+                  <>
+                    <SectionHeader title="VOICE EXERCISE BREAKDOWN" />
+                    <Card>
+                      {(Object.entries(voiceStats.byExerciseType) as [VoiceExerciseType, { attempts: number; accuracy: number; recentAccuracy: number }][]).map(
+                        ([type, typeStats]) => (
+                          <View key={type} style={styles.voiceExerciseRow}>
+                            <View style={styles.voiceExerciseInfo}>
+                              <Text style={styles.voiceExerciseName}>
+                                {VOICE_EXERCISE_NAMES[type]}
+                              </Text>
+                              <Text style={styles.voiceExerciseAttempts}>
+                                {typeStats.attempts} attempts
+                              </Text>
+                            </View>
+                            <View style={styles.voiceExerciseStats}>
+                              <Text style={styles.voiceExerciseAccuracy}>
+                                {Math.round(typeStats.accuracy)}%
+                              </Text>
+                              <Text style={styles.voiceExerciseRecent}>
+                                Recent: {Math.round(typeStats.recentAccuracy)}%
+                              </Text>
+                            </View>
+                          </View>
+                        )
+                      )}
+                    </Card>
+                  </>
+                )}
+              </>
+            )}
 
             <AppFooter />
           </>
@@ -292,5 +365,40 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     color: colors.textMuted,
+  },
+  // Voice Training styles
+  voiceExerciseRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.cardBorder,
+  },
+  voiceExerciseInfo: {
+    flex: 1,
+  },
+  voiceExerciseName: {
+    fontFamily: fonts.mono,
+    fontSize: 14,
+    color: colors.textPrimary,
+  },
+  voiceExerciseAttempts: {
+    fontFamily: fonts.mono,
+    fontSize: 11,
+    color: colors.textMuted,
+  },
+  voiceExerciseStats: {
+    alignItems: 'flex-end',
+  },
+  voiceExerciseAccuracy: {
+    fontFamily: fonts.monoBold,
+    fontSize: 14,
+    color: colors.accentGreen,
+  },
+  voiceExerciseRecent: {
+    fontFamily: fonts.mono,
+    fontSize: 11,
+    color: colors.textSecondary,
   },
 });
