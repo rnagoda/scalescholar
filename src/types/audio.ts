@@ -62,4 +62,4 @@ export interface AudioEngineConfig {
 /**
  * Available synth types
  */
-export type SynthType = 'sine' | 'piano';
+export type SynthType = 'sine' | 'piano' | 'sampled-piano';

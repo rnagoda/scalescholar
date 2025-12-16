@@ -1,6 +1,6 @@
 import { AppState, AppStateStatus } from 'react-native';
 import { Synthesizer, SynthType } from '../types/audio';
-import { SineSynth, PianoSynth } from './synths';
+import { SineSynth, PianoSynth, SampledPianoSynth } from './synths';
 import {
   midiToFrequency,
   DEFAULT_A4_FREQUENCY,
@@ -20,7 +20,7 @@ class AudioEngineClass {
   private static instance: AudioEngineClass | null = null;
 
   private synth: Synthesizer | null = null;
-  private synthType: SynthType = 'piano';
+  private synthType: SynthType = 'sampled-piano';
   private a4Frequency: number = DEFAULT_A4_FREQUENCY;
   private defaultNoteDuration: number = 0.8;
   private isInitialized = false;
@@ -94,8 +94,10 @@ class AudioEngineClass {
         return new SineSynth();
       case 'piano':
         return new PianoSynth();
+      case 'sampled-piano':
+        return new SampledPianoSynth();
       default:
-        return new PianoSynth();
+        return new SampledPianoSynth();
     }
   }
 
