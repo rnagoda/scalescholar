@@ -98,13 +98,22 @@ export default function HomeScreen() {
         {/* Music School */}
         <Card style={styles.cardDisabled}>
           <View style={styles.cardHeader}>
-            <View style={styles.titleWithBadge}>
-              <Text style={[styles.cardTitle, styles.textMuted]}>Music School</Text>
-              <Text style={styles.comingSoonBadge}>SOON</Text>
-            </View>
+            <Text style={[styles.cardTitle, styles.textMuted]}>Music School</Text>
+            <Text style={styles.comingSoonLabel}>[ COMING SOON ]</Text>
           </View>
           <Text style={[styles.cardDescription, styles.textMuted]}>
             Learn music theory fundamentals, reading notation, and more.
+          </Text>
+        </Card>
+
+        {/* Writing School */}
+        <Card style={styles.cardDisabled}>
+          <View style={styles.cardHeader}>
+            <Text style={[styles.cardTitle, styles.textMuted]}>Writing School</Text>
+            <Text style={styles.comingSoonLabel}>[ COMING SOON ]</Text>
+          </View>
+          <Text style={[styles.cardDescription, styles.textMuted]}>
+            Tools to assist with writing songs, melodies, and compositions.
           </Text>
         </Card>
 
@@ -148,18 +157,12 @@ const styles = StyleSheet.create({
   cardDisabled: {
     opacity: 0.6,
   },
-  titleWithBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
   textMuted: {
     color: colors.textMuted,
   },
-  comingSoonBadge: {
+  comingSoonLabel: {
     fontFamily: fonts.mono,
-    fontSize: 10,
-    color: colors.accentPink,
-    letterSpacing: 1,
+    fontSize: 15,
+    color: colors.textMuted,
   },
 });
