@@ -61,6 +61,7 @@ export default function VoiceMenuScreen() {
     initialize,
     getProfileSummary,
     getRangeOctaves,
+    getComfortableRangeOctaves,
   } = useVoiceProfileStore();
 
   useEffect(() => {
@@ -134,7 +135,7 @@ export default function VoiceMenuScreen() {
               />
               <LabelValue
                 label="Comfortable:"
-                value={`${midiToNoteName(profile.comfortableLow)} - ${midiToNoteName(profile.comfortableHigh)}`}
+                value={`${midiToNoteName(profile.comfortableLow)} - ${midiToNoteName(profile.comfortableHigh)} (${getComfortableRangeOctaves().toFixed(1)} oct)`}
               />
             </View>
             <View style={styles.profileAction}>

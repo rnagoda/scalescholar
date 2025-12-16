@@ -70,6 +70,7 @@ interface VoiceProfileState {
   // Helpers
   getProfileSummary: () => string | null;
   getRangeOctaves: () => number;
+  getComfortableRangeOctaves: () => number;
 }
 
 const INITIAL_ASSESSMENT_STATE = {
@@ -438,6 +439,14 @@ export const useVoiceProfileStore = create<VoiceProfileState>((set, get) => ({
     if (!profile) return 0;
 
     const semitones = profile.highestNote - profile.lowestNote;
+    return Math.round((semitones / 12) * 10) / 10; // One decimal place
+  },
+
+  getComfortableRangeOctaves: () => {
+    const { profile } = get();
+    if (!profile) return 0;
+
+    const semitones = profile.comfortableHigh - profile.comfortableLow;
     return Math.round((semitones / 12) * 10) / 10; // One decimal place
   },
 }));
