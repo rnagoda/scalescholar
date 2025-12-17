@@ -8,7 +8,6 @@ import {
   ScreenHeader,
   Card,
   BracketButton,
-  LabelValue,
   Divider,
   TerminalProgressBar,
 } from '@/src/components/common';
@@ -28,8 +27,6 @@ export default function HomeScreen() {
     profile,
     isInitialized: voiceInitialized,
     initialize: initializeVoice,
-    getProfileSummary,
-    getRangeOctaves,
   } = useVoiceProfileStore();
 
   const {
@@ -110,10 +107,16 @@ export default function HomeScreen() {
       <ScreenHeader
         title="SCALE SCHOLAR"
         rightContent={
-          <BracketButton
-            label="TUNE"
-            onPress={() => router.push('/exercise/pitch-detector' as Href)}
-          />
+          <View style={styles.headerButtons}>
+            <BracketButton
+              label="TUNE"
+              onPress={() => router.push('/exercise/pitch-detector' as Href)}
+            />
+            <BracketButton
+              label="*"
+              onPress={() => router.push('/settings')}
+            />
+          </View>
         }
       />
       <Divider style={styles.divider} />
@@ -143,9 +146,7 @@ export default function HomeScreen() {
         {/* Ear School */}
         <Card onPress={() => router.push('/exercise/ear-school-menu' as Href)}>
           <Text style={styles.cardTitle}>Ear School</Text>
-          <Text style={styles.cardDescription}>
-            Train your ear to recognize intervals, scale degrees, and chord qualities.
-          </Text>
+          <Text style={styles.cardDescription}>Train your ears.</Text>
           <View style={styles.progressRow}>
             <TerminalProgressBar progress={earSchoolProgress} />
           </View>
@@ -162,16 +163,7 @@ export default function HomeScreen() {
           }
         >
           <Text style={styles.cardTitle}>Voice School</Text>
-          {hasProfile && profile ? (
-            <View style={styles.cardContent}>
-              <LabelValue label="Range:" value={getProfileSummary() ?? '--'} />
-              <LabelValue label="Octaves:" value={getRangeOctaves().toString()} />
-            </View>
-          ) : (
-            <Text style={styles.cardDescription}>
-              Train your voice to hit notes accurately. First, let's find your vocal range.
-            </Text>
-          )}
+          <Text style={styles.cardDescription}>Train your voice.</Text>
           <View style={styles.progressRow}>
             <TerminalProgressBar progress={voiceSchoolProgress} />
           </View>
@@ -180,9 +172,7 @@ export default function HomeScreen() {
         {/* Music School */}
         <Card onPress={() => router.push('/exercise/music-school-menu' as Href)}>
           <Text style={styles.cardTitle}>Music School</Text>
-          <Text style={styles.cardDescription}>
-            Learn music theory fundamentals, reading notation, and more.
-          </Text>
+          <Text style={styles.cardDescription}>Train your brain.</Text>
           <View style={styles.progressRow}>
             <TerminalProgressBar progress={musicSchoolProgress} />
           </View>
@@ -199,17 +189,16 @@ export default function HomeScreen() {
           </Text>
         </Card>
 
-        {/* Navigation */}
-        <View style={styles.navRow}>
-          <BracketButton
-            label="PROGRESS"
-            onPress={() => router.push('/progress')}
-          />
-          <BracketButton
-            label="SETTINGS"
-            onPress={() => router.push('/settings')}
-          />
-        </View>
+        {/* Academic Progress */}
+        <Card style={styles.cardDisabled}>
+          <View style={styles.cardHeader}>
+            <Text style={[styles.cardTitle, styles.textMuted]}>Academic Progress</Text>
+            <Text style={styles.comingSoonLabel}>[ COMING SOON ]</Text>
+          </View>
+          <Text style={[styles.cardDescription, styles.textMuted]}>
+            Track your overall learning progress, statistics, and achievements.
+          </Text>
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );
@@ -245,7 +234,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 20,
   },
-  cardContent: {},
   cardDisabled: {
     opacity: 0.6,
   },
@@ -260,11 +248,9 @@ const styles = StyleSheet.create({
   progressRow: {
     marginTop: spacing.sm,
   },
-  navRow: {
+  headerButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: spacing.xl,
-    paddingVertical: spacing.md,
+    gap: spacing.sm,
   },
   levelRow: {
     flexDirection: 'row',

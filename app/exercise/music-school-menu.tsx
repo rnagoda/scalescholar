@@ -97,6 +97,7 @@ export default function MusicSchoolMenuScreen() {
             <Card
               key={track.id}
               style={!hasLessons ? styles.cardDisabled : undefined}
+              onPress={hasLessons ? () => handleOpenTrack(track.id) : undefined}
             >
               <View style={styles.cardHeader}>
                 <Text style={[
@@ -105,13 +106,7 @@ export default function MusicSchoolMenuScreen() {
                 ]}>
                   {track.title}
                 </Text>
-                {hasLessons ? (
-                  <BracketButton
-                    label="OPEN"
-                    onPress={() => handleOpenTrack(track.id)}
-                    color={colors.accentGreen}
-                  />
-                ) : (
+                {!hasLessons && (
                   <Text style={styles.comingSoonLabel}>[ COMING SOON ]</Text>
                 )}
               </View>
