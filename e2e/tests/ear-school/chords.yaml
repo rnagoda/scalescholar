@@ -1,0 +1,68 @@
+appId: com.nagodasoft.scalescholar
+---
+# Test: Chord Quality exercise full flow
+# Verifies:
+# - Navigation to chords exercise
+# - All answer buttons visible (catches iPad overflow)
+# - Play/answer/feedback cycle works
+
+- launchApp:
+    clearState: true
+
+# Navigate to Ear School
+- tapOn:
+    text: ".*Ear School.*"
+
+- assertVisible: "EAR SCHOOL"
+
+# Tap Chord Qualities exercise
+- tapOn:
+    text: ".*Chord Qualities.*"
+
+# Verify exercise screen loaded
+- assertVisible: "CHORD QUALITY"
+- assertVisible:
+    text: ".*CLOSE.*"
+
+# Verify progress indicator
+- assertVisible:
+    text: "1 / 10"
+
+# Verify PLAY button is visible
+- assertVisible:
+    text: ".*PLAY.*"
+
+# Default unlocked chord qualities: Major, Minor (displayed as full names)
+- assertVisible: "Major"
+- assertVisible: "Minor"
+
+# Play the chord
+- tapOn:
+    text: ".*PLAY.*"
+
+# Wait for answering state
+- extendedWaitUntil:
+    visible: "What chord quality is it?"
+    timeout: 5000
+
+# Submit an answer (tap Major)
+- tapOn: "Major"
+
+# Verify feedback state - should show NEXT button
+- assertVisible:
+    text: ".*NEXT.*"
+
+# Go to next question
+- tapOn:
+    text: ".*NEXT.*"
+
+# Verify progress updated
+- assertVisible:
+    text: "2 / 10"
+
+# Close the exercise
+- tapOn:
+    text: ".*CLOSE.*"
+
+# Verify we're back at home
+- assertVisible: "SCALE SCHOLAR"

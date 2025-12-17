@@ -9,6 +9,10 @@ interface AnswerButtonProps {
   onPress: () => void;
   state?: AnswerState;
   disabled?: boolean;
+  /** Number of columns in the grid (used for width calculation) */
+  columns?: number;
+  /** Actual container width (measured by AnswerGrid) */
+  containerWidth: number;
 }
 
 export const AnswerButton: React.FC<AnswerButtonProps> = ({
@@ -16,7 +20,18 @@ export const AnswerButton: React.FC<AnswerButtonProps> = ({
   onPress,
   state = 'default',
   disabled = false,
+  columns = 2,
+  containerWidth,
 }) => {
+  // Calculate button width based on actual container width
+  // Gap between buttons (spacing.sm = 8) * (columns - 1)
+  // Border width (1px left + 1px right = 2px per button)
+  const totalGaps = spacing.sm * (columns - 1);
+  const borderWidth = 1; // matches styles.container.borderWidth
+  const totalBorders = (borderWidth * 2) * columns;
+  const availableWidth = containerWidth - totalGaps - totalBorders;
+  const buttonWidth = Math.floor(availableWidth / columns);
+
   const getColors = () => {
     switch (state) {
       case 'correct':
@@ -53,6 +68,7 @@ export const AnswerButton: React.FC<AnswerButtonProps> = ({
       style={[
         styles.container,
         {
+          width: buttonWidth,
           borderColor: stateColors.border,
           backgroundColor: stateColors.background,
         },
@@ -69,14 +85,12 @@ export const AnswerButton: React.FC<AnswerButtonProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     borderWidth: 1,
     borderRadius: 8,
     paddingVertical: spacing.xl,
     paddingHorizontal: spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: spacing.xs,
     minHeight: 80,
   },
   disabled: {

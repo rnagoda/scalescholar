@@ -1,0 +1,82 @@
+appId: com.nagodasoft.scalescholar
+---
+# Test: Intervals exercise full flow
+# This test verifies:
+# - Navigation to intervals exercise
+# - All answer buttons are visible (catches iPad overflow bugs)
+# - Play/answer/feedback cycle works
+# - Session completion
+
+- launchApp:
+    clearState: true
+
+# Navigate to Ear School
+- tapOn:
+    text: ".*Ear School.*"
+
+- assertVisible: "EAR SCHOOL"
+
+# Tap Intervals exercise
+- tapOn:
+    text: ".*Intervals.*"
+
+# Verify exercise screen loaded
+- assertVisible: "INTERVALS"
+
+# Note: BracketButton renders text as [ CLOSE ] across 3 Text elements
+# We just check for the label text which is its own element
+- assertVisible:
+    text: ".*CLOSE.*"
+
+# Verify progress indicator (starts at 1/10)
+- assertVisible:
+    text: "1 / 10"
+
+# Verify PLAY button is visible (shows as "▶ PLAY")
+- assertVisible:
+    text: ".*PLAY.*"
+
+# Verify answer buttons are visible
+# Default unlocked intervals: m3, M3, P4, P5
+# If any button overflows the screen, this assertion will fail
+- assertVisible: "m3"
+- assertVisible: "M3"
+- assertVisible: "P4"
+- assertVisible: "P5"
+
+# Play the interval
+- tapOn:
+    text: ".*PLAY.*"
+
+# Wait for audio to finish and answering state
+- extendedWaitUntil:
+    visible: "Select your answer below"
+    timeout: 5000
+
+# Submit an answer (tap m3)
+- tapOn: "m3"
+
+# Verify feedback state - should show NEXT button
+- assertVisible:
+    text: ".*NEXT.*"
+
+# Verify we can still see all answer buttons in feedback state
+- assertVisible: "m3"
+- assertVisible: "M3"
+- assertVisible: "P4"
+- assertVisible: "P5"
+
+# Go to next question
+- tapOn:
+    text: ".*NEXT.*"
+
+# Verify progress updated
+- assertVisible:
+    text: "2 / 10"
+
+# Close the exercise
+- tapOn:
+    text: ".*CLOSE.*"
+
+# Verify we're back at home
+- assertVisible: "SCALE SCHOLAR"

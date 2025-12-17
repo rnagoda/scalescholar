@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 
 import { colors, typography, spacing } from '@/src/theme';
 import { ScreenHeader, BracketButton, Divider } from '@/src/components/common';
-import { PlayButton, AnswerButton } from '@/src/components/exercises';
+import { PlayButton, AnswerGrid } from '@/src/components/exercises';
 import { useExerciseStore } from '@/src/stores/useExerciseStore';
 import { useProgressStore } from '@/src/stores/useProgressStore';
 import { useSettingsStore } from '@/src/stores/useSettingsStore';
@@ -243,30 +243,11 @@ export default function IntervalsExercise() {
     );
   }
 
-  // Generate answer button rows dynamically based on number of intervals
-  const renderAnswerButtons = () => {
-    const intervals = config.availableIntervals;
-    const rows: Interval[][] = [];
-
-    // Create rows of 2-4 buttons
-    for (let i = 0; i < intervals.length; i += 4) {
-      rows.push(intervals.slice(i, Math.min(i + 4, intervals.length)));
-    }
-
-    return rows.map((row, rowIndex) => (
-      <View key={rowIndex} style={styles.answerRow}>
-        {row.map((interval) => (
-          <AnswerButton
-            key={interval}
-            label={INTERVAL_SHORT_NAMES[interval]}
-            onPress={() => handleAnswer(interval)}
-            state={getAnswerState(interval)}
-            disabled={state !== 'answering'}
-          />
-        ))}
-      </View>
-    ));
-  };
+  // Build answer options from available intervals
+  const answerOptions = config.availableIntervals.map((interval) => ({
+    value: interval,
+    label: INTERVAL_SHORT_NAMES[interval],
+  }));
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -317,7 +298,12 @@ export default function IntervalsExercise() {
         )}
 
         <View style={styles.answersGrid}>
-          {renderAnswerButtons()}
+          <AnswerGrid
+            options={answerOptions}
+            onSelect={handleAnswer}
+            getState={getAnswerState}
+            disabled={state !== 'answering'}
+          />
         </View>
 
         {state === 'feedback' && (
@@ -380,10 +366,6 @@ const styles = StyleSheet.create({
   },
   answersGrid: {
     marginBottom: spacing.lg,
-  },
-  answerRow: {
-    flexDirection: 'row',
-    marginBottom: spacing.md,
   },
   nextButtonContainer: {
     alignItems: 'center',

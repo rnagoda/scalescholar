@@ -1,0 +1,37 @@
+appId: com.nagodasoft.scalescholar
+---
+# Test: Voice School navigation
+# Verifies:
+# - Can open Voice School
+# - Since we cleared state, no profile exists -> shows Voice Range Assessment
+# - Can close and return to home
+
+- launchApp:
+    clearState: true
+
+# Navigate to Voice School
+- tapOn:
+    text: ".*Voice School.*"
+
+# Since clearState removes the voice profile, app routes to Voice Range Assessment
+# Verify we're on the Voice Range assessment screen
+- assertVisible: "VOICE RANGE"
+
+# Should show the assessment intro
+- assertVisible:
+    text: ".*Find Your Vocal Range.*"
+
+# Verify BEGIN button is present
+- assertVisible:
+    text: ".*BEGIN.*"
+
+# Verify close button is present
+- assertVisible:
+    text: ".*CLOSE.*"
+
+# Close Voice School
+- tapOn:
+    text: ".*CLOSE.*"
+
+# Verify we're back at home
+- assertVisible: "SCALE SCHOLAR"

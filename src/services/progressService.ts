@@ -346,6 +346,38 @@ export const checkAndProcessUnlocks = async (
 };
 
 /**
+ * Reset all Ear School progress
+ * Deletes all attempts, sessions, and unlocks for intervals, scale-degrees, and chords
+ */
+export const resetAllEarSchoolProgress = async (): Promise<void> => {
+  const db = await getDatabase();
+  const exerciseTypes = ['intervals', 'scale-degrees', 'chords'];
+
+  // Delete all attempts for Ear School exercises
+  await db.runAsync(
+    `DELETE FROM exercise_attempts WHERE exercise_type IN (?, ?, ?)`,
+    ...exerciseTypes
+  );
+
+  // Delete all sessions for Ear School exercises
+  await db.runAsync(
+    `DELETE FROM sessions WHERE exercise_type IN (?, ?, ?)`,
+    ...exerciseTypes
+  );
+
+  // Delete all unlocks for Ear School exercises
+  await db.runAsync(
+    `DELETE FROM unlocks WHERE exercise_type IN (?, ?, ?)`,
+    ...exerciseTypes
+  );
+
+  // Invalidate all caches for these exercise types
+  for (const exerciseType of exerciseTypes) {
+    queryCache.invalidate(CACHE_KEYS.EXERCISE_STATS, [exerciseType]);
+  }
+};
+
+/**
  * Get recent sessions
  */
 export const getRecentSessions = async (

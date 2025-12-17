@@ -227,6 +227,23 @@ export const getVoiceTrainingStats = async (): Promise<VoiceTrainingStats> => {
 };
 
 /**
+ * Reset all Voice School progress
+ * Deletes voice profile, all attempts, and all sessions
+ */
+export const resetAllVoiceSchoolProgress = async (): Promise<void> => {
+  const db = await getDatabase();
+
+  // Delete voice profile
+  await db.runAsync('DELETE FROM voice_profile');
+
+  // Delete all voice exercise attempts
+  await db.runAsync('DELETE FROM voice_exercise_attempts');
+
+  // Delete all voice training sessions
+  await db.runAsync('DELETE FROM voice_training_sessions');
+};
+
+/**
  * Get recent voice training sessions
  */
 export const getRecentVoiceSessions = async (

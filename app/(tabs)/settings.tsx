@@ -30,7 +30,11 @@ import {
 import { AudioEngine } from '@/src/audio';
 import { SynthType } from '@/src/types/audio';
 import { resetAllLessonProgress } from '@/src/services/lessonService';
+import { resetAllEarSchoolProgress } from '@/src/services/progressService';
+import { resetAllVoiceSchoolProgress } from '@/src/services/voiceProfileService';
 import { useXPStore } from '@/src/stores/useXPStore';
+import { useProgressStore } from '@/src/stores/useProgressStore';
+import { useVoiceProfileStore } from '@/src/stores/useVoiceProfileStore';
 
 // Reference pitch options (common concert pitch variations)
 const REFERENCE_PITCH_OPTIONS = [415, 432, 440, 442, 444, 466];
@@ -61,6 +65,8 @@ export default function SettingsScreen() {
   } = useSettingsStore();
 
   const { resetAllXP } = useXPStore();
+  const { initialize: reinitializeProgress } = useProgressStore();
+  const { initialize: reinitializeVoiceProfile } = useVoiceProfileStore();
 
   // Sync instrument setting with AudioEngine
   useEffect(() => {
@@ -99,11 +105,19 @@ export default function SettingsScreen() {
     setReferencePitch(REFERENCE_PITCH_OPTIONS[nextIndex]);
   };
 
-  // Reset all progress (lessons + XP)
+  // Reset all progress (lessons, XP, Ear School, Voice School)
   const handleResetProgress = async () => {
     await Promise.all([
-      resetAllLessonProgress(),
-      resetAllXP(),
+      resetAllLessonProgress(),    // Music School
+      resetAllXP(),                 // XP system
+      resetAllEarSchoolProgress(),  // Ear School (intervals, scale degrees, chords)
+      resetAllVoiceSchoolProgress(), // Voice School (profile, attempts, sessions)
+    ]);
+
+    // Reinitialize stores to reflect reset state
+    await Promise.all([
+      reinitializeProgress(),
+      reinitializeVoiceProfile(),
     ]);
   };
 
@@ -211,9 +225,9 @@ export default function SettingsScreen() {
         <SectionHeader title="DATA" />
         <Card>
           <View style={styles.dataRow}>
-            <Text style={styles.dataLabel}>Reset all lesson and XP progress</Text>
+            <Text style={styles.dataLabel}>Reset all progress (Music, Ear, Voice Schools + XP)</Text>
             <BracketButton
-              label="RESET PROGRESS"
+              label="RESET ALL"
               onPress={handleResetProgress}
               color={colors.accentPink}
             />

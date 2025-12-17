@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 
 import { colors, typography, spacing } from '@/src/theme';
 import { ScreenHeader, BracketButton, Divider } from '@/src/components/common';
-import { PlayButton, AnswerButton } from '@/src/components/exercises';
+import { PlayButton, AnswerGrid } from '@/src/components/exercises';
 import { useScaleDegreeStore } from '@/src/stores/useScaleDegreeStore';
 import { useProgressStore } from '@/src/stores/useProgressStore';
 import { useSettingsStore } from '@/src/stores/useSettingsStore';
@@ -245,30 +245,11 @@ export default function ScaleDegreesExercise() {
     );
   }
 
-  // Generate answer buttons
-  const renderAnswerButtons = () => {
-    const degrees = config.availableDegrees;
-    const rows: ScaleDegree[][] = [];
-
-    // Create rows of up to 4 buttons
-    for (let i = 0; i < degrees.length; i += 4) {
-      rows.push(degrees.slice(i, Math.min(i + 4, degrees.length)));
-    }
-
-    return rows.map((row, rowIndex) => (
-      <View key={rowIndex} style={styles.answerRow}>
-        {row.map((degree) => (
-          <AnswerButton
-            key={degree}
-            label={getScaleDegreeName(degree, config.useSolfege)}
-            onPress={() => handleAnswer(degree)}
-            state={getAnswerState(degree)}
-            disabled={state !== 'answering'}
-          />
-        ))}
-      </View>
-    ));
-  };
+  // Build answer options from available scale degrees
+  const answerOptions = config.availableDegrees.map((degree) => ({
+    value: degree,
+    label: getScaleDegreeName(degree, config.useSolfege),
+  }));
 
   const isPlaying = state === 'playing_context' || state === 'playing_degree';
 
@@ -319,7 +300,12 @@ export default function ScaleDegreesExercise() {
         )}
 
         <View style={styles.answersGrid}>
-          {renderAnswerButtons()}
+          <AnswerGrid
+            options={answerOptions}
+            onSelect={handleAnswer}
+            getState={getAnswerState}
+            disabled={state !== 'answering'}
+          />
         </View>
 
         {state === 'feedback' && (
@@ -388,10 +374,6 @@ const styles = StyleSheet.create({
   },
   answersGrid: {
     marginBottom: spacing.lg,
-  },
-  answerRow: {
-    flexDirection: 'row',
-    marginBottom: spacing.md,
   },
   nextButtonContainer: {
     alignItems: 'center',
