@@ -20,6 +20,7 @@ import { VoiceAnalyzer, calculatePitchAccuracy, isPitchOnTarget } from '../audio
 import { AudioEngine } from '../audio';
 import { midiToFrequency } from '../utils/music';
 import { saveVoiceAttempt, saveVoiceSession } from '../services/voiceProfileService';
+import { useXPStore } from './useXPStore';
 
 interface VoiceTrainerState {
   // Session configuration
@@ -347,6 +348,11 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
       console.error('Failed to save voice attempt:', error);
     });
 
+    // Award XP for successful attempts
+    if (success) {
+      useXPStore.getState().awardVoiceExerciseCorrect();
+    }
+
     set({
       state: 'feedback',
       sessionResults: [...sessionResults, result],
@@ -413,6 +419,9 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
         durationSeconds,
         completedAt: new Date(),
       });
+
+      // Award XP for completing a session
+      await useXPStore.getState().awardVoiceSessionComplete();
     } catch (error) {
       console.error('Failed to save voice session:', error);
     }

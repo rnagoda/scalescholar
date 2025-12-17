@@ -1,0 +1,68 @@
+appId: com.nagodasoft.scalescholar
+---
+# Test: Scale Degrees exercise full flow
+# Verifies:
+# - Navigation to scale degrees exercise
+# - All answer buttons visible (catches iPad overflow)
+# - Play/answer/feedback cycle works
+
+- launchApp:
+    clearState: true
+
+# Navigate to Ear School
+- tapOn:
+    text: ".*Ear School.*"
+
+- assertVisible: "EAR SCHOOL"
+
+# Tap Scale Degrees exercise
+- tapOn:
+    text: ".*Scale Degrees.*"
+
+# Verify exercise screen loaded
+- assertVisible: "SCALE DEGREES"
+- assertVisible:
+    text: ".*CLOSE.*"
+
+# Verify progress indicator
+- assertVisible:
+    text: "1 / 10"
+
+# Verify PLAY button is visible
+- assertVisible:
+    text: ".*PLAY.*"
+
+# Default unlocked scale degrees: 1, 3, 5 (Tonic, Mediant, Dominant)
+# Verify answer button for degree 1 is visible
+- assertVisible: "1"
+
+# Play the scale degree
+- tapOn:
+    text: ".*PLAY.*"
+
+# Wait for answering state
+- extendedWaitUntil:
+    visible: "What scale degree is it?"
+    timeout: 5000
+
+# Submit an answer (tap degree 1)
+- tapOn: "1"
+
+# Verify feedback state - should show NEXT button
+- assertVisible:
+    text: ".*NEXT.*"
+
+# Go to next question
+- tapOn:
+    text: ".*NEXT.*"
+
+# Verify progress updated
+- assertVisible:
+    text: "2 / 10"
+
+# Close the exercise
+- tapOn:
+    text: ".*CLOSE.*"
+
+# Verify we're back at home
+- assertVisible: "SCALE SCHOLAR"

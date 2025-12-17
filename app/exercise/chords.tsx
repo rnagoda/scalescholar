@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 
 import { colors, typography, spacing } from '@/src/theme';
 import { ScreenHeader, BracketButton, Divider } from '@/src/components/common';
-import { PlayButton, AnswerButton } from '@/src/components/exercises';
+import { PlayButton, AnswerGrid } from '@/src/components/exercises';
 import { useChordStore } from '@/src/stores/useChordStore';
 import { useProgressStore } from '@/src/stores/useProgressStore';
 import { useSettingsStore } from '@/src/stores/useSettingsStore';
@@ -232,30 +232,11 @@ export default function ChordsExercise() {
     );
   }
 
-  // Generate answer buttons
-  const renderAnswerButtons = () => {
-    const qualities = config.availableQualities;
-    const rows: ChordQuality[][] = [];
-
-    // Create rows of up to 2 buttons (chord qualities have longer names)
-    for (let i = 0; i < qualities.length; i += 2) {
-      rows.push(qualities.slice(i, Math.min(i + 2, qualities.length)));
-    }
-
-    return rows.map((row, rowIndex) => (
-      <View key={rowIndex} style={styles.answerRow}>
-        {row.map((quality) => (
-          <AnswerButton
-            key={quality}
-            label={getChordQualityName(quality, false)}
-            onPress={() => handleAnswer(quality)}
-            state={getAnswerState(quality)}
-            disabled={state !== 'answering'}
-          />
-        ))}
-      </View>
-    ));
-  };
+  // Build answer options from available chord qualities
+  const answerOptions = config.availableQualities.map((quality) => ({
+    value: quality,
+    label: getChordQualityName(quality, false),
+  }));
 
   const isPlaying = state === 'playing';
 
@@ -306,7 +287,13 @@ export default function ChordsExercise() {
         )}
 
         <View style={styles.answersGrid}>
-          {renderAnswerButtons()}
+          <AnswerGrid
+            options={answerOptions}
+            onSelect={handleAnswer}
+            getState={getAnswerState}
+            disabled={state !== 'answering'}
+            columns={2}
+          />
         </View>
 
         {state === 'feedback' && (
@@ -375,10 +362,6 @@ const styles = StyleSheet.create({
   },
   answersGrid: {
     marginBottom: spacing.lg,
-  },
-  answerRow: {
-    flexDirection: 'row',
-    marginBottom: spacing.md,
   },
   nextButtonContainer: {
     alignItems: 'center',

@@ -1,0 +1,22 @@
+appId: com.nagodasoft.scalescholar
+---
+# Smoke test: Verify app launches and home screen is visible
+
+- launchApp:
+    clearState: true  # Start fresh each time
+
+# Verify home screen header
+- assertVisible: "SCALE SCHOLAR"
+
+# Verify all three school cards are present
+# (Cards combine title + description + stats, so use regex pattern)
+- assertVisible:
+    text: ".*Ear School.*"
+- assertVisible:
+    text: ".*Voice School.*"
+- assertVisible:
+    text: ".*Music School.*"
+
+# Verify XP system is displayed
+- assertVisible:
+    text: ".*XP.*"

@@ -8,6 +8,7 @@ interface BracketButtonProps {
   color?: string;
   style?: ViewStyle;
   disabled?: boolean;
+  testID?: string;
 }
 
 export const BracketButton: React.FC<BracketButtonProps> = ({
@@ -16,6 +17,7 @@ export const BracketButton: React.FC<BracketButtonProps> = ({
   color = colors.textPrimary,
   style,
   disabled = false,
+  testID,
 }) => {
   const textColor = disabled ? colors.textMuted : color;
 
@@ -25,6 +27,7 @@ export const BracketButton: React.FC<BracketButtonProps> = ({
       style={[styles.container, style]}
       disabled={disabled}
       activeOpacity={0.7}
+      testID={testID ?? `button-${label.toLowerCase()}`}
     >
       <Text style={[styles.bracket, { color: textColor }]}>[ </Text>
       <Text style={[styles.label, { color: textColor }]}>{label}</Text>

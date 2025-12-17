@@ -1,0 +1,71 @@
+appId: com.nagodasoft.scalescholar
+---
+# Test: Reset Progress functionality
+# Verifies:
+# - Can navigate to settings
+# - Reset button is present
+# - Can tap reset and return to home
+
+- launchApp:
+    clearState: true
+
+# First, do some activity to accumulate XP
+# Navigate to Ear School
+- tapOn:
+    text: ".*Ear School.*"
+
+- assertVisible: "EAR SCHOOL"
+
+# Open Intervals
+- tapOn:
+    text: ".*Intervals.*"
+
+# Play and answer a question
+- tapOn:
+    text: ".*PLAY.*"
+
+- extendedWaitUntil:
+    visible: "Select your answer below"
+    timeout: 5000
+
+# Submit an answer
+- tapOn: "m3"
+
+# Close the exercise
+- tapOn:
+    text: ".*CLOSE.*"
+
+# Go back to home (close Ear School menu)
+- tapOn:
+    text: ".*X.*"
+
+# Verify home screen
+- assertVisible: "SCALE SCHOLAR"
+
+# Navigate to Settings (the "*" button in header)
+- tapOn:
+    text: ".*\\*.*"
+
+# Verify we're in Settings
+- assertVisible: "SETTINGS"
+
+# Look for reset button by scrolling down
+- scrollUntilVisible:
+    element:
+      text: ".*RESET ALL.*"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible:
+    text: ".*RESET ALL.*"
+
+# Tap reset
+- tapOn:
+    text: ".*RESET ALL.*"
+
+# Close settings
+- tapOn:
+    text: ".*X.*"
+
+# Verify we're back at home
+- assertVisible: "SCALE SCHOLAR"
