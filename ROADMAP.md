@@ -195,7 +195,6 @@ Ideas for future development, not committed to timeline:
 - Practice mode (unscored) for exercises
 - Onboarding tutorial
 - UI sound effects (optional)
-- Additional lesson content
 - Ear School exercise improvements
 
 ### Long-term possibilities
@@ -211,6 +210,16 @@ Ideas for future development, not committed to timeline:
 ---
 
 ## Changelog
+
+### 2025-12-16 — v0.9.0 UI Cleanup & Simplification
+
+- Made cards tappable throughout app (removed action buttons from cards)
+- Removed Progress page entirely
+- Added Settings button `[ * ]` to header (next to `[ TUNE ]`)
+- Added "Academic Progress" coming soon card to home screen
+- Simplified home screen card descriptions
+- Removed vocal range display from Voice School home card
+- Made progress bars responsive (full width instead of fixed character count)
 
 ### 2025-12-16 — v0.8.0 Music School & Audio Improvements
 
