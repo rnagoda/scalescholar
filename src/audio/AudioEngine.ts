@@ -54,7 +54,6 @@ class AudioEngineClass {
       this.isInitialized &&
       this.synth
     ) {
-      console.log('App returned to foreground, reinitializing audio...');
       try {
         await this.synth.reinitialize();
       } catch (error) {

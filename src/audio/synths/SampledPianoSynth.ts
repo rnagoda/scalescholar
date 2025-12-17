@@ -119,9 +119,7 @@ export class SampledPianoSynth implements Synthesizer {
       this.isInitialized = this.sampleBuffers.size > 0;
       this.isLoading = false;
 
-      if (this.isInitialized) {
-        console.log(`Loaded ${this.sampleBuffers.size} piano samples`);
-      } else {
+      if (!this.isInitialized) {
         console.error('No piano samples loaded');
       }
 

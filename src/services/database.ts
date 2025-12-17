@@ -18,10 +18,16 @@ export const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
 
   // Start initialization and store the promise
   dbPromise = (async () => {
-    const database = await SQLite.openDatabaseAsync(DATABASE_NAME);
-    await initializeSchema(database);
-    db = database;
-    return database;
+    try {
+      const database = await SQLite.openDatabaseAsync(DATABASE_NAME);
+      await initializeSchema(database);
+      db = database;
+      return database;
+    } catch (error) {
+      // Reset promise on failure so next call can retry
+      dbPromise = null;
+      throw error;
+    }
   })();
 
   return dbPromise;

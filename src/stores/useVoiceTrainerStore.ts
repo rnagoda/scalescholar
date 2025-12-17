@@ -399,7 +399,9 @@ export const useVoiceTrainerStore = create<VoiceTrainerState>((set, get) => ({
 
     const correctCount = sessionResults.filter((r) => r.success).length;
     const averageAccuracy =
-      sessionResults.reduce((sum, r) => sum + r.accuracy, 0) / sessionResults.length;
+      sessionResults.length > 0
+        ? sessionResults.reduce((sum, r) => sum + r.accuracy, 0) / sessionResults.length
+        : 0;
     const durationSeconds = sessionStartTime
       ? Math.round((Date.now() - sessionStartTime) / 1000)
       : 0;
