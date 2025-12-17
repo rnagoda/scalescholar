@@ -190,6 +190,7 @@ Ideas for future development, not committed to timeline:
 
 ### Near-term possibilities
 
+- Academic Progress dashboard (statistics, streaks, achievements, historical data visualization)
 - Voice training exercises (sing the note, match pitch using pitch detector)
 - Practice mode (unscored) for exercises
 - Onboarding tutorial

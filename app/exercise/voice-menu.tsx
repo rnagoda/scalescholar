@@ -29,25 +29,21 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   disabled = false,
   comingSoon = false,
 }) => (
-  <Card style={disabled ? styles.cardDisabled : undefined}>
+  <Card
+    style={disabled ? styles.cardDisabled : undefined}
+    onPress={disabled ? undefined : onPress}
+  >
     <View style={styles.cardHeader}>
       <Text style={[styles.cardTitle, disabled && styles.textDisabled]}>
         {title}
       </Text>
       {comingSoon && (
-        <Text style={styles.comingSoonBadge}>SOON</Text>
+        <Text style={styles.comingSoonBadge}>[ COMING SOON ]</Text>
       )}
     </View>
     <Text style={[styles.cardDescription, disabled && styles.textDisabled]}>
       {description}
     </Text>
-    <View style={styles.cardAction}>
-      <BracketButton
-        label={comingSoon ? "COMING SOON" : "START"}
-        onPress={onPress}
-        color={disabled ? colors.textMuted : colors.accentGreen}
-      />
-    </View>
   </Card>
 );
 
@@ -247,11 +243,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textSecondary,
     lineHeight: 20,
-    marginBottom: spacing.md,
-  },
-  cardAction: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
   },
   cardDisabled: {
     opacity: 0.6,

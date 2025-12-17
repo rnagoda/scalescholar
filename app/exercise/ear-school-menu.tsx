@@ -79,7 +79,7 @@ export default function EarSchoolMenuScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Intervals */}
-        <Card>
+        <Card onPress={() => router.push('/exercise/intervals')}>
           <Text style={styles.cardTitle}>Intervals</Text>
           <Text style={styles.cardDescription}>
             Learn to identify the distance between two notes played melodically or harmonically.
@@ -97,17 +97,10 @@ export default function EarSchoolMenuScreen() {
               {unlockedIntervalsCount}/{totalIntervals} unlocked
             </Text>
           </View>
-          <View style={styles.cardAction}>
-            <BracketButton
-              label="TRAIN"
-              onPress={() => router.push('/exercise/intervals')}
-              color={colors.accentGreen}
-            />
-          </View>
         </Card>
 
         {/* Scale Degrees */}
-        <Card>
+        <Card onPress={() => router.push('/exercise/scale-degrees')}>
           <Text style={styles.cardTitle}>Scale Degrees</Text>
           <Text style={styles.cardDescription}>
             Identify notes within a major scale context. Essential for understanding melody and harmony.
@@ -125,17 +118,10 @@ export default function EarSchoolMenuScreen() {
               {unlockedDegreesCount}/{totalDegrees} unlocked
             </Text>
           </View>
-          <View style={styles.cardAction}>
-            <BracketButton
-              label="TRAIN"
-              onPress={() => router.push('/exercise/scale-degrees')}
-              color={colors.accentGreen}
-            />
-          </View>
         </Card>
 
         {/* Chord Qualities */}
-        <Card>
+        <Card onPress={() => router.push('/exercise/chords')}>
           <Text style={styles.cardTitle}>Chord Qualities</Text>
           <Text style={styles.cardDescription}>
             Distinguish between major, minor, diminished, and other chord types by ear.
@@ -152,13 +138,6 @@ export default function EarSchoolMenuScreen() {
             <Text style={styles.progressLabel}>
               {unlockedChordsCount}/{totalChords} unlocked
             </Text>
-          </View>
-          <View style={styles.cardAction}>
-            <BracketButton
-              label="TRAIN"
-              onPress={() => router.push('/exercise/chords')}
-              color={colors.accentGreen}
-            />
           </View>
         </Card>
       </ScrollView>
@@ -205,10 +184,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: spacing.xs,
     textAlign: 'right',
-  },
-  cardAction: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: spacing.sm,
   },
 });
