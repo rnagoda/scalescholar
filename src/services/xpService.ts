@@ -13,6 +13,7 @@ import {
   getLevelProgress,
   getXPToNextLevel,
 } from '../types/xp';
+import { queryCache, CACHE_KEYS } from './queryCache';
 
 /**
  * Award XP and save to database
@@ -30,6 +31,9 @@ export const awardXP = async (
     amount,
     details ?? null
   );
+
+  // Invalidate XP-related caches
+  queryCache.invalidate(CACHE_KEYS.XP_STATE);
 };
 
 /**
@@ -61,18 +65,24 @@ export const getXPBySource = async (source: XPSource): Promise<number> => {
 
 /**
  * Get full XP state with level info
+ * Results are cached for 30 seconds
  */
 export const getXPState = async (): Promise<XPState> => {
-  const totalXP = await getTotalXP();
-  const level = getLevelFromXP(totalXP);
+  return queryCache.getOrFetch(
+    CACHE_KEYS.XP_STATE,
+    async () => {
+      const totalXP = await getTotalXP();
+      const level = getLevelFromXP(totalXP);
 
-  return {
-    totalXP,
-    currentLevel: level.level,
-    levelTitle: level.title,
-    levelProgress: getLevelProgress(totalXP),
-    xpToNextLevel: getXPToNextLevel(totalXP),
-  };
+      return {
+        totalXP,
+        currentLevel: level.level,
+        levelTitle: level.title,
+        levelProgress: getLevelProgress(totalXP),
+        xpToNextLevel: getXPToNextLevel(totalXP),
+      };
+    }
+  );
 };
 
 /**
@@ -149,4 +159,7 @@ export const getXPBreakdown = async (): Promise<Record<XPSource, number>> => {
 export const resetAllXP = async (): Promise<void> => {
   const db = await getDatabase();
   await db.runAsync(`DELETE FROM xp_events`);
+
+  // Invalidate XP cache
+  queryCache.invalidate(CACHE_KEYS.XP_STATE);
 };

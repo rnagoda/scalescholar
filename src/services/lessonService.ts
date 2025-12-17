@@ -16,6 +16,7 @@ import { useXPStore } from '../stores/useXPStore';
 import { XP_AMOUNTS } from '../types/xp';
 import { unlockItem } from './progressService';
 import { getLessonUnlocks } from '../content/unlockMappings';
+import { queryCache, CACHE_KEYS } from './queryCache';
 
 /**
  * Get lesson progress by lesson ID
@@ -101,6 +102,53 @@ export const getCompletedLessonCount = async (
 };
 
 /**
+ * Get completed lesson counts for all tracks in a single query
+ * Returns a map of trackId -> completed count
+ * Results are cached for 30 seconds
+ */
+export const getAllTrackProgress = async (): Promise<Record<TrackId, number>> => {
+  return queryCache.getOrFetch(
+    CACHE_KEYS.ALL_TRACK_PROGRESS,
+    async () => {
+      const db = await getDatabase();
+
+      // Extract track_id from lesson_id (format: trackId-level-lessonNumber)
+      // Use SUBSTR to get everything before the first hyphen
+      const results = await db.getAllAsync<{ track_id: string; completed: number }>(
+        `SELECT
+           SUBSTR(lesson_id, 1,
+             CASE
+               WHEN INSTR(lesson_id, '-') > 0 THEN INSTR(lesson_id, '-') - 1
+               ELSE LENGTH(lesson_id)
+             END
+           ) as track_id,
+           COUNT(*) as completed
+         FROM lesson_progress
+         WHERE completed = 1
+         GROUP BY track_id`
+      );
+
+      // Initialize with zero counts for all tracks
+      const progress: Record<TrackId, number> = {
+        foundations: 0,
+        intervals: 0,
+        'scales-keys': 0,
+        chords: 0,
+      };
+
+      // Fill in actual counts from query results
+      for (const row of results) {
+        if (row.track_id in progress) {
+          progress[row.track_id as TrackId] = row.completed;
+        }
+      }
+
+      return progress;
+    }
+  );
+};
+
+/**
  * Update lesson progress (create or update)
  */
 export const updateLessonProgress = async (
@@ -146,6 +194,9 @@ export const markLessonComplete = async (
     totalBlocks,
     totalBlocks
   );
+
+  // Invalidate track progress cache since completion status changed
+  queryCache.invalidate(CACHE_KEYS.ALL_TRACK_PROGRESS);
 
   // Process unlocks and award XP only on first completion
   const newUnlocks: string[] = [];
