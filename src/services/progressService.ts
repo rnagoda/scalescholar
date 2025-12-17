@@ -1,4 +1,5 @@
 import { getDatabase } from './database';
+import { queryCache, CACHE_KEYS } from './queryCache';
 
 export type ExerciseType = 'intervals' | 'scale-degrees' | 'chords';
 
@@ -52,6 +53,9 @@ export const saveAttempt = async (
     correct ? 1 : 0,
     responseTimeMs ?? null
   );
+
+  // Invalidate exercise stats cache for this exercise type
+  queryCache.invalidate(CACHE_KEYS.EXERCISE_STATS, [exerciseType]);
 };
 
 /**
@@ -74,54 +78,71 @@ export const saveSession = async (
 
 /**
  * Get overall stats for an exercise type
+ * Consolidated into a single query for better performance
+ * Results are cached for 30 seconds
  */
 export const getExerciseStats = async (
   exerciseType: ExerciseType
 ): Promise<ExerciseStats> => {
-  const db = await getDatabase();
+  return queryCache.getOrFetch(
+    CACHE_KEYS.EXERCISE_STATS,
+    async () => {
+      const db = await getDatabase();
 
-  // Total stats
-  const totalResult = await db.getFirstAsync<{
-    total: number;
-    correct: number;
-  }>(
-    `SELECT COUNT(*) as total, SUM(correct) as correct
-     FROM exercise_attempts
-     WHERE exercise_type = ?`,
-    exerciseType
+      // Single query with CTEs for all stats
+      const result = await db.getFirstAsync<{
+        total_attempts: number;
+        correct_attempts: number;
+        recent_total: number;
+        recent_correct: number;
+      }>(
+        `WITH
+          all_stats AS (
+            SELECT
+              COUNT(*) as total_attempts,
+              COALESCE(SUM(correct), 0) as correct_attempts
+            FROM exercise_attempts
+            WHERE exercise_type = ?
+          ),
+          recent_stats AS (
+            SELECT
+              COUNT(*) as recent_total,
+              COALESCE(SUM(correct), 0) as recent_correct
+            FROM (
+              SELECT correct FROM exercise_attempts
+              WHERE exercise_type = ?
+              ORDER BY created_at DESC
+              LIMIT 20
+            )
+          )
+        SELECT
+          all_stats.total_attempts,
+          all_stats.correct_attempts,
+          recent_stats.recent_total,
+          recent_stats.recent_correct
+        FROM all_stats, recent_stats`,
+        exerciseType,
+        exerciseType
+      );
+
+      const totalAttempts = result?.total_attempts ?? 0;
+      const correctAttempts = result?.correct_attempts ?? 0;
+      const recentTotal = result?.recent_total ?? 0;
+      const recentCorrect = result?.recent_correct ?? 0;
+
+      // Calculate current streak (still separate - streak requires ordered iteration)
+      const streak = await calculateStreak(exerciseType);
+
+      return {
+        totalAttempts,
+        correctAttempts,
+        accuracy: totalAttempts > 0 ? correctAttempts / totalAttempts : 0,
+        recentAccuracy: recentTotal > 0 ? recentCorrect / recentTotal : 0,
+        streak,
+      };
+    },
+    [exerciseType]
   );
-
-  const totalAttempts = totalResult?.total ?? 0;
-  const correctAttempts = totalResult?.correct ?? 0;
-
-  // Recent stats (last 20)
-  const recentResult = await db.getFirstAsync<{
-    total: number;
-    correct: number;
-  }>(
-    `SELECT COUNT(*) as total, SUM(correct) as correct
-     FROM (
-       SELECT correct FROM exercise_attempts
-       WHERE exercise_type = ?
-       ORDER BY created_at DESC
-       LIMIT 20
-     )`,
-    exerciseType
-  );
-
-  const recentTotal = recentResult?.total ?? 0;
-  const recentCorrect = recentResult?.correct ?? 0;
-
-  // Calculate current streak
-  const streak = await calculateStreak(exerciseType);
-
-  return {
-    totalAttempts,
-    correctAttempts,
-    accuracy: totalAttempts > 0 ? correctAttempts / totalAttempts : 0,
-    recentAccuracy: recentTotal > 0 ? recentCorrect / recentTotal : 0,
-    streak,
-  };
 };
 
 /**
@@ -264,6 +285,7 @@ export const unlockItem = async (
 /**
  * Check unlock eligibility and unlock if criteria met
  * Criteria: 80% accuracy with 20+ attempts on currently unlocked items
+ * Optimized: batch operations instead of per-item queries
  */
 export const checkAndProcessUnlocks = async (
   exerciseType: ExerciseType,
@@ -273,18 +295,24 @@ export const checkAndProcessUnlocks = async (
   const db = await getDatabase();
   const newUnlocks: string[] = [];
 
-  // Ensure starter items are unlocked
-  for (const item of starterItems) {
-    const unlocked = await isUnlocked(exerciseType, item);
-    if (!unlocked) {
-      await unlockItem(exerciseType, item);
-    }
+  // Batch insert starter items (INSERT OR IGNORE handles duplicates)
+  if (starterItems.length > 0) {
+    const placeholders = starterItems.map(() => '(?, ?)').join(', ');
+    const values = starterItems.flatMap((item) => [exerciseType, item]);
+    await db.runAsync(
+      `INSERT OR IGNORE INTO unlocks (exercise_type, item_id) VALUES ${placeholders}`,
+      ...values
+    );
   }
 
   // Get currently unlocked items
   const unlockedItems = await getUnlockedItems(exerciseType);
 
   // Get stats for unlocked items only
+  if (unlockedItems.length === 0) {
+    return newUnlocks;
+  }
+
   const statsResult = await db.getFirstAsync<{
     total: number;
     correct: number;

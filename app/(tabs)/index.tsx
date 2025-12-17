@@ -17,7 +17,7 @@ import { useXPStore } from '@/src/stores/useXPStore';
 import { ALL_INTERVALS, ALL_SCALE_DEGREES, ALL_CHORD_QUALITIES } from '@/src/utils/music';
 import { TRACKS, TrackId } from '@/src/types/lesson';
 import { getTrackLessonCount } from '@/src/content/lessons';
-import { getCompletedLessonCount } from '@/src/services/lessonService';
+import { getAllTrackProgress } from '@/src/services/lessonService';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -54,16 +54,16 @@ export default function HomeScreen() {
   // Music School progress state
   const [musicSchoolProgress, setMusicSchoolProgress] = useState(0);
 
-  // Load Music School progress
+  // Load Music School progress (single batch query for all tracks)
   const loadMusicSchoolProgress = async () => {
+    const trackProgress = await getAllTrackProgress();
+
     let totalLessons = 0;
     let completedLessons = 0;
 
     for (const track of TRACKS) {
-      const trackTotal = getTrackLessonCount(track.id);
-      const trackCompleted = await getCompletedLessonCount(track.id);
-      totalLessons += trackTotal;
-      completedLessons += trackCompleted;
+      totalLessons += getTrackLessonCount(track.id);
+      completedLessons += trackProgress[track.id] ?? 0;
     }
 
     if (totalLessons > 0) {

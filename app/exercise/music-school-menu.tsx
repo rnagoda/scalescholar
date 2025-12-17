@@ -19,7 +19,7 @@ import {
 } from '@/src/components/common';
 import { TRACKS, TrackId } from '@/src/types/lesson';
 import { getTrackLessonCount } from '@/src/content/lessons';
-import { getCompletedLessonCount } from '@/src/services/lessonService';
+import { getAllTrackProgress } from '@/src/services/lessonService';
 
 interface TrackProgress {
   total: number;
@@ -43,6 +43,9 @@ export default function MusicSchoolMenuScreen() {
   );
 
   const loadProgress = async () => {
+    // Single batch query for all track progress
+    const completedCounts = await getAllTrackProgress();
+
     const progress: Record<TrackId, TrackProgress> = {
       foundations: { total: 0, completed: 0 },
       intervals: { total: 0, completed: 0 },
@@ -51,9 +54,10 @@ export default function MusicSchoolMenuScreen() {
     };
 
     for (const track of TRACKS) {
-      const total = getTrackLessonCount(track.id);
-      const completed = await getCompletedLessonCount(track.id);
-      progress[track.id] = { total, completed };
+      progress[track.id] = {
+        total: getTrackLessonCount(track.id),
+        completed: completedCounts[track.id] ?? 0,
+      };
     }
 
     setTrackProgress(progress);
