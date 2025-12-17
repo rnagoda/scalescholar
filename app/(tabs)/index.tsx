@@ -141,15 +141,8 @@ export default function HomeScreen() {
         </View>
 
         {/* Ear School */}
-        <Card>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Ear School</Text>
-            <BracketButton
-              label="OPEN"
-              onPress={() => router.push('/exercise/ear-school-menu' as Href)}
-              color={colors.accentGreen}
-            />
-          </View>
+        <Card onPress={() => router.push('/exercise/ear-school-menu' as Href)}>
+          <Text style={styles.cardTitle}>Ear School</Text>
           <Text style={styles.cardDescription}>
             Train your ear to recognize intervals, scale degrees, and chord qualities.
           </Text>
@@ -159,23 +152,16 @@ export default function HomeScreen() {
         </Card>
 
         {/* Voice School */}
-        <Card>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Voice School</Text>
-            {hasProfile && profile ? (
-              <BracketButton
-                label="OPEN"
-                onPress={() => router.push('/exercise/voice-menu' as Href)}
-                color={colors.accentGreen}
-              />
-            ) : (
-              <BracketButton
-                label="GET STARTED"
-                onPress={() => router.push('/exercise/voice-range-assessment' as Href)}
-                color={colors.accentGreen}
-              />
-            )}
-          </View>
+        <Card
+          onPress={() =>
+            router.push(
+              hasProfile && profile
+                ? '/exercise/voice-menu'
+                : '/exercise/voice-range-assessment' as Href
+            )
+          }
+        >
+          <Text style={styles.cardTitle}>Voice School</Text>
           {hasProfile && profile ? (
             <View style={styles.cardContent}>
               <LabelValue label="Range:" value={getProfileSummary() ?? '--'} />
@@ -192,15 +178,8 @@ export default function HomeScreen() {
         </Card>
 
         {/* Music School */}
-        <Card>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Music School</Text>
-            <BracketButton
-              label="OPEN"
-              onPress={() => router.push('/exercise/music-school-menu' as Href)}
-              color={colors.accentGreen}
-            />
-          </View>
+        <Card onPress={() => router.push('/exercise/music-school-menu' as Href)}>
+          <Text style={styles.cardTitle}>Music School</Text>
           <Text style={styles.cardDescription}>
             Learn music theory fundamentals, reading notation, and more.
           </Text>
