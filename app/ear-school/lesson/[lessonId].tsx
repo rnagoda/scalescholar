@@ -37,6 +37,9 @@ export default function LessonPlayerScreen() {
 
   const lesson = getLessonById(lessonId || '');
 
+  // Intro screen state
+  const [showIntro, setShowIntro] = useState(true);
+
   // Timer state for challenge mode
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -137,7 +140,8 @@ export default function LessonPlayerScreen() {
           const degrees = audioParams.scaleDegrees || [1];
           const targetDegree = degrees[0] as ScaleDegree;
           const contextType = audioParams.playContext ? 'triad' : 'triad';
-          await AudioEngine.playScaleDegreeWithContext(keyRootMidi, targetDegree, contextType);
+          const octaveOffset = audioParams.octaveOffset || 0;
+          await AudioEngine.playScaleDegreeWithContext(keyRootMidi, targetDegree, contextType, octaveOffset);
           break;
         }
 
@@ -162,11 +166,10 @@ export default function LessonPlayerScreen() {
         }
 
         case 'identify-tonic': {
-          // Play a short phrase, user identifies which note is "Do"
-          // For now: play context + target note
-          const degrees = audioParams.scaleDegrees || [1];
-          const targetDegree = degrees[0] as ScaleDegree;
-          await AudioEngine.playScaleDegreeWithContext(keyRootMidi, targetDegree, 'triad');
+          // Play a melodic phrase ending on the specified degree
+          // User identifies which ending note is "home" (Do)
+          const endingDegree = (audioParams.endingDegree || 1) as 1 | 2 | 3;
+          await AudioEngine.playMelodicPhrase(keyRootMidi, endingDegree);
           break;
         }
 
@@ -246,6 +249,10 @@ export default function LessonPlayerScreen() {
 
   const handleContinue = () => {
     router.back();
+  };
+
+  const handleBegin = () => {
+    setShowIntro(false);
   };
 
   // Results screen (check first since session is null when showing results)
@@ -331,6 +338,64 @@ export default function LessonPlayerScreen() {
         />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Preparing lesson...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Intro screen
+  if (showIntro && lesson) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <ScreenHeader
+          title={`LESSON ${lesson.sectionNumber}.${lesson.lessonNumber}`}
+          testID={`lesson-${lessonId}-intro-header`}
+          rightContent={
+            <BracketButton
+              label="X"
+              onPress={handleClose}
+              testID="intro-close-button"
+            />
+          }
+        />
+        <Divider style={styles.divider} />
+
+        <View style={styles.introContainer}>
+          <Text style={styles.introTitle}>{lesson.title}</Text>
+          <Text style={styles.introSubtitle}>{lesson.subtitle}</Text>
+
+          <View style={styles.introDivider} />
+
+          <View style={styles.introSection}>
+            <Text style={styles.introSectionTitle}>CONCEPT</Text>
+            <Text style={styles.introSectionText}>{lesson.concept}</Text>
+          </View>
+
+          <View style={styles.introSection}>
+            <Text style={styles.introSectionTitle}>INSTRUCTIONS</Text>
+            <Text style={styles.introSectionText}>
+              • Tap PLAY to hear the audio{'\n'}
+              • Listen carefully to identify the correct answer{'\n'}
+              • Tap REPLAY anytime to hear it again{'\n'}
+              • Score {lesson.passThreshold}% or higher to pass
+            </Text>
+          </View>
+
+          <View style={styles.introDetails}>
+            <Text style={styles.introDetailText}>
+              {lesson.questionCount} questions • {lesson.passThreshold}% to pass
+              {lesson.isAssessment && ' • Assessment'}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.beginButton}
+            onPress={handleBegin}
+            activeOpacity={0.7}
+            testID="begin-lesson-button"
+          >
+            <Text style={styles.beginButtonText}>[ BEGIN ]</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -447,6 +512,13 @@ export default function LessonPlayerScreen() {
                     {timeRemaining}s
                   </Text>
                 </View>
+              )}
+
+              {/* Hint display for first 5 questions */}
+              {currentQuestion.hint && session.currentIndex < 5 && (
+                <Text style={styles.hintText} testID="question-hint">
+                  💡 {currentQuestion.hint}
+                </Text>
               )}
 
               <Text style={styles.answerHint} testID="play-hint">
@@ -600,6 +672,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textMuted,
   },
+  hintText: {
+    fontFamily: fonts.mono,
+    fontSize: 13,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    fontStyle: 'italic',
+  },
   timerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -722,5 +803,69 @@ const styles = StyleSheet.create({
   continueButton: {},
   continueButtonText: {
     color: colors.accentGreen,
+  },
+  // Intro screen styles
+  introContainer: {
+    flex: 1,
+    padding: spacing.xl,
+  },
+  introTitle: {
+    fontFamily: fonts.monoBold,
+    fontSize: 24,
+    color: colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  introSubtitle: {
+    fontFamily: fonts.mono,
+    fontSize: 16,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+  },
+  introDivider: {
+    height: 1,
+    backgroundColor: colors.divider,
+    marginBottom: spacing.xl,
+  },
+  introSection: {
+    marginBottom: spacing.xl,
+  },
+  introSectionTitle: {
+    fontFamily: fonts.monoBold,
+    fontSize: 12,
+    color: colors.textMuted,
+    letterSpacing: 1.5,
+    marginBottom: spacing.sm,
+  },
+  introSectionText: {
+    fontFamily: fonts.mono,
+    fontSize: 14,
+    color: colors.textPrimary,
+    lineHeight: 22,
+  },
+  introDetails: {
+    marginTop: 'auto',
+    marginBottom: spacing.xl,
+    alignItems: 'center',
+  },
+  introDetailText: {
+    fontFamily: fonts.mono,
+    fontSize: 13,
+    color: colors.textMuted,
+  },
+  beginButton: {
+    alignSelf: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xxxl,
+    borderWidth: 1,
+    borderColor: colors.accentGreen,
+    borderRadius: 4,
+  },
+  beginButtonText: {
+    fontFamily: fonts.monoBold,
+    fontSize: 18,
+    color: colors.accentGreen,
+    letterSpacing: 1,
   },
 });

@@ -116,6 +116,54 @@ const generateIntervalQuestion = (
 };
 
 /**
+ * Question generator for identify-tonic (Finding Do) exercises
+ * Plays a melodic phrase ending on 1, 2, or 3 and asks which is "home"
+ */
+const generateIdentifyTonicQuestion = (
+  keyPool: readonly string[],
+  previousQuestion?: EarSchoolQuestion
+): EarSchoolQuestion => {
+  const key = pickRandom(keyPool);
+
+  // The phrase will end on one of these degrees
+  const endingDegrees: (1 | 2 | 3)[] = [1, 2, 3];
+
+  // Try to avoid repeating the same correct answer
+  let availableDegrees = [...endingDegrees];
+  if (previousQuestion?.audioParams.endingDegree) {
+    const prevDegree = previousQuestion.audioParams.endingDegree as 1 | 2 | 3;
+    availableDegrees = availableDegrees.filter((d) => d !== prevDegree);
+    if (availableDegrees.length === 0) availableDegrees = [...endingDegrees];
+  }
+
+  const endingDegree = pickRandom(availableDegrees);
+
+  // Options are solfege names
+  const solfegeNames = { 1: 'Do', 2: 'Re', 3: 'Mi' };
+  const options: EarSchoolAnswerOption[] = shuffle(
+    endingDegrees.map((d) => ({
+      id: `solfege-${d}`,
+      label: solfegeNames[d],
+      value: d.toString(),
+    }))
+  );
+
+  return {
+    id: generateQuestionId(),
+    type: 'identify-tonic',
+    prompt: 'Which note is "home" (Do)?',
+    key,
+    audioParams: {
+      key,
+      endingDegree,
+    },
+    options,
+    correctAnswerId: 'solfege-1', // Do is always the correct "home" answer
+    hint: 'The "home" note feels like a resting place. Listen for which ending sounds most resolved.',
+  };
+};
+
+/**
  * Placeholder question generator for same/different
  */
 const generateSameDifferentQuestion = (
@@ -144,6 +192,41 @@ const generateSameDifferentQuestion = (
 };
 
 /**
+ * Question generator for step-type exercises (whole step vs half step)
+ * Plays raw interval without key context
+ */
+const generateStepTypeQuestion = (
+  _keyPool: readonly string[],
+  _previousQuestion?: EarSchoolQuestion
+): EarSchoolQuestion => {
+  // Randomly choose whole step (2 semitones) or half step (1 semitone)
+  const isWholeStep = Math.random() > 0.5;
+  const interval = isWholeStep ? 2 : 1;
+
+  // Random root note in mid-range (C3 to C5)
+  const rootMidi = 48 + Math.floor(Math.random() * 24);
+
+  const options: EarSchoolAnswerOption[] = [
+    { id: 'half', label: 'Half Step', value: '1' },
+    { id: 'whole', label: 'Whole Step', value: '2' },
+  ];
+
+  return {
+    id: generateQuestionId(),
+    type: 'step-type',
+    prompt: 'Is this a whole step or half step?',
+    key: 'C major', // Not used for playback, just for consistency
+    audioParams: {
+      rootMidi,
+      interval,
+    },
+    options,
+    correctAnswerId: isWholeStep ? 'whole' : 'half',
+    hint: 'A half step is the smallest distance between two notes. A whole step is two half steps.',
+  };
+};
+
+/**
  * Common 3-note patterns using scale degrees 1, 2, 3
  */
 const BASIC_PATTERNS: readonly number[][] = [
@@ -161,6 +244,62 @@ const BASIC_PATTERNS: readonly number[][] = [
  * Format pattern for display (e.g., [1, 2, 3] -> "1-2-3")
  */
 const formatPattern = (pattern: readonly number[]): string => pattern.join('-');
+
+/**
+ * Question generator for upper tetrachord (degrees 5, 6, 7, 8)
+ * Note: Degree 8 is high Do (same as 1, but an octave higher)
+ */
+const generateUpperTetrachordQuestion = (
+  keyPool: readonly string[],
+  previousQuestion?: EarSchoolQuestion
+): EarSchoolQuestion => {
+  const key = pickRandom(keyPool);
+
+  // Degrees for upper tetrachord: 5, 6, 7, 8 (8 = high Do)
+  const displayDegrees = [5, 6, 7, 8];
+  // Map display degree to actual scale degree for audio (8 -> 1 with octave offset)
+  const degreeToAudio: Record<number, { degree: number; octave: number }> = {
+    5: { degree: 5, octave: 0 },
+    6: { degree: 6, octave: 0 },
+    7: { degree: 7, octave: 0 },
+    8: { degree: 1, octave: 1 }, // High Do - degree 1, octave +1
+  };
+
+  // Try to avoid repeating the same correct answer
+  let availableDegrees = [...displayDegrees];
+  if (previousQuestion?.audioParams.scaleDegrees) {
+    const prevDegree = previousQuestion.audioParams.scaleDegrees[0];
+    availableDegrees = availableDegrees.filter((d) => d !== prevDegree);
+    if (availableDegrees.length === 0) availableDegrees = [...displayDegrees];
+  }
+
+  const targetDisplayDegree = pickRandom(availableDegrees);
+  const audioInfo = degreeToAudio[targetDisplayDegree];
+
+  const options: EarSchoolAnswerOption[] = shuffle(
+    displayDegrees.map((d) => ({
+      id: `degree-${d}`,
+      label: d.toString(),
+      value: d.toString(),
+    }))
+  );
+
+  return {
+    id: generateQuestionId(),
+    type: 'scale-degree-id',
+    prompt: 'What scale degree is this?',
+    key,
+    audioParams: {
+      key,
+      scaleDegrees: [audioInfo.degree],
+      octaveOffset: audioInfo.octave,
+      playContext: true,
+    },
+    options,
+    correctAnswerId: `degree-${targetDisplayDegree}`,
+    hint: 'Listen for whether the note is in the upper part of the scale (5-6-7-8).',
+  };
+};
 
 /**
  * Question generator for pattern-match exercises
@@ -230,14 +369,14 @@ const section1Lessons: EarSchoolLessonDef[] = [
     lessonNumber: 1,
     title: 'Finding Do',
     subtitle: 'Identify the tonal center',
-    concept: 'Do as the tonal center / "home" note',
+    concept:
+      'Every melody has a "home" note that feels like a resting place. In music, we call this Do (degree 1). You will hear a short phrase and identify which note sounds like home.',
     exerciseType: 'identify-tonic',
     keyPool: ['C major', 'G major'],
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
-    generateQuestion: (keyPool, prev) =>
-      generateScaleDegreeQuestion(keyPool, [1, 2, 3], prev),
+    generateQuestion: (keyPool, prev) => generateIdentifyTonicQuestion(keyPool, prev),
   },
   {
     id: 'ear-school-1.2',
@@ -246,7 +385,8 @@ const section1Lessons: EarSchoolLessonDef[] = [
     lessonNumber: 2,
     title: 'Do-Re-Mi Recognition',
     subtitle: 'Identify scale degrees 1, 2, 3',
-    concept: 'First three scale degrees as a unit',
+    concept:
+      'The first three notes of a scale (Do-Re-Mi or 1-2-3) form the foundation of melody. Listen for where the note sits in relation to the home note.',
     exerciseType: 'scale-degree-id',
     keyPool: ['C major', 'G major', 'F major'],
     questionCount: 10,
@@ -262,7 +402,8 @@ const section1Lessons: EarSchoolLessonDef[] = [
     lessonNumber: 3,
     title: 'Do-Re-Mi Patterns',
     subtitle: 'Match 3-note melodic patterns',
-    concept: 'Recognizing melodic patterns within the trichord',
+    concept:
+      'Melodies are made of patterns. Listen for which direction the notes move (up, down, or back) and match the pattern you hear.',
     exerciseType: 'pattern-match',
     keyPool: KEY_POOLS.SECTION_1,
     questionCount: 10,
@@ -316,7 +457,8 @@ const section2Lessons: EarSchoolLessonDef[] = [
     lessonNumber: 1,
     title: 'Unison vs. Different',
     subtitle: 'Same pitch recognition',
-    concept: 'Same pitch recognition',
+    concept:
+      'The most basic interval question: are two notes the same pitch, or different? This builds your foundation for hearing all intervals.',
     exerciseType: 'same-different',
     keyPool: KEY_POOLS.SECTION_2,
     questionCount: 10,
@@ -331,7 +473,8 @@ const section2Lessons: EarSchoolLessonDef[] = [
     lessonNumber: 2,
     title: 'Perfect 5th (Do-Sol)',
     subtitle: 'The stable, open sound of P5',
-    concept: 'The stable, open sound of P5',
+    concept:
+      'The Perfect 5th has a wide, stable, open sound. It is the interval at the start of "Twinkle Twinkle Little Star" and "Star Wars".',
     exerciseType: 'interval-id',
     keyPool: KEY_POOLS.SECTION_2,
     questionCount: 10,
@@ -347,7 +490,8 @@ const section2Lessons: EarSchoolLessonDef[] = [
     lessonNumber: 3,
     title: 'Perfect Interval Discrimination',
     subtitle: 'Distinguish all three perfect intervals',
-    concept: 'Distinguishing all three perfect intervals in any direction',
+    concept:
+      'Now you will hear all three perfect intervals mixed together. Compare: Unison (same note), Perfect 5th (wide and open), Octave (same note, higher).',
     exerciseType: 'interval-id',
     keyPool: KEY_POOLS.SECTION_2,
     questionCount: 15,
@@ -396,14 +540,15 @@ const section3Lessons: EarSchoolLessonDef[] = [
     lessonNumber: 1,
     title: 'Upper Tetrachord',
     subtitle: 'Sol-La-Ti-Do (degrees 5-6-7-8)',
-    concept: 'Extending beyond Do-Re-Mi to complete the scale',
+    concept:
+      'Now we extend beyond Do-Re-Mi to the upper half of the scale. The upper tetrachord (Sol-La-Ti-Do) has degrees 5, 6, 7, and 8 (high Do).',
     exerciseType: 'scale-degree-id',
     keyPool: ['C major', 'G major', 'D major', 'F major', 'Bb major'],
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
     generateQuestion: (keyPool, prev) =>
-      generateScaleDegreeQuestion(keyPool, [5, 6, 7, 1], prev),
+      generateUpperTetrachordQuestion(keyPool, prev),
   },
   {
     id: 'ear-school-3.2',
@@ -412,7 +557,8 @@ const section3Lessons: EarSchoolLessonDef[] = [
     lessonNumber: 2,
     title: 'Full Scale Degrees',
     subtitle: 'All seven degrees in context',
-    concept: 'All seven degrees in context',
+    concept:
+      'You now know all seven degrees of the major scale. Each has its own character: 1 (home), 2 (stepping up), 3 (bright), 4 (leaning), 5 (stable), 6 (longing), 7 (urgent).',
     exerciseType: 'scale-degree-id',
     keyPool: KEY_POOLS.SECTION_3_MAJOR,
     questionCount: 15,
@@ -428,21 +574,14 @@ const section3Lessons: EarSchoolLessonDef[] = [
     lessonNumber: 3,
     title: 'Whole Step vs. Half Step',
     subtitle: 'The building blocks of scales',
-    concept: 'The building blocks of scales',
+    concept:
+      'Scales are built from whole steps (2 half steps) and half steps (the smallest distance between notes). Listen for the size of the gap between the two notes.',
     exerciseType: 'step-type',
     keyPool: KEY_POOLS.SECTION_3_MAJOR,
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
-    generateQuestion: (keyPool, prev) =>
-      generateIntervalQuestion(
-        keyPool,
-        [
-          { semitones: 1, name: 'Half Step' },
-          { semitones: 2, name: 'Whole Step' },
-        ],
-        prev
-      ),
+    generateQuestion: (keyPool, prev) => generateStepTypeQuestion(keyPool, prev),
   },
   {
     id: 'ear-school-3.4',
@@ -451,7 +590,8 @@ const section3Lessons: EarSchoolLessonDef[] = [
     lessonNumber: 4,
     title: 'Major vs. Minor',
     subtitle: 'Scale quality identification',
-    concept: 'Hearing the difference between major and natural minor',
+    concept:
+      'Major scales sound bright and happy. Minor scales sound dark and sad. Listen to the 3rd and 6th degrees - they are lower in minor.',
     exerciseType: 'scale-quality',
     keyPool: [...KEY_POOLS.SECTION_3_MAJOR.slice(0, 4), ...KEY_POOLS.SECTION_3_MINOR],
     questionCount: 10,
