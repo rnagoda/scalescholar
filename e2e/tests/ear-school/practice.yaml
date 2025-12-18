@@ -1,0 +1,72 @@
+appId: com.nagodasoft.scalescholar
+---
+# Test: Navigate to Ear School Practice module
+
+- launchApp:
+    clearState: true
+
+# Tap the Ear School card on home screen
+- tapOn:
+    id: "ear-school-card"
+
+# Verify Ear School home opened
+- assertVisible:
+    id: "ear-school-header-title"
+
+# Verify TRAIN button is present
+- assertVisible:
+    id: "ear-school-practice-button"
+
+# Tap TRAIN button to open practice menu
+- tapOn:
+    id: "ear-school-practice-button"
+
+# Verify practice menu opened
+- assertVisible:
+    id: "practice-header-title"
+
+# Verify all three practice options are visible
+- assertVisible:
+    id: "practice-intervals-card"
+
+- assertVisible:
+    id: "practice-scale-degrees-card"
+
+- assertVisible:
+    id: "practice-chords-card"
+
+# Tap on intervals practice
+- tapOn:
+    id: "practice-intervals-card"
+
+# Verify intervals trainer opened
+- assertVisible:
+    id: "intervals-header"
+
+# Verify play button is present
+- assertVisible:
+    id: "play-button"
+
+# Close intervals trainer
+- tapOn:
+    id: "intervals-close-button"
+
+# Back on practice menu
+- assertVisible:
+    id: "practice-header-title"
+
+# Close practice menu
+- tapOn:
+    id: "practice-close-button"
+
+# Back on Ear School home
+- assertVisible:
+    id: "ear-school-header-title"
+
+# Close Ear School
+- tapOn:
+    id: "ear-school-close-button"
+
+# Verify we're back on home screen
+- assertVisible:
+    id: "home-header-title"
