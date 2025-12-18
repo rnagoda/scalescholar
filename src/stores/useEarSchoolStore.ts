@@ -425,7 +425,8 @@ export const useEarSchoolStore = create<EarSchoolStoreState>((set, get) => ({
 
   isSectionCompleted: (sectionId: string) => {
     const { sectionProgress } = get();
-    return sectionProgress.get(sectionId)?.completedAt !== null;
+    const progress = sectionProgress.get(sectionId);
+    return progress !== undefined && progress.completedAt !== null;
   },
 
   shouldShowChallengeMode: (lessonId: string) => {
