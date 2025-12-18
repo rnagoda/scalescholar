@@ -140,14 +140,14 @@ export default function LessonPlayerScreen() {
           const degrees = audioParams.scaleDegrees || [1];
           const targetDegree = degrees[0] as ScaleDegree;
           const contextType = audioParams.playContext ? 'triad' : 'triad';
-          const octaveOffset = audioParams.octaveOffset || 0;
+          const octaveOffset = audioParams.octaveOffset ?? 0;
           await AudioEngine.playScaleDegreeWithContext(keyRootMidi, targetDegree, contextType, octaveOffset);
           break;
         }
 
         case 'interval-id': {
           // Play the interval
-          const interval = audioParams.interval || 7; // Default to P5
+          const interval = audioParams.interval ?? 7; // Default to P5 (use ?? to preserve 0 for unison)
           const direction = audioParams.direction || 'ascending';
           const ascending = direction === 'ascending';
           const melodic = direction !== 'harmonic';
@@ -157,8 +157,8 @@ export default function LessonPlayerScreen() {
 
         case 'same-different': {
           // Play two notes - same or different
-          const rootMidi = audioParams.rootMidi || 60;
-          const interval = audioParams.interval || 0;
+          const rootMidi = audioParams.rootMidi ?? 60;
+          const interval = audioParams.interval ?? 0;
           await AudioEngine.playMidiNote(rootMidi);
           await new Promise(resolve => setTimeout(resolve, 600));
           await AudioEngine.playMidiNote(rootMidi + interval);
@@ -187,8 +187,8 @@ export default function LessonPlayerScreen() {
 
         case 'step-type': {
           // Play two adjacent notes - whole step or half step
-          const rootMidi = audioParams.rootMidi || 60;
-          const interval = audioParams.interval || 2; // 2 = whole step, 1 = half step
+          const rootMidi = audioParams.rootMidi ?? 60;
+          const interval = audioParams.interval ?? 2; // 2 = whole step, 1 = half step
           await AudioEngine.playMidiNote(rootMidi);
           await new Promise(resolve => setTimeout(resolve, 500));
           await AudioEngine.playMidiNote(rootMidi + interval);
