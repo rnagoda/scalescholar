@@ -17,12 +17,12 @@ appId: com.nagodasoft.scalescholar
 - assertVisible:
     id: "ear-school-header-title"
 
-# Open Week 1
+# Open Section 1
 - tapOn:
-    id: "week-1-card"
+    id: "section-1-card"
 
 - assertVisible:
-    id: "week-1-header-title"
+    id: "section-1-header-title"
 
 # Open Lesson 1.1
 - tapOn:
@@ -61,9 +61,9 @@ appId: com.nagodasoft.scalescholar
 - tapOn:
     text: "Leave"
 
-# Back at week - close it
+# Back at section - close it
 - tapOn:
-    id: "week-1-close-button"
+    id: "section-1-close-button"
 
 # Back at Ear School home - close it
 - tapOn:

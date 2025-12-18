@@ -13,7 +13,7 @@ import {
   EarSchoolSession,
   EarSchoolSessionResult,
   EarSchoolLessonProgress,
-  EarSchoolWeekProgress,
+  EarSchoolSectionProgress,
   EarSchoolAdaptiveState,
   EAR_SCHOOL_THRESHOLDS,
   calculateXP,
@@ -24,9 +24,9 @@ import {
   getLessonProgress,
   getAllLessonProgress,
   saveLessonResult,
-  getWeekProgress,
-  getAllWeekProgress,
-  updateWeekProgress,
+  getSectionProgress,
+  getAllSectionProgress,
+  updateSectionProgress,
   getAdaptiveState,
   updateAdaptiveState,
   setAdaptiveEnabled,
@@ -42,15 +42,15 @@ interface EarSchoolStoreState {
 
   // Progress (cached from database)
   lessonProgress: Map<string, EarSchoolLessonProgress>;
-  weekProgress: Map<string, EarSchoolWeekProgress>;
+  sectionProgress: Map<string, EarSchoolSectionProgress>;
   adaptiveState: EarSchoolAdaptiveState;
 
   // Overall progress
   overallProgress: {
     lessonsPassed: number;
     totalLessons: number;
-    weeksCompleted: number;
-    totalWeeks: number;
+    sectionsCompleted: number;
+    totalSections: number;
     completionPercentage: number;
     nextLessonId: string | null;
   } | null;
@@ -80,14 +80,14 @@ interface EarSchoolStoreState {
   getCurrentQuestion: () => EarSchoolQuestion | null;
   getSessionProgress: () => { current: number; total: number };
   isLessonPassed: (lessonId: string) => boolean;
-  isWeekCompleted: (weekId: string) => boolean;
+  isSectionCompleted: (sectionId: string) => boolean;
   shouldShowChallengeMode: (lessonId: string) => boolean;
 }
 
 const INITIAL_STATE = {
   session: null,
   lessonProgress: new Map<string, EarSchoolLessonProgress>(),
-  weekProgress: new Map<string, EarSchoolWeekProgress>(),
+  sectionProgress: new Map<string, EarSchoolSectionProgress>(),
   adaptiveState: {
     enabled: true,
     globalChallengeMode: false,
@@ -112,7 +112,7 @@ export const useEarSchoolStore = create<EarSchoolStoreState>((set, get) => ({
     try {
       const [lessons, weeks, adaptive, overall] = await Promise.all([
         getAllLessonProgress(),
-        getAllWeekProgress(),
+        getAllSectionProgress(),
         getAdaptiveState(),
         getOverallProgress(),
       ]);
@@ -122,14 +122,14 @@ export const useEarSchoolStore = create<EarSchoolStoreState>((set, get) => ({
         lessonMap.set(lesson.lessonId, lesson);
       }
 
-      const weekMap = new Map<string, EarSchoolWeekProgress>();
+      const weekMap = new Map<string, EarSchoolSectionProgress>();
       for (const week of weeks) {
-        weekMap.set(week.weekId, week);
+        weekMap.set(week.sectionId, week);
       }
 
       set({
         lessonProgress: lessonMap,
-        weekProgress: weekMap,
+        sectionProgress: weekMap,
         adaptiveState: adaptive,
         overallProgress: overall,
         isLoading: false,
@@ -343,23 +343,23 @@ export const useEarSchoolStore = create<EarSchoolStoreState>((set, get) => ({
       // Update adaptive difficulty
       const newAdaptiveState = await updateAdaptiveState(score);
 
-      // If aced, set challenge mode for next lesson in the week
+      // If aced, set challenge mode for next lesson in the section
       if (aced && newAdaptiveState.enabled) {
-        const weekNumber = session.lesson.weekNumber;
+        const sectionNum = session.lesson.sectionNumber;
         const lessonNumber = session.lesson.lessonNumber;
-        const nextLessonId = `ear-school-${weekNumber}.${lessonNumber + 1}`;
+        const nextLessonId = `ear-school-${sectionNum}.${lessonNumber + 1}`;
         await setLessonChallengeMode(nextLessonId, true);
       }
 
-      // Update week progress
-      const weekId = session.lesson.weekId;
-      const weekLessons = await getAllLessonProgress();
-      const weekLessonsPassed = weekLessons.filter(
-        (l) => l.passed && l.lessonId.startsWith(`ear-school-${session.lesson.weekNumber}.`)
+      // Update section progress
+      const sectionId = session.lesson.sectionId;
+      const allLessons = await getAllLessonProgress();
+      const sectionLessonsPassed = allLessons.filter(
+        (l) => l.passed && l.lessonId.startsWith(`ear-school-${session.lesson.sectionNumber}.`)
       ).length;
 
       const assessmentScore = session.lesson.isAssessment ? score : undefined;
-      await updateWeekProgress(weekId, weekLessonsPassed, assessmentScore);
+      await updateSectionProgress(sectionId, sectionLessonsPassed, assessmentScore);
 
       // Refresh progress
       await get().loadProgress();
@@ -423,9 +423,9 @@ export const useEarSchoolStore = create<EarSchoolStoreState>((set, get) => ({
     return lessonProgress.get(lessonId)?.passed ?? false;
   },
 
-  isWeekCompleted: (weekId: string) => {
-    const { weekProgress } = get();
-    return weekProgress.get(weekId)?.completedAt !== null;
+  isSectionCompleted: (sectionId: string) => {
+    const { sectionProgress } = get();
+    return sectionProgress.get(sectionId)?.completedAt !== null;
   },
 
   shouldShowChallengeMode: (lessonId: string) => {

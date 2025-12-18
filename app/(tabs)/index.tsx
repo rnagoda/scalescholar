@@ -156,8 +156,8 @@ export default function HomeScreen() {
           <Text style={styles.cardTitle}>Ear School</Text>
           <Text style={styles.cardDescription}>
             {earSchoolOverallProgress
-              ? `Week ${Math.min(4, Math.floor(earSchoolOverallProgress.lessonsPassed / 4) + 1)} of 4 — ${earSchoolOverallProgress.completionPercentage}% complete`
-              : '4-week ear training curriculum'}
+              ? `Section ${Math.min(4, Math.floor(earSchoolOverallProgress.lessonsPassed / 4) + 1)} of 4 — ${earSchoolOverallProgress.completionPercentage}% complete`
+              : '4-section ear training curriculum'}
           </Text>
           <View style={styles.progressRow}>
             <TerminalProgressBar progress={earSchoolProgress} />

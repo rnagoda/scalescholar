@@ -366,7 +366,7 @@ export default function LessonPlayerScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader
-        title={`LESSON ${session.lesson.weekNumber}.${session.lesson.lessonNumber}`}
+        title={`LESSON ${session.lesson.sectionNumber}.${session.lesson.lessonNumber}`}
         testID={`lesson-${session.lessonId}-header-title`}
         rightContent={
           <BracketButton
