@@ -117,7 +117,7 @@ const generateIntervalQuestion = (
 
 /**
  * Question generator for identify-tonic (Finding Do) exercises
- * Plays a melodic phrase ending on 1, 2, or 3 and asks which is "home"
+ * Plays a melodic phrase ending on 1, 2, or 3 and asks what note it ended on
  */
 const generateIdentifyTonicQuestion = (
   keyPool: readonly string[],
@@ -139,7 +139,7 @@ const generateIdentifyTonicQuestion = (
   const endingDegree = pickRandom(availableDegrees);
 
   // Options are solfege names
-  const solfegeNames = { 1: 'Do', 2: 'Re', 3: 'Mi' };
+  const solfegeNames: Record<number, string> = { 1: 'Do', 2: 'Re', 3: 'Mi' };
   const options: EarSchoolAnswerOption[] = shuffle(
     endingDegrees.map((d) => ({
       id: `solfege-${d}`,
@@ -151,15 +151,15 @@ const generateIdentifyTonicQuestion = (
   return {
     id: generateQuestionId(),
     type: 'identify-tonic',
-    prompt: 'Which note is "home" (Do)?',
+    prompt: 'What note did the phrase end on?',
     key,
     audioParams: {
       key,
       endingDegree,
     },
     options,
-    correctAnswerId: 'solfege-1', // Do is always the correct "home" answer
-    hint: 'The "home" note feels like a resting place. Listen for which ending sounds most resolved.',
+    correctAnswerId: `solfege-${endingDegree}`, // Answer matches the actual ending degree
+    hint: 'Listen carefully to the last note of the phrase.',
   };
 };
 

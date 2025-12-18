@@ -50,7 +50,7 @@ appId: com.nagodasoft.scalescholar
 - assertVisible:
     id: "replay-button"
 
-# Tap an answer (Lesson 1.1 uses solfege: Do, Re, Mi)
+# Tap an answer (any solfege option - testing flow, not correctness)
 - tapOn:
     text: "Do"
 
