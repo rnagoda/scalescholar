@@ -40,3 +40,6 @@ yarn-error.*
 /ios
 /android
 coverage/
+
+# E2E test reports
+e2e/reports/

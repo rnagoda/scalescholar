@@ -49,6 +49,56 @@ echo ""
 FAILED_PLATFORMS=""
 PASSED_PLATFORMS=""
 
+# Reports directory
+REPORTS_DIR="e2e/reports"
+
+# Create reports directory structure
+setup_reports_dir() {
+  mkdir -p "$REPORTS_DIR/iphone"
+  mkdir -p "$REPORTS_DIR/ipad"
+  mkdir -p "$REPORTS_DIR/android"
+}
+
+# Parse JUnit XML report and extract failure details
+# Returns: passed_count failed_count
+parse_junit_report() {
+  local report_file="$1"
+
+  if [ ! -f "$report_file" ]; then
+    echo "0 0"
+    return
+  fi
+
+  # Extract test counts from JUnit XML
+  local tests=$(grep -o 'tests="[0-9]*"' "$report_file" 2>/dev/null | head -1 | grep -o '[0-9]*')
+  local failures=$(grep -o 'failures="[0-9]*"' "$report_file" 2>/dev/null | head -1 | grep -o '[0-9]*')
+  local errors=$(grep -o 'errors="[0-9]*"' "$report_file" 2>/dev/null | head -1 | grep -o '[0-9]*')
+
+  tests=${tests:-0}
+  failures=${failures:-0}
+  errors=${errors:-0}
+
+  local total_failures=$((failures + errors))
+  local passed=$((tests - total_failures))
+
+  echo "$passed $tests"
+}
+
+# Get failure messages from JUnit XML
+get_failure_messages() {
+  local report_file="$1"
+
+  if [ ! -f "$report_file" ]; then
+    return
+  fi
+
+  # Extract failure messages - look for <failure> tags and their message attributes
+  grep -o 'message="[^"]*"' "$report_file" 2>/dev/null | sed 's/message="//g' | sed 's/"$//g' | head -5
+}
+
+# Initialize reports
+setup_reports_dir
+
 # Function to shutdown all iOS simulators
 shutdown_all_ios_simulators() {
   echo "Shutting down all iOS simulators..."
@@ -187,6 +237,8 @@ run_tests() {
   local platform_name="$1"
   local device_id="$2"
   local test_failed=0
+  local platform_lower=$(echo "$platform_name" | tr '[:upper:]' '[:lower:]')
+  local report_dir="$REPORTS_DIR/$platform_lower"
 
   echo ""
   echo "----------------------------------------"
@@ -194,8 +246,13 @@ run_tests() {
   echo "Device: $device_id"
   echo "----------------------------------------"
 
+  # Clear previous reports for this platform
+  rm -f "$report_dir"/*.xml 2>/dev/null
+
   if [ -n "$TEST_FILE" ]; then
-    if "$MAESTRO" --device "$device_id" test "$TEST_PATH"; then
+    local test_name=$(basename "$TEST_FILE" .yaml)
+    local report_path="$report_dir/${test_name}.xml"
+    if "$MAESTRO" --device "$device_id" test "$TEST_PATH" --format=JUNIT --output="$report_path"; then
       return 0
     else
       return 1
@@ -209,7 +266,10 @@ run_tests() {
   for test_file in $test_files; do
     echo ""
     echo "Running: $test_file"
-    if ! "$MAESTRO" --device "$device_id" test "$test_file"; then
+    # Create report filename from test path (e.g., ear-school/intervals.yaml -> ear-school_intervals.xml)
+    local test_name=$(echo "$test_file" | sed 's|e2e/tests/||' | sed 's|/|_|g' | sed 's|.yaml$||')
+    local report_path="$report_dir/${test_name}.xml"
+    if ! "$MAESTRO" --device "$device_id" test "$test_file" --format=JUNIT --output="$report_path"; then
       test_failed=1
     fi
   done
@@ -383,21 +443,97 @@ case "$PLATFORM" in
     ;;
 esac
 
+# Function to print platform test summary
+print_platform_summary() {
+  local platform="$1"
+  local platform_lower=$(echo "$platform" | tr '[:upper:]' '[:lower:]')
+  local report_dir="$REPORTS_DIR/$platform_lower"
+
+  # Count totals across all report files
+  local total_passed=0
+  local total_tests=0
+
+  # Use find instead of glob to handle no-match case
+  while IFS= read -r report_file; do
+    if [ -n "$report_file" ] && [ -f "$report_file" ]; then
+      local counts
+      counts=$(parse_junit_report "$report_file")
+      local passed=$(echo "$counts" | cut -d' ' -f1)
+      local tests=$(echo "$counts" | cut -d' ' -f2)
+      total_passed=$((total_passed + passed))
+      total_tests=$((total_tests + tests))
+    fi
+  done < <(find "$report_dir" -name "*.xml" -type f 2>/dev/null)
+
+  # If no reports found, show 0/0
+  if [ $total_tests -eq 0 ]; then
+    printf "%-10s (no reports found)\n" "$platform:"
+    return
+  fi
+
+  # Determine status
+  local status_icon="✓"
+  if [ $total_passed -lt $total_tests ]; then
+    status_icon="✗"
+  fi
+
+  printf "%-10s %d/%d tests passed %s\n" "$platform:" "$total_passed" "$total_tests" "$status_icon"
+
+  # If failures, show details
+  if [ $total_passed -lt $total_tests ]; then
+    while IFS= read -r report_file; do
+      if [ -n "$report_file" ] && [ -f "$report_file" ]; then
+        local counts
+        counts=$(parse_junit_report "$report_file")
+        local passed=$(echo "$counts" | cut -d' ' -f1)
+        local tests=$(echo "$counts" | cut -d' ' -f2)
+        if [ $passed -lt $tests ]; then
+          # Extract test name from filename
+          local test_name=$(basename "$report_file" .xml | sed 's|_|/|g')
+          echo "  FAILED: ${test_name}.yaml"
+          # Show failure messages
+          local messages
+          messages=$(get_failure_messages "$report_file")
+          if [ -n "$messages" ]; then
+            echo "$messages" | while read -r msg; do
+              echo "    - $msg"
+            done
+          fi
+        fi
+      fi
+    done < <(find "$report_dir" -name "*.xml" -type f 2>/dev/null)
+  fi
+}
+
 # Summary
 echo ""
 echo "========================================"
 echo "SUMMARY"
 echo "========================================"
-if [ -n "$PASSED_PLATFORMS" ]; then
-  echo "PASSED:$PASSED_PLATFORMS"
-fi
+
+# Print detailed results for each platform that was run
+case "$PLATFORM" in
+  ipad)
+    print_platform_summary "iPad"
+    ;;
+  iphone)
+    print_platform_summary "iPhone"
+    ;;
+  android)
+    print_platform_summary "Android"
+    ;;
+  all)
+    print_platform_summary "iPad"
+    print_platform_summary "iPhone"
+    print_platform_summary "Android"
+    ;;
+esac
+
+echo ""
 if [ -n "$FAILED_PLATFORMS" ]; then
-  echo "FAILED:$FAILED_PLATFORMS"
-  echo ""
   echo "RESULT: SOME TESTS FAILED"
   exit 1
 else
-  echo ""
   echo "RESULT: ALL TESTS PASSED"
   exit 0
 fi
