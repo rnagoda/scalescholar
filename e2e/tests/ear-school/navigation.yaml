@@ -1,6 +1,6 @@
 appId: com.nagodasoft.scalescholar
 ---
-# Test: Navigate to Ear School and verify menu contents
+# Test: Navigate to Ear School curriculum and verify structure
 
 - launchApp:
     clearState: true
@@ -9,7 +9,7 @@ appId: com.nagodasoft.scalescholar
 - tapOn:
     id: "ear-school-card"
 
-# Verify Ear School modal opened
+# Verify Ear School home opened (shows weeks)
 - assertVisible:
     id: "ear-school-header-title"
 
@@ -17,15 +17,55 @@ appId: com.nagodasoft.scalescholar
 - assertVisible:
     id: "ear-school-close-button"
 
-# Verify all three exercise options are present
+# Verify week 1 card is present
 - assertVisible:
-    id: "intervals-card"
-- assertVisible:
-    id: "scale-degrees-card"
-- assertVisible:
-    id: "chord-qualities-card"
+    id: "week-1-card"
 
-# Close the modal
+# Tap on Week 1 to open it
+- tapOn:
+    id: "week-1-card"
+
+# Verify Week 1 detail screen
+- assertVisible:
+    id: "week-1-header-title"
+
+# Verify lesson 1.1 is present
+- assertVisible:
+    id: "lesson-1-1-card"
+
+# Tap on Lesson 1.1
+- tapOn:
+    id: "lesson-1-1-card"
+
+# Verify lesson player opened
+- assertVisible:
+    id: "lesson-ear-school-1.1-header-title"
+
+# Close lesson player
+- tapOn:
+    id: "lesson-ear-school-1.1-close-button"
+
+# Confirm leave dialog appears (since session not complete)
+- extendedWaitUntil:
+    visible:
+      text: "Leave"
+    timeout: 3000
+
+# Tap Leave to confirm
+- tapOn:
+    text: "Leave"
+
+# Wait for week detail screen to be visible after navigation
+- extendedWaitUntil:
+    visible:
+      id: "week-1-header-title"
+    timeout: 5000
+
+# Back on week detail - close it
+- tapOn:
+    id: "week-1-close-button"
+
+# Back on Ear School home - close it
 - tapOn:
     id: "ear-school-close-button"
 

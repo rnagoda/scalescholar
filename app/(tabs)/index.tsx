@@ -14,6 +14,7 @@ import {
 import { useVoiceProfileStore } from '@/src/stores/useVoiceProfileStore';
 import { useProgressStore } from '@/src/stores/useProgressStore';
 import { useXPStore } from '@/src/stores/useXPStore';
+import { useEarSchoolStore } from '@/src/stores/useEarSchoolStore';
 import { ALL_INTERVALS, ALL_SCALE_DEGREES, ALL_CHORD_QUALITIES } from '@/src/utils/music';
 import { TRACKS, TrackId } from '@/src/types/lesson';
 import { getTrackLessonCount } from '@/src/content/lessons';
@@ -50,6 +51,11 @@ export default function HomeScreen() {
     initialize: initializeXP,
     refreshXP,
   } = useXPStore();
+
+  const {
+    overallProgress: earSchoolOverallProgress,
+    loadProgress: loadEarSchoolProgress,
+  } = useEarSchoolStore();
 
   // Music School progress state
   const [musicSchoolProgress, setMusicSchoolProgress] = useState(0);
@@ -89,15 +95,14 @@ export default function HomeScreen() {
     }
     // Load Music School progress
     loadMusicSchoolProgress();
+    // Load Ear School curriculum progress
+    loadEarSchoolProgress();
   }, []);
 
-  // Calculate Ear School progress (average of all three)
-  const earSchoolProgress = (() => {
-    const intervalProg = intervalProgress.unlockedIntervals.length / ALL_INTERVALS.length;
-    const degreeProg = scaleDegreeProgress.unlockedDegrees.length / ALL_SCALE_DEGREES.length;
-    const chordProg = chordProgress.unlockedQualities.length / ALL_CHORD_QUALITIES.length;
-    return (intervalProg + degreeProg + chordProg) / 3;
-  })();
+  // Calculate Ear School progress from curriculum
+  const earSchoolProgress = earSchoolOverallProgress
+    ? earSchoolOverallProgress.completionPercentage / 100
+    : 0;
 
   // Voice School progress (based on profile existence and exercises completed)
   const voiceSchoolProgress = hasProfile ? 0.1 : 0; // Start at 10% if profile exists
@@ -147,9 +152,13 @@ export default function HomeScreen() {
         </View>
 
         {/* Ear School */}
-        <Card onPress={() => router.push('/exercise/ear-school-menu' as Href)} testID="ear-school-card">
+        <Card onPress={() => router.push('/ear-school' as Href)} testID="ear-school-card">
           <Text style={styles.cardTitle}>Ear School</Text>
-          <Text style={styles.cardDescription}>Train your ears.</Text>
+          <Text style={styles.cardDescription}>
+            {earSchoolOverallProgress
+              ? `Week ${Math.min(4, Math.floor(earSchoolOverallProgress.lessonsPassed / 4) + 1)} of 4 — ${earSchoolOverallProgress.completionPercentage}% complete`
+              : '4-week ear training curriculum'}
+          </Text>
           <View style={styles.progressRow}>
             <TerminalProgressBar progress={earSchoolProgress} />
           </View>

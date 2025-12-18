@@ -152,6 +152,61 @@ const initializeSchema = async (database: SQLite.SQLiteDatabase): Promise<void> 
       ON lesson_block_attempts(lesson_id);
     CREATE INDEX IF NOT EXISTS idx_lesson_block_attempts_block
       ON lesson_block_attempts(block_id);
+
+    -- Ear School lesson progress
+    CREATE TABLE IF NOT EXISTS ear_school_lessons (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      lesson_id TEXT UNIQUE NOT NULL,
+      attempts INTEGER DEFAULT 0,
+      best_score INTEGER DEFAULT 0,
+      passed INTEGER DEFAULT 0,
+      mastered INTEGER DEFAULT 0,
+      aced INTEGER DEFAULT 0,
+      challenge_mode INTEGER DEFAULT 0,
+      first_passed_at TEXT,
+      last_attempt_at TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_ear_school_lessons_lesson_id
+      ON ear_school_lessons(lesson_id);
+
+    -- Ear School week progress
+    CREATE TABLE IF NOT EXISTS ear_school_weeks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      week_id TEXT UNIQUE NOT NULL,
+      lessons_passed INTEGER DEFAULT 0,
+      assessment_score INTEGER DEFAULT 0,
+      challenge_mode INTEGER DEFAULT 0,
+      completed_at TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_ear_school_weeks_week_id
+      ON ear_school_weeks(week_id);
+
+    -- Ear School individual question attempts (for analytics)
+    CREATE TABLE IF NOT EXISTS ear_school_attempts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      lesson_id TEXT NOT NULL,
+      question_type TEXT,
+      key TEXT,
+      correct INTEGER,
+      response_time_ms INTEGER,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_ear_school_attempts_lesson
+      ON ear_school_attempts(lesson_id);
+    CREATE INDEX IF NOT EXISTS idx_ear_school_attempts_created
+      ON ear_school_attempts(created_at);
+
+    -- Ear School adaptive difficulty state
+    CREATE TABLE IF NOT EXISTS ear_school_adaptive (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      enabled INTEGER DEFAULT 1,
+      global_challenge_mode INTEGER DEFAULT 0,
+      aced_streak INTEGER DEFAULT 0,
+      last_score_below_85_at TEXT
+    );
   `);
 };
 
