@@ -7,26 +7,28 @@ appId: com.nagodasoft.scalescholar
 
 # Tap the Ear School card on home screen
 - tapOn:
-    text: ".*Ear School.*"
+    id: "ear-school-card"
 
 # Verify Ear School modal opened
-- assertVisible: "EAR SCHOOL"
-
-# Verify close button is present (X button - rendered as [ X ] by BracketButton)
 - assertVisible:
-    text: ".*X.*"
+    id: "ear-school-header-title"
+
+# Verify close button is present
+- assertVisible:
+    id: "ear-school-close-button"
 
 # Verify all three exercise options are present
 - assertVisible:
-    text: ".*Intervals.*"
+    id: "intervals-card"
 - assertVisible:
-    text: ".*Scale Degrees.*"
+    id: "scale-degrees-card"
 - assertVisible:
-    text: ".*Chord Qualities.*"
+    id: "chord-qualities-card"
 
 # Close the modal
 - tapOn:
-    text: ".*X.*"
+    id: "ear-school-close-button"
 
 # Verify we're back on home screen
-- assertVisible: "SCALE SCHOLAR"
+- assertVisible:
+    id: "home-header-title"

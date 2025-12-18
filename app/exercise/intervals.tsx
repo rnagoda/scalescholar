@@ -247,21 +247,23 @@ export default function IntervalsExercise() {
   const answerOptions = config.availableIntervals.map((interval) => ({
     value: interval,
     label: INTERVAL_SHORT_NAMES[interval],
+    testID: `answer-${INTERVAL_SHORT_NAMES[interval].toLowerCase().replace(/\s+/g, '-')}`,
   }));
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader
         title="INTERVALS"
+        testID="intervals-header"
         rightContent={
-          <BracketButton label="CLOSE" onPress={handleClose} />
+          <BracketButton label="CLOSE" onPress={handleClose} testID="intervals-close-button" />
         }
       />
       <Divider style={styles.divider} />
 
       <View style={styles.content}>
         <View style={styles.progressRow}>
-          <Text style={styles.questionNumber}>
+          <Text style={styles.questionNumber} testID="progress-indicator">
             {progress.current} / {progress.total}
           </Text>
           {score.total > 0 && (
@@ -277,8 +279,9 @@ export default function IntervalsExercise() {
             isPlaying={state === 'playing'}
             disabled={state === 'feedback'}
             label={state === 'ready' ? 'PLAY' : 'REPLAY'}
+            testID="play-button"
           />
-          <Text style={styles.playHint}>
+          <Text style={styles.playHint} testID="play-hint">
             {state === 'ready' && 'Tap to hear the interval'}
             {state === 'playing' && 'Listen carefully...'}
             {state === 'answering' && 'Select your answer below'}
@@ -312,6 +315,7 @@ export default function IntervalsExercise() {
               label="NEXT"
               onPress={handleNext}
               color={colors.accentGreen}
+              testID="next-button"
             />
           </View>
         )}

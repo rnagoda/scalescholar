@@ -67,8 +67,9 @@ export default function EarSchoolMenuScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader
         title="EAR SCHOOL"
+        testID="ear-school-header"
         rightContent={
-          <BracketButton label="X" onPress={handleClose} />
+          <BracketButton label="X" onPress={handleClose} testID="ear-school-close-button" />
         }
       />
       <Divider style={styles.divider} />
@@ -79,7 +80,7 @@ export default function EarSchoolMenuScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Intervals */}
-        <Card onPress={() => router.push('/exercise/intervals')}>
+        <Card onPress={() => router.push('/exercise/intervals')} testID="intervals-card">
           <Text style={styles.cardTitle}>Intervals</Text>
           <Text style={styles.cardDescription}>
             Learn to identify the distance between two notes played melodically or harmonically.
@@ -100,7 +101,7 @@ export default function EarSchoolMenuScreen() {
         </Card>
 
         {/* Scale Degrees */}
-        <Card onPress={() => router.push('/exercise/scale-degrees')}>
+        <Card onPress={() => router.push('/exercise/scale-degrees')} testID="scale-degrees-card">
           <Text style={styles.cardTitle}>Scale Degrees</Text>
           <Text style={styles.cardDescription}>
             Identify notes within a major scale context. Essential for understanding melody and harmony.
@@ -121,7 +122,7 @@ export default function EarSchoolMenuScreen() {
         </Card>
 
         {/* Chord Qualities */}
-        <Card onPress={() => router.push('/exercise/chords')}>
+        <Card onPress={() => router.push('/exercise/chords')} testID="chord-qualities-card">
           <Text style={styles.cardTitle}>Chord Qualities</Text>
           <Text style={styles.cardDescription}>
             Distinguish between major, minor, diminished, and other chord types by ear.

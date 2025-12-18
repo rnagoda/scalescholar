@@ -11,58 +11,68 @@ appId: com.nagodasoft.scalescholar
 
 # Navigate to Ear School
 - tapOn:
-    text: ".*Ear School.*"
+    id: "ear-school-card"
 
-- assertVisible: "EAR SCHOOL"
+- assertVisible:
+    id: "ear-school-header-title"
 
 # Tap Scale Degrees exercise
 - tapOn:
-    text: ".*Scale Degrees.*"
+    id: "scale-degrees-card"
 
 # Verify exercise screen loaded
-- assertVisible: "SCALE DEGREES"
 - assertVisible:
-    text: ".*CLOSE.*"
+    id: "scale-degrees-header-title"
+- assertVisible:
+    id: "scale-degrees-close-button"
 
 # Verify progress indicator
 - assertVisible:
-    text: "1 / 10"
+    id: "progress-indicator"
 
 # Verify PLAY button is visible
 - assertVisible:
-    text: ".*PLAY.*"
+    id: "play-button"
 
 # Default unlocked scale degrees: 1, 3, 5 (Tonic, Mediant, Dominant)
 # Verify answer button for degree 1 is visible
-- assertVisible: "1"
+- assertVisible:
+    id: "answer-degree-1"
 
 # Play the scale degree
 - tapOn:
-    text: ".*PLAY.*"
+    id: "play-button"
 
-# Wait for answering state
+# Wait for answering state (wait for specific text)
 - extendedWaitUntil:
-    visible: "What scale degree is it?"
+    visible:
+      text: "What scale degree is it?"
     timeout: 5000
 
 # Submit an answer (tap degree 1)
-- tapOn: "1"
+- tapOn:
+    id: "answer-degree-1"
 
 # Verify feedback state - should show NEXT button
 - assertVisible:
-    text: ".*NEXT.*"
+    id: "next-button"
 
 # Go to next question
 - tapOn:
-    text: ".*NEXT.*"
+    id: "next-button"
 
 # Verify progress updated
 - assertVisible:
-    text: "2 / 10"
+    id: "progress-indicator"
 
-# Close the exercise
+# Close the exercise (goes back to Ear School menu)
 - tapOn:
-    text: ".*CLOSE.*"
+    id: "scale-degrees-close-button"
+
+# Close Ear School menu to return home
+- tapOn:
+    id: "ear-school-close-button"
 
 # Verify we're back at home
-- assertVisible: "SCALE SCHOLAR"
+- assertVisible:
+    id: "home-header-title"

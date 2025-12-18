@@ -7,6 +7,7 @@ interface PlayButtonProps {
   isPlaying?: boolean;
   disabled?: boolean;
   label?: string;
+  testID?: string;
 }
 
 export const PlayButton: React.FC<PlayButtonProps> = ({
@@ -14,6 +15,7 @@ export const PlayButton: React.FC<PlayButtonProps> = ({
   isPlaying = false,
   disabled = false,
   label = 'PLAY',
+  testID = 'play-button',
 }) => {
   const buttonColor = disabled
     ? colors.textMuted
@@ -31,6 +33,7 @@ export const PlayButton: React.FC<PlayButtonProps> = ({
       onPress={onPress}
       disabled={disabled || isPlaying}
       activeOpacity={0.7}
+      testID={testID}
     >
       <View style={styles.content}>
         <Text style={[styles.icon, { color: buttonColor }]}>

@@ -12,60 +12,67 @@ appId: com.nagodasoft.scalescholar
 # First, do some activity to accumulate XP
 # Navigate to Ear School
 - tapOn:
-    text: ".*Ear School.*"
+    id: "ear-school-card"
 
-- assertVisible: "EAR SCHOOL"
+- assertVisible:
+    id: "ear-school-header-title"
 
 # Open Intervals
 - tapOn:
-    text: ".*Intervals.*"
+    id: "intervals-card"
 
 # Play and answer a question
 - tapOn:
-    text: ".*PLAY.*"
+    id: "play-button"
 
+# Wait for answering state (wait for specific text)
 - extendedWaitUntil:
-    visible: "Select your answer below"
+    visible:
+      text: "Select your answer below"
     timeout: 5000
 
 # Submit an answer
-- tapOn: "m3"
+- tapOn:
+    id: "answer-m3"
 
 # Close the exercise
 - tapOn:
-    text: ".*CLOSE.*"
+    id: "intervals-close-button"
 
 # Go back to home (close Ear School menu)
 - tapOn:
-    text: ".*X.*"
+    id: "ear-school-close-button"
 
 # Verify home screen
-- assertVisible: "SCALE SCHOLAR"
+- assertVisible:
+    id: "home-header-title"
 
-# Navigate to Settings (the "*" button in header)
+# Navigate to Settings
 - tapOn:
-    text: ".*\\*.*"
+    id: "settings-button"
 
 # Verify we're in Settings
-- assertVisible: "SETTINGS"
+- assertVisible:
+    id: "settings-header-title"
 
 # Look for reset button by scrolling down
 - scrollUntilVisible:
     element:
-      text: ".*RESET ALL.*"
+      id: "reset-all-button"
     direction: DOWN
     timeout: 10000
 
 - assertVisible:
-    text: ".*RESET ALL.*"
+    id: "reset-all-button"
 
 # Tap reset
 - tapOn:
-    text: ".*RESET ALL.*"
+    id: "reset-all-button"
 
 # Close settings
 - tapOn:
-    text: ".*X.*"
+    id: "settings-close-button"
 
 # Verify we're back at home
-- assertVisible: "SCALE SCHOLAR"
+- assertVisible:
+    id: "home-header-title"

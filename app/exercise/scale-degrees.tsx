@@ -249,6 +249,7 @@ export default function ScaleDegreesExercise() {
   const answerOptions = config.availableDegrees.map((degree) => ({
     value: degree,
     label: getScaleDegreeName(degree, config.useSolfege),
+    testID: `answer-degree-${degree}`,
   }));
 
   const isPlaying = state === 'playing_context' || state === 'playing_degree';
@@ -257,15 +258,16 @@ export default function ScaleDegreesExercise() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader
         title="SCALE DEGREES"
+        testID="scale-degrees-header"
         rightContent={
-          <BracketButton label="CLOSE" onPress={handleClose} />
+          <BracketButton label="CLOSE" onPress={handleClose} testID="scale-degrees-close-button" />
         }
       />
       <Divider style={styles.divider} />
 
       <View style={styles.content}>
         <View style={styles.progressRow}>
-          <Text style={styles.questionNumber}>
+          <Text style={styles.questionNumber} testID="progress-indicator">
             {progress.current} / {progress.total}
           </Text>
           {score.total > 0 && (
@@ -281,8 +283,9 @@ export default function ScaleDegreesExercise() {
             isPlaying={isPlaying}
             disabled={state === 'feedback'}
             label={state === 'ready' ? 'PLAY' : 'REPLAY'}
+            testID="play-button"
           />
-          <Text style={styles.playHint}>{getStatusText()}</Text>
+          <Text style={styles.playHint} testID="play-hint">{getStatusText()}</Text>
         </View>
 
         {state === 'feedback' && currentQuestion && (
@@ -314,6 +317,7 @@ export default function ScaleDegreesExercise() {
               label="NEXT"
               onPress={handleNext}
               color={colors.accentGreen}
+              testID="next-button"
             />
           </View>
         )}

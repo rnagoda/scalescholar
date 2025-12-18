@@ -125,8 +125,9 @@ export default function SettingsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader
         title="SETTINGS"
+        testID="settings-header"
         rightContent={
-          <BracketButton label="X" onPress={() => router.back()} />
+          <BracketButton label="X" onPress={() => router.back()} testID="settings-close-button" />
         }
       />
       <Divider style={styles.divider} />
@@ -230,6 +231,7 @@ export default function SettingsScreen() {
               label="RESET ALL"
               onPress={handleResetProgress}
               color={colors.accentPink}
+              testID="reset-all-button"
             />
           </View>
         </Card>
@@ -256,6 +258,7 @@ export default function SettingsScreen() {
             label="RESET TO DEFAULTS"
             onPress={resetToDefaults}
             color={colors.accentPink}
+            testID="reset-defaults-button"
           />
         </View>
 

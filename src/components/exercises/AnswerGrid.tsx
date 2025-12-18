@@ -8,6 +8,7 @@ type AnswerState = 'default' | 'selected' | 'correct' | 'incorrect';
 interface AnswerOption<T> {
   value: T;
   label: string;
+  testID?: string;
 }
 
 interface AnswerGridProps<T> {
@@ -74,6 +75,7 @@ export function AnswerGrid<T>({
               disabled={disabled}
               columns={columns}
               containerWidth={containerWidth}
+              testID={option.testID}
             />
           ))}
         </View>

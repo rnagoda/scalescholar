@@ -106,15 +106,18 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader
         title="SCALE SCHOLAR"
+        testID="home-header"
         rightContent={
           <View style={styles.headerButtons}>
             <BracketButton
               label="TUNE"
               onPress={() => router.push('/exercise/pitch-detector' as Href)}
+              testID="tune-button"
             />
             <BracketButton
               label="*"
               onPress={() => router.push('/settings')}
+              testID="settings-button"
             />
           </View>
         }
@@ -127,13 +130,13 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* XP Level Display */}
-        <View style={styles.levelRow}>
+        <View style={styles.levelRow} testID="xp-display">
           <View style={styles.levelInfo}>
-            <Text style={styles.levelLabel}>LEVEL {currentLevel}</Text>
+            <Text style={styles.levelLabel} testID="level-label">LEVEL {currentLevel}</Text>
             <Text style={styles.levelTitle}>{levelTitle}</Text>
           </View>
           <View style={styles.xpInfo}>
-            <Text style={styles.xpTotal}>{totalXP} XP</Text>
+            <Text style={styles.xpTotal} testID="xp-total">{totalXP} XP</Text>
             {xpToNextLevel > 0 && (
               <Text style={styles.xpToNext}>{xpToNextLevel} to next</Text>
             )}
@@ -144,7 +147,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Ear School */}
-        <Card onPress={() => router.push('/exercise/ear-school-menu' as Href)}>
+        <Card onPress={() => router.push('/exercise/ear-school-menu' as Href)} testID="ear-school-card">
           <Text style={styles.cardTitle}>Ear School</Text>
           <Text style={styles.cardDescription}>Train your ears.</Text>
           <View style={styles.progressRow}>
@@ -161,6 +164,7 @@ export default function HomeScreen() {
                 : '/exercise/voice-range-assessment' as Href
             )
           }
+          testID="voice-school-card"
         >
           <Text style={styles.cardTitle}>Voice School</Text>
           <Text style={styles.cardDescription}>Train your voice.</Text>
@@ -170,7 +174,7 @@ export default function HomeScreen() {
         </Card>
 
         {/* Music School */}
-        <Card onPress={() => router.push('/exercise/music-school-menu' as Href)}>
+        <Card onPress={() => router.push('/exercise/music-school-menu' as Href)} testID="music-school-card">
           <Text style={styles.cardTitle}>Music School</Text>
           <Text style={styles.cardDescription}>Train your brain.</Text>
           <View style={styles.progressRow}>

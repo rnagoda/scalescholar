@@ -5,15 +5,19 @@ import { colors, typography, spacing } from '../../theme';
 interface ScreenHeaderProps {
   title: string;
   rightContent?: React.ReactNode;
+  testID?: string;
 }
 
 export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   title,
   rightContent,
+  testID,
 }) => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+    <View style={styles.container} testID={testID}>
+      <Text style={styles.title} testID={testID ? `${testID}-title` : undefined}>
+        {title}
+      </Text>
       {rightContent && <View style={styles.rightContent}>{rightContent}</View>}
     </View>
   );

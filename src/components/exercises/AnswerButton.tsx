@@ -11,8 +11,9 @@ interface AnswerButtonProps {
   disabled?: boolean;
   /** Number of columns in the grid (used for width calculation) */
   columns?: number;
-  /** Actual container width (measured by AnswerGrid) */
-  containerWidth: number;
+  /** Actual container width (measured by AnswerGrid). If not provided, uses flex. */
+  containerWidth?: number;
+  testID?: string;
 }
 
 export const AnswerButton: React.FC<AnswerButtonProps> = ({
@@ -22,15 +23,21 @@ export const AnswerButton: React.FC<AnswerButtonProps> = ({
   disabled = false,
   columns = 2,
   containerWidth,
+  testID,
 }) => {
   // Calculate button width based on actual container width
   // Gap between buttons (spacing.sm = 8) * (columns - 1)
   // Border width (1px left + 1px right = 2px per button)
-  const totalGaps = spacing.sm * (columns - 1);
-  const borderWidth = 1; // matches styles.container.borderWidth
-  const totalBorders = (borderWidth * 2) * columns;
-  const availableWidth = containerWidth - totalGaps - totalBorders;
-  const buttonWidth = Math.floor(availableWidth / columns);
+  // If containerWidth is not provided, use undefined (flex layout)
+  const buttonWidth = containerWidth !== undefined
+    ? (() => {
+        const totalGaps = spacing.sm * (columns - 1);
+        const borderWidth = 1; // matches styles.container.borderWidth
+        const totalBorders = (borderWidth * 2) * columns;
+        const availableWidth = containerWidth - totalGaps - totalBorders;
+        return Math.floor(availableWidth / columns);
+      })()
+    : undefined;
 
   const getColors = () => {
     switch (state) {
@@ -77,6 +84,7 @@ export const AnswerButton: React.FC<AnswerButtonProps> = ({
       onPress={onPress}
       disabled={disabled}
       activeOpacity={0.7}
+      testID={testID}
     >
       <Text style={[styles.label, { color: stateColors.text }]}>{label}</Text>
     </TouchableOpacity>

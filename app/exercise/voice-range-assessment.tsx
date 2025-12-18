@@ -95,7 +95,7 @@ export default function VoiceRangeAssessment() {
       case 'intro':
         return (
           <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>Find Your Vocal Range</Text>
+            <Text style={styles.stepTitle} testID="voice-range-intro-title">Find Your Vocal Range</Text>
             <Text style={styles.stepDescription}>
               This quick assessment will determine your singing range.
               We'll find your lowest note, highest note, and comfortable range.
@@ -109,6 +109,7 @@ export default function VoiceRangeAssessment() {
                 label="BEGIN"
                 onPress={() => setAssessmentStep('lowest')}
                 color={colors.accentGreen}
+                testID="begin-button"
               />
             </View>
           </View>
@@ -395,8 +396,9 @@ export default function VoiceRangeAssessment() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader
         title="VOICE RANGE"
+        testID="voice-range-header"
         rightContent={
-          <BracketButton label="CLOSE" onPress={handleClose} />
+          <BracketButton label="CLOSE" onPress={handleClose} testID="voice-range-close-button" />
         }
       />
       <Divider style={styles.divider} />
