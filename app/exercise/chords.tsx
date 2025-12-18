@@ -236,6 +236,7 @@ export default function ChordsExercise() {
   const answerOptions = config.availableQualities.map((quality) => ({
     value: quality,
     label: getChordQualityName(quality, false),
+    testID: `answer-${quality.toLowerCase()}`,
   }));
 
   const isPlaying = state === 'playing';
@@ -244,15 +245,16 @@ export default function ChordsExercise() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader
         title="CHORD QUALITY"
+        testID="chords-header"
         rightContent={
-          <BracketButton label="CLOSE" onPress={handleClose} />
+          <BracketButton label="CLOSE" onPress={handleClose} testID="chords-close-button" />
         }
       />
       <Divider style={styles.divider} />
 
       <View style={styles.content}>
         <View style={styles.progressRow}>
-          <Text style={styles.questionNumber}>
+          <Text style={styles.questionNumber} testID="progress-indicator">
             {progress.current} / {progress.total}
           </Text>
           {score.total > 0 && (
@@ -268,8 +270,9 @@ export default function ChordsExercise() {
             isPlaying={isPlaying}
             disabled={state === 'feedback'}
             label={state === 'ready' ? 'PLAY' : 'REPLAY'}
+            testID="play-button"
           />
-          <Text style={styles.playHint}>{getStatusText()}</Text>
+          <Text style={styles.playHint} testID="play-hint">{getStatusText()}</Text>
         </View>
 
         {state === 'feedback' && currentQuestion && (
@@ -302,6 +305,7 @@ export default function ChordsExercise() {
               label="NEXT"
               onPress={handleNext}
               color={colors.accentGreen}
+              testID="next-button"
             />
           </View>
         )}

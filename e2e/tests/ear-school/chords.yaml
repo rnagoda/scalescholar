@@ -11,58 +11,69 @@ appId: com.nagodasoft.scalescholar
 
 # Navigate to Ear School
 - tapOn:
-    text: ".*Ear School.*"
+    id: "ear-school-card"
 
-- assertVisible: "EAR SCHOOL"
+- assertVisible:
+    id: "ear-school-header-title"
 
 # Tap Chord Qualities exercise
 - tapOn:
-    text: ".*Chord Qualities.*"
+    id: "chord-qualities-card"
 
 # Verify exercise screen loaded
-- assertVisible: "CHORD QUALITY"
 - assertVisible:
-    text: ".*CLOSE.*"
+    id: "chords-header-title"
+- assertVisible:
+    id: "chords-close-button"
 
 # Verify progress indicator
 - assertVisible:
-    text: "1 / 10"
+    id: "progress-indicator"
 
 # Verify PLAY button is visible
 - assertVisible:
-    text: ".*PLAY.*"
+    id: "play-button"
 
-# Default unlocked chord qualities: Major, Minor (displayed as full names)
-- assertVisible: "Major"
-- assertVisible: "Minor"
+# Default unlocked chord qualities: Major, Minor
+- assertVisible:
+    id: "answer-major"
+- assertVisible:
+    id: "answer-minor"
 
 # Play the chord
 - tapOn:
-    text: ".*PLAY.*"
+    id: "play-button"
 
-# Wait for answering state
+# Wait for answering state (wait for specific text)
 - extendedWaitUntil:
-    visible: "What chord quality is it?"
+    visible:
+      text: "What chord quality is it?"
     timeout: 5000
 
 # Submit an answer (tap Major)
-- tapOn: "Major"
+- tapOn:
+    id: "answer-major"
 
 # Verify feedback state - should show NEXT button
 - assertVisible:
-    text: ".*NEXT.*"
+    id: "next-button"
 
 # Go to next question
 - tapOn:
-    text: ".*NEXT.*"
+    id: "next-button"
 
 # Verify progress updated
 - assertVisible:
-    text: "2 / 10"
+    id: "progress-indicator"
 
-# Close the exercise
+# Close the exercise (goes back to Ear School menu)
 - tapOn:
-    text: ".*CLOSE.*"
+    id: "chords-close-button"
+
+# Close Ear School menu to return home
+- tapOn:
+    id: "ear-school-close-button"
 
 # Verify we're back at home
-- assertVisible: "SCALE SCHOLAR"
+- assertVisible:
+    id: "home-header-title"

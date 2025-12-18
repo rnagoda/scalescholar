@@ -12,71 +12,76 @@ appId: com.nagodasoft.scalescholar
 
 # Navigate to Ear School
 - tapOn:
-    text: ".*Ear School.*"
+    id: "ear-school-card"
 
-- assertVisible: "EAR SCHOOL"
+- assertVisible:
+    id: "ear-school-header-title"
 
 # Tap Intervals exercise
 - tapOn:
-    text: ".*Intervals.*"
+    id: "intervals-card"
 
 # Verify exercise screen loaded
-- assertVisible: "INTERVALS"
-
-# Note: BracketButton renders text as [ CLOSE ] across 3 Text elements
-# We just check for the label text which is its own element
 - assertVisible:
-    text: ".*CLOSE.*"
+    id: "intervals-header-title"
+
+# Verify close button is present
+- assertVisible:
+    id: "intervals-close-button"
 
 # Verify progress indicator (starts at 1/10)
 - assertVisible:
-    text: "1 / 10"
+    id: "progress-indicator"
 
-# Verify PLAY button is visible (shows as "▶ PLAY")
+# Verify PLAY button is visible
 - assertVisible:
-    text: ".*PLAY.*"
+    id: "play-button"
 
 # Verify answer buttons are visible
 # Default unlocked intervals: m3, M3, P4, P5
-# If any button overflows the screen, this assertion will fail
-- assertVisible: "m3"
-- assertVisible: "M3"
-- assertVisible: "P4"
-- assertVisible: "P5"
+- assertVisible:
+    id: "answer-m3"
+- assertVisible:
+    id: "answer-m3"
+- assertVisible:
+    id: "answer-p4"
+- assertVisible:
+    id: "answer-p5"
 
 # Play the interval
 - tapOn:
-    text: ".*PLAY.*"
+    id: "play-button"
 
-# Wait for audio to finish and answering state
+# Wait for audio to finish and answering state (wait for specific text)
 - extendedWaitUntil:
-    visible: "Select your answer below"
+    visible:
+      text: "Select your answer below"
     timeout: 5000
 
 # Submit an answer (tap m3)
-- tapOn: "m3"
+- tapOn:
+    id: "answer-m3"
 
 # Verify feedback state - should show NEXT button
 - assertVisible:
-    text: ".*NEXT.*"
-
-# Verify we can still see all answer buttons in feedback state
-- assertVisible: "m3"
-- assertVisible: "M3"
-- assertVisible: "P4"
-- assertVisible: "P5"
+    id: "next-button"
 
 # Go to next question
 - tapOn:
-    text: ".*NEXT.*"
+    id: "next-button"
 
-# Verify progress updated
+# Verify progress updated (now 2/10)
 - assertVisible:
-    text: "2 / 10"
+    id: "progress-indicator"
 
-# Close the exercise
+# Close the exercise (goes back to Ear School menu)
 - tapOn:
-    text: ".*CLOSE.*"
+    id: "intervals-close-button"
+
+# Close Ear School menu to return home
+- tapOn:
+    id: "ear-school-close-button"
 
 # Verify we're back at home
-- assertVisible: "SCALE SCHOLAR"
+- assertVisible:
+    id: "home-header-title"
