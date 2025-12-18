@@ -143,6 +143,81 @@ const generateSameDifferentQuestion = (
   };
 };
 
+/**
+ * Common 3-note patterns using scale degrees 1, 2, 3
+ */
+const BASIC_PATTERNS: readonly number[][] = [
+  [1, 2, 3], // Ascending
+  [3, 2, 1], // Descending
+  [1, 3, 2], // Skip up, step down
+  [2, 1, 3], // Step down, skip up
+  [1, 2, 1], // Neighbor
+  [3, 2, 3], // Upper neighbor
+  [2, 3, 1], // Step up, skip down
+  [2, 1, 2], // Lower neighbor
+];
+
+/**
+ * Format pattern for display (e.g., [1, 2, 3] -> "1-2-3")
+ */
+const formatPattern = (pattern: readonly number[]): string => pattern.join('-');
+
+/**
+ * Question generator for pattern-match exercises
+ */
+const generatePatternMatchQuestion = (
+  keyPool: readonly string[],
+  previousQuestion?: EarSchoolQuestion
+): EarSchoolQuestion => {
+  const key = pickRandom(keyPool);
+
+  // Pick 4 distinct patterns for options
+  let availablePatterns = [...BASIC_PATTERNS];
+
+  // Try to avoid repeating the same correct answer
+  if (previousQuestion?.audioParams.pattern) {
+    const prevPattern = previousQuestion.audioParams.pattern;
+    availablePatterns = availablePatterns.filter(
+      (p) => formatPattern(p) !== formatPattern(prevPattern)
+    );
+  }
+
+  // Select the correct pattern
+  const correctPattern = pickRandom(availablePatterns);
+
+  // Get 3 more distractors
+  const distractors = shuffle(
+    availablePatterns.filter((p) => formatPattern(p) !== formatPattern(correctPattern))
+  ).slice(0, 3);
+
+  // Combine and shuffle options
+  const allPatterns = shuffle([correctPattern, ...distractors]);
+
+  const options: EarSchoolAnswerOption[] = allPatterns.map((pattern) => {
+    const patternStr = formatPattern(pattern);
+    return {
+      id: `pattern-${patternStr}`,
+      label: patternStr,
+      value: patternStr,
+    };
+  });
+
+  return {
+    id: generateQuestionId(),
+    type: 'pattern-match',
+    prompt: 'What pattern did you hear?',
+    key,
+    audioParams: {
+      key,
+      pattern: [...correctPattern],
+      playContext: true,
+    },
+    options,
+    correctAnswerId: `pattern-${formatPattern(correctPattern)}`,
+    hint: 'Listen for whether the melody goes up, down, or returns to the same note.',
+  };
+};
+
 // ============================================================================
 // Week 1: Basic Solfege & Pitch Awareness
 // ============================================================================
@@ -193,8 +268,7 @@ const week1Lessons: EarSchoolLessonDef[] = [
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
-    generateQuestion: (keyPool, prev) =>
-      generateScaleDegreeQuestion(keyPool, [1, 2, 3], prev),
+    generateQuestion: (keyPool, prev) => generatePatternMatchQuestion(keyPool, prev),
   },
 ];
 

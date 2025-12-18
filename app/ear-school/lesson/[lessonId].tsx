@@ -14,7 +14,9 @@ import { ScreenHeader, BracketButton, Divider, Card } from '@/src/components/com
 import { PlayButton, AnswerGrid } from '@/src/components/exercises';
 import { useEarSchoolStore, useEarSchoolSessionTransition } from '@/src/stores/useEarSchoolStore';
 import { getLessonById } from '@/src/content/ear-school/curriculum';
-import { EAR_SCHOOL_THRESHOLDS } from '@/src/types/ear-school';
+import { EAR_SCHOOL_THRESHOLDS, EarSchoolQuestion, EarSchoolAudioParams } from '@/src/types/ear-school';
+import { AudioEngine } from '@/src/audio/AudioEngine';
+import { keyNameToMidi, ScaleDegree, MAJOR_SCALE } from '@/src/utils/music';
 
 export default function LessonPlayerScreen() {
   const router = useRouter();
@@ -64,13 +66,107 @@ export default function LessonPlayerScreen() {
     }
   };
 
-  const handlePlay = () => {
+  /**
+   * Play audio for the current question based on exercise type
+   */
+  const playQuestionAudio = async (question: EarSchoolQuestion): Promise<void> => {
+    const { type, audioParams, key } = question;
+    const keyRootMidi = keyNameToMidi(key);
+
+    try {
+      switch (type) {
+        case 'scale-degree-id': {
+          // Play key context, then the target scale degree
+          const degrees = audioParams.scaleDegrees || [1];
+          const targetDegree = degrees[0] as ScaleDegree;
+          const contextType = audioParams.playContext ? 'triad' : 'triad';
+          await AudioEngine.playScaleDegreeWithContext(keyRootMidi, targetDegree, contextType);
+          break;
+        }
+
+        case 'interval-id': {
+          // Play the interval
+          const interval = audioParams.interval || 7; // Default to P5
+          const direction = audioParams.direction || 'ascending';
+          const ascending = direction === 'ascending';
+          const melodic = direction !== 'harmonic';
+          await AudioEngine.playInterval(keyRootMidi, interval, ascending, melodic);
+          break;
+        }
+
+        case 'same-different': {
+          // Play two notes - same or different
+          const rootMidi = audioParams.rootMidi || 60;
+          const interval = audioParams.interval || 0;
+          await AudioEngine.playMidiNote(rootMidi);
+          await new Promise(resolve => setTimeout(resolve, 600));
+          await AudioEngine.playMidiNote(rootMidi + interval);
+          break;
+        }
+
+        case 'identify-tonic': {
+          // Play a short phrase, user identifies which note is "Do"
+          // For now: play context + target note
+          const degrees = audioParams.scaleDegrees || [1];
+          const targetDegree = degrees[0] as ScaleDegree;
+          await AudioEngine.playScaleDegreeWithContext(keyRootMidi, targetDegree, 'triad');
+          break;
+        }
+
+        case 'pattern-match': {
+          // Play a pattern of scale degrees
+          const pattern = audioParams.pattern || [1, 2, 3];
+          await AudioEngine.playKeyContext(keyRootMidi, 'triad');
+          await new Promise(resolve => setTimeout(resolve, 400));
+          for (const degree of pattern) {
+            await AudioEngine.playScaleDegree(keyRootMidi, degree as ScaleDegree);
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
+          break;
+        }
+
+        case 'step-type': {
+          // Play two adjacent notes - whole step or half step
+          const rootMidi = audioParams.rootMidi || 60;
+          const interval = audioParams.interval || 2; // 2 = whole step, 1 = half step
+          await AudioEngine.playMidiNote(rootMidi);
+          await new Promise(resolve => setTimeout(resolve, 500));
+          await AudioEngine.playMidiNote(rootMidi + interval);
+          break;
+        }
+
+        case 'scale-quality': {
+          // Play a full scale - major or minor
+          const scaleType = audioParams.scaleType || 'major';
+          const intervals = scaleType === 'major'
+            ? MAJOR_SCALE
+            : [0, 2, 3, 5, 7, 8, 10]; // Natural minor
+          await AudioEngine.playScale(keyRootMidi, intervals, 0.4);
+          break;
+        }
+
+        default: {
+          // Fallback: play a simple note
+          await AudioEngine.playMidiNote(keyRootMidi);
+          break;
+        }
+      }
+    } catch (error) {
+      console.warn('Audio playback error:', error);
+    }
+  };
+
+  const handlePlay = async () => {
+    if (!session) return;
+
     playQuestion();
-    // Simulate audio playing - in real implementation, this would be called
-    // after audio finishes. For now, transition after a delay.
-    setTimeout(() => {
-      transitionToAnswering();
-    }, 1500);
+
+    // Get current question and play its audio
+    const currentQuestion = session.questions[session.currentIndex];
+    await playQuestionAudio(currentQuestion);
+
+    // Transition to answering state after audio completes
+    transitionToAnswering();
   };
 
   const handleAnswer = async (answerId: string) => {

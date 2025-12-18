@@ -155,6 +155,46 @@ export function randomMidiNote(minMidi: number, maxMidi: number): number {
 }
 
 /**
+ * Note name to MIDI offset from C
+ */
+const NOTE_NAME_TO_OFFSET: Record<string, number> = {
+  'C': 0, 'C#': 1, 'Db': 1,
+  'D': 2, 'D#': 3, 'Eb': 3,
+  'E': 4, 'Fb': 4, 'E#': 5,
+  'F': 5, 'F#': 6, 'Gb': 6,
+  'G': 7, 'G#': 8, 'Ab': 8,
+  'A': 9, 'A#': 10, 'Bb': 10,
+  'B': 11, 'Cb': 11, 'B#': 0,
+};
+
+/**
+ * Convert a key name like "C major", "G major", "A minor" to MIDI root note
+ * Returns MIDI note in octave 4 (middle octave)
+ * @param keyName - Key name (e.g., "C major", "F# minor", "Bb major")
+ * @returns MIDI note number for the root, or 60 (middle C) if parsing fails
+ */
+export function keyNameToMidi(keyName: string): number {
+  // Parse key name: "C major" -> ["C", "major"], "F# minor" -> ["F#", "minor"]
+  const parts = keyName.trim().split(/\s+/);
+  if (parts.length < 1) return MIDDLE_C;
+
+  const noteName = parts[0];
+  const offset = NOTE_NAME_TO_OFFSET[noteName];
+
+  if (offset === undefined) return MIDDLE_C;
+
+  // Return MIDI note in octave 4 (C4 = 60)
+  return MIDDLE_C + offset;
+}
+
+/**
+ * Check if a key is minor based on its name
+ */
+export function isMinorKey(keyName: string): boolean {
+  return keyName.toLowerCase().includes('minor');
+}
+
+/**
  * Generate a random interval from the given set
  */
 export function randomInterval(intervals: Interval[]): Interval {
