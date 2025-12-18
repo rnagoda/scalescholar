@@ -35,6 +35,10 @@ export default function EarSchoolHomeScreen() {
     router.back();
   };
 
+  const handleOpenPractice = () => {
+    router.push('/ear-school/practice' as Href);
+  };
+
   const handleOpenSection = (sectionId: string) => {
     router.push(`/ear-school/section/${sectionId}` as Href);
   };
@@ -82,11 +86,18 @@ export default function EarSchoolHomeScreen() {
         title="EAR SCHOOL"
         testID="ear-school-header-title"
         rightContent={
-          <BracketButton
-            label="X"
-            onPress={handleClose}
-            testID="ear-school-close-button"
-          />
+          <>
+            <BracketButton
+              label="TRAIN"
+              onPress={handleOpenPractice}
+              testID="ear-school-practice-button"
+            />
+            <BracketButton
+              label="X"
+              onPress={handleClose}
+              testID="ear-school-close-button"
+            />
+          </>
         }
       />
       <Divider style={styles.divider} />
