@@ -1,7 +1,7 @@
 /**
  * Ear School Home Screen
  *
- * Displays the 4-week curriculum with progress indicators.
+ * Displays the 4-section curriculum with progress indicators.
  */
 
 import React, { useCallback } from 'react';
@@ -18,7 +18,7 @@ export default function EarSchoolHomeScreen() {
   const router = useRouter();
   const {
     lessonProgress,
-    weekProgress,
+    sectionProgress,
     overallProgress,
     loadProgress,
     isLoading,
@@ -35,23 +35,23 @@ export default function EarSchoolHomeScreen() {
     router.back();
   };
 
-  const handleOpenWeek = (weekId: string) => {
-    router.push(`/ear-school/week/${weekId}` as Href);
+  const handleOpenSection = (sectionId: string) => {
+    router.push(`/ear-school/section/${sectionId}` as Href);
   };
 
-  const getWeekProgressDots = (weekId: string, lessonCount: number) => {
-    const weekNum = parseInt(weekId.split('-').pop() || '0', 10);
+  const getSectionProgressDots = (sectionId: string, lessonCount: number) => {
+    const sectionNum = parseInt(sectionId.split('-').pop() || '0', 10);
     let passedCount = 0;
 
-    // Count passed lessons for this week
+    // Count passed lessons for this section
     for (const [lessonId, progress] of lessonProgress) {
-      if (lessonId.startsWith(`ear-school-${weekNum}.`) && progress.passed) {
+      if (lessonId.startsWith(`ear-school-${sectionNum}.`) && progress.passed) {
         passedCount++;
       }
     }
 
     // Check assessment
-    const assessmentProgress = lessonProgress.get(`ear-school-${weekNum}-assessment`);
+    const assessmentProgress = lessonProgress.get(`ear-school-${sectionNum}-assessment`);
     const assessmentPassed = assessmentProgress?.passed ?? false;
 
     return (
@@ -110,9 +110,9 @@ export default function EarSchoolHomeScreen() {
               <View style={styles.progressDivider} />
               <View style={styles.progressStat}>
                 <Text style={styles.progressNumber}>
-                  {overallProgress.weeksCompleted}/{overallProgress.totalWeeks}
+                  {overallProgress.sectionsCompleted}/{overallProgress.totalSections}
                 </Text>
-                <Text style={styles.progressLabel}>Weeks</Text>
+                <Text style={styles.progressLabel}>Sections</Text>
               </View>
               <View style={styles.progressDivider} />
               <View style={styles.progressStat}>
@@ -125,39 +125,39 @@ export default function EarSchoolHomeScreen() {
           </Card>
         )}
 
-        {/* Week List */}
-        {EAR_SCHOOL_CURRICULUM.weeks.map((week) => {
-          const weekProg = weekProgress.get(week.id);
-          const isCompleted = weekProg?.completedAt !== null;
+        {/* Section List */}
+        {EAR_SCHOOL_CURRICULUM.sections.map((section) => {
+          const sectionProg = sectionProgress.get(section.id);
+          const isCompleted = sectionProg?.completedAt !== null;
 
           return (
             <TouchableOpacity
-              key={week.id}
-              style={styles.weekCard}
-              onPress={() => handleOpenWeek(week.id)}
+              key={section.id}
+              style={styles.sectionCard}
+              onPress={() => handleOpenSection(section.id)}
               activeOpacity={0.7}
-              testID={`week-${week.number}-card`}
+              testID={`section-${section.number}-card`}
             >
-              <View style={styles.weekHeader}>
-                <View style={styles.weekNumber}>
-                  <Text style={styles.weekNumberText}>{week.number}</Text>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>{section.number}</Text>
                 </View>
-                <View style={styles.weekInfo}>
-                  <Text style={styles.weekTitle}>WEEK {week.number}</Text>
-                  <Text style={styles.weekSubtitle}>{week.title}</Text>
+                <View style={styles.sectionInfo}>
+                  <Text style={styles.sectionLabel}>SECTION {section.number}</Text>
+                  <Text style={styles.sectionSubtitle}>{section.title}</Text>
                 </View>
                 {isCompleted && (
                   <Text style={styles.completedIcon}>✓</Text>
                 )}
               </View>
 
-              <Text style={styles.weekDescription}>{week.description}</Text>
+              <Text style={styles.sectionDescription}>{section.description}</Text>
 
-              {getWeekProgressDots(week.id, week.lessons.length)}
+              {getSectionProgressDots(section.id, section.lessons.length)}
 
-              <View style={styles.weekLessonPreview}>
+              <View style={styles.sectionLessonPreview}>
                 <Text style={styles.lessonPreviewText}>
-                  {week.lessons.length} lessons + assessment
+                  {section.lessons.length} lessons + assessment
                 </Text>
               </View>
             </TouchableOpacity>
@@ -166,7 +166,7 @@ export default function EarSchoolHomeScreen() {
 
         {/* Footer Note */}
         <Text style={styles.footerNote}>
-          All weeks are accessible. Tap any week to view lessons.
+          All sections are accessible. Tap any section to view lessons.
         </Text>
       </ScrollView>
     </SafeAreaView>
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: colors.cardBorder,
   },
-  weekCard: {
+  sectionCard: {
     backgroundColor: colors.cardBackground,
     borderWidth: 1,
     borderColor: colors.cardBorder,
@@ -233,12 +233,12 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     marginBottom: spacing.md,
   },
-  weekHeader: {
+  sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: spacing.md,
   },
-  weekNumber: {
+  sectionNumber: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -249,21 +249,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: spacing.md,
   },
-  weekNumberText: {
+  sectionNumberText: {
     fontFamily: fonts.monoBold,
     fontSize: 16,
     color: colors.textPrimary,
   },
-  weekInfo: {
+  sectionInfo: {
     flex: 1,
   },
-  weekTitle: {
+  sectionLabel: {
     fontFamily: fonts.monoBold,
     fontSize: 12,
     color: colors.textMuted,
     letterSpacing: 1.5,
   },
-  weekSubtitle: {
+  sectionSubtitle: {
     fontFamily: fonts.monoBold,
     fontSize: 15,
     color: colors.textPrimary,
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: colors.accentGreen,
   },
-  weekDescription: {
+  sectionDescription: {
     fontFamily: fonts.mono,
     fontSize: 13,
     color: colors.textSecondary,
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginLeft: spacing.xs,
   },
-  weekLessonPreview: {
+  sectionLessonPreview: {
     borderTopWidth: 1,
     borderTopColor: colors.cardBorder,
     paddingTop: spacing.md,

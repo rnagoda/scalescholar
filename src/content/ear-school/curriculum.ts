@@ -1,16 +1,16 @@
 /**
  * Ear School Curriculum
  *
- * 4-week structured curriculum for ear training.
- * Week 1: Basic Solfege & Pitch Awareness
- * Week 2: Perfect Intervals
- * Week 3: Major Scale Construction
- * Week 4: Simple Rhythms
+ * 4-section structured curriculum for ear training.
+ * Section 1: Basic Solfege & Pitch Awareness
+ * Section 2: Perfect Intervals
+ * Section 3: Major Scale Construction
+ * Section 4: Simple Rhythms
  */
 
 import {
   EarSchoolCurriculum,
-  EarSchoolWeekDef,
+  EarSchoolSectionDef,
   EarSchoolLessonDef,
   EarSchoolQuestion,
   EarSchoolAnswerOption,
@@ -219,14 +219,14 @@ const generatePatternMatchQuestion = (
 };
 
 // ============================================================================
-// Week 1: Basic Solfege & Pitch Awareness
+// Section 1: Basic Solfege & Pitch Awareness
 // ============================================================================
 
-const week1Lessons: EarSchoolLessonDef[] = [
+const section1Lessons: EarSchoolLessonDef[] = [
   {
     id: 'ear-school-1.1',
-    weekId: 'ear-school-week-1',
-    weekNumber: 1,
+    sectionId: 'ear-school-section-1',
+    sectionNumber: 1,
     lessonNumber: 1,
     title: 'Finding Do',
     subtitle: 'Identify the tonal center',
@@ -241,8 +241,8 @@ const week1Lessons: EarSchoolLessonDef[] = [
   },
   {
     id: 'ear-school-1.2',
-    weekId: 'ear-school-week-1',
-    weekNumber: 1,
+    sectionId: 'ear-school-section-1',
+    sectionNumber: 1,
     lessonNumber: 2,
     title: 'Do-Re-Mi Recognition',
     subtitle: 'Identify scale degrees 1, 2, 3',
@@ -257,14 +257,14 @@ const week1Lessons: EarSchoolLessonDef[] = [
   },
   {
     id: 'ear-school-1.3',
-    weekId: 'ear-school-week-1',
-    weekNumber: 1,
+    sectionId: 'ear-school-section-1',
+    sectionNumber: 1,
     lessonNumber: 3,
     title: 'Do-Re-Mi Patterns',
     subtitle: 'Match 3-note melodic patterns',
     concept: 'Recognizing melodic patterns within the trichord',
     exerciseType: 'pattern-match',
-    keyPool: KEY_POOLS.WEEK_1,
+    keyPool: KEY_POOLS.SECTION_1,
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
@@ -272,16 +272,16 @@ const week1Lessons: EarSchoolLessonDef[] = [
   },
 ];
 
-const week1Assessment: EarSchoolLessonDef = {
+const section1Assessment: EarSchoolLessonDef = {
   id: 'ear-school-1-assessment',
-  weekId: 'ear-school-week-1',
-  weekNumber: 1,
+  sectionId: 'ear-school-section-1',
+  sectionNumber: 1,
   lessonNumber: 4,
-  title: 'Week 1 Assessment',
+  title: 'Section 1 Assessment',
   subtitle: 'Test your solfege skills',
-  concept: 'Assessment covering all Week 1 concepts',
+  concept: 'Assessment covering all Section 1 concepts',
   exerciseType: 'scale-degree-id',
-  keyPool: KEY_POOLS.WEEK_1,
+  keyPool: KEY_POOLS.SECTION_1,
   questionCount: 15,
   passThreshold: 80,
   isAssessment: true,
@@ -289,17 +289,17 @@ const week1Assessment: EarSchoolLessonDef = {
     generateScaleDegreeQuestion(keyPool, [1, 2, 3], prev),
 };
 
-const week1: EarSchoolWeekDef = {
-  id: 'ear-school-week-1',
+const section1: EarSchoolSectionDef = {
+  id: 'ear-school-section-1',
   number: 1,
   title: 'Basic Solfege & Pitch Awareness',
   description: 'Recognize and identify Do-Re-Mi (scale degrees 1-2-3) by ear in various keys',
-  lessons: week1Lessons,
-  assessment: week1Assessment,
+  lessons: section1Lessons,
+  assessment: section1Assessment,
 };
 
 // ============================================================================
-// Week 2: Perfect Intervals
+// Section 2: Perfect Intervals
 // ============================================================================
 
 const PERFECT_INTERVALS = [
@@ -308,17 +308,17 @@ const PERFECT_INTERVALS = [
   { semitones: 12, name: 'Octave' },
 ];
 
-const week2Lessons: EarSchoolLessonDef[] = [
+const section2Lessons: EarSchoolLessonDef[] = [
   {
     id: 'ear-school-2.1',
-    weekId: 'ear-school-week-2',
-    weekNumber: 2,
+    sectionId: 'ear-school-section-2',
+    sectionNumber: 2,
     lessonNumber: 1,
     title: 'Unison vs. Different',
     subtitle: 'Same pitch recognition',
     concept: 'Same pitch recognition',
     exerciseType: 'same-different',
-    keyPool: KEY_POOLS.WEEK_2,
+    keyPool: KEY_POOLS.SECTION_2,
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
@@ -326,14 +326,14 @@ const week2Lessons: EarSchoolLessonDef[] = [
   },
   {
     id: 'ear-school-2.2',
-    weekId: 'ear-school-week-2',
-    weekNumber: 2,
+    sectionId: 'ear-school-section-2',
+    sectionNumber: 2,
     lessonNumber: 2,
     title: 'Perfect 5th (Do-Sol)',
     subtitle: 'The stable, open sound of P5',
     concept: 'The stable, open sound of P5',
     exerciseType: 'interval-id',
-    keyPool: KEY_POOLS.WEEK_2,
+    keyPool: KEY_POOLS.SECTION_2,
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
@@ -342,14 +342,14 @@ const week2Lessons: EarSchoolLessonDef[] = [
   },
   {
     id: 'ear-school-2.3',
-    weekId: 'ear-school-week-2',
-    weekNumber: 2,
+    sectionId: 'ear-school-section-2',
+    sectionNumber: 2,
     lessonNumber: 3,
     title: 'Perfect Interval Discrimination',
     subtitle: 'Distinguish all three perfect intervals',
     concept: 'Distinguishing all three perfect intervals in any direction',
     exerciseType: 'interval-id',
-    keyPool: KEY_POOLS.WEEK_2,
+    keyPool: KEY_POOLS.SECTION_2,
     questionCount: 15,
     passThreshold: 70,
     isAssessment: false,
@@ -358,16 +358,16 @@ const week2Lessons: EarSchoolLessonDef[] = [
   },
 ];
 
-const week2Assessment: EarSchoolLessonDef = {
+const section2Assessment: EarSchoolLessonDef = {
   id: 'ear-school-2-assessment',
-  weekId: 'ear-school-week-2',
-  weekNumber: 2,
+  sectionId: 'ear-school-section-2',
+  sectionNumber: 2,
   lessonNumber: 4,
-  title: 'Week 2 Assessment',
+  title: 'Section 2 Assessment',
   subtitle: 'Test your interval skills',
   concept: 'Assessment covering all perfect intervals',
   exerciseType: 'interval-id',
-  keyPool: KEY_POOLS.WEEK_2,
+  keyPool: KEY_POOLS.SECTION_2,
   questionCount: 15,
   passThreshold: 80,
   isAssessment: true,
@@ -375,24 +375,24 @@ const week2Assessment: EarSchoolLessonDef = {
     generateIntervalQuestion(keyPool, PERFECT_INTERVALS, prev),
 };
 
-const week2: EarSchoolWeekDef = {
-  id: 'ear-school-week-2',
+const section2: EarSchoolSectionDef = {
+  id: 'ear-school-section-2',
   number: 2,
   title: 'Perfect Intervals',
   description: 'Identify perfect unison, perfect 5th, and octave by ear from any root',
-  lessons: week2Lessons,
-  assessment: week2Assessment,
+  lessons: section2Lessons,
+  assessment: section2Assessment,
 };
 
 // ============================================================================
-// Week 3: Major Scale Construction
+// Section 3: Major Scale Construction
 // ============================================================================
 
-const week3Lessons: EarSchoolLessonDef[] = [
+const section3Lessons: EarSchoolLessonDef[] = [
   {
     id: 'ear-school-3.1',
-    weekId: 'ear-school-week-3',
-    weekNumber: 3,
+    sectionId: 'ear-school-section-3',
+    sectionNumber: 3,
     lessonNumber: 1,
     title: 'Upper Tetrachord',
     subtitle: 'Sol-La-Ti-Do (degrees 5-6-7-8)',
@@ -407,14 +407,14 @@ const week3Lessons: EarSchoolLessonDef[] = [
   },
   {
     id: 'ear-school-3.2',
-    weekId: 'ear-school-week-3',
-    weekNumber: 3,
+    sectionId: 'ear-school-section-3',
+    sectionNumber: 3,
     lessonNumber: 2,
     title: 'Full Scale Degrees',
     subtitle: 'All seven degrees in context',
     concept: 'All seven degrees in context',
     exerciseType: 'scale-degree-id',
-    keyPool: KEY_POOLS.WEEK_3_MAJOR,
+    keyPool: KEY_POOLS.SECTION_3_MAJOR,
     questionCount: 15,
     passThreshold: 70,
     isAssessment: false,
@@ -423,14 +423,14 @@ const week3Lessons: EarSchoolLessonDef[] = [
   },
   {
     id: 'ear-school-3.3',
-    weekId: 'ear-school-week-3',
-    weekNumber: 3,
+    sectionId: 'ear-school-section-3',
+    sectionNumber: 3,
     lessonNumber: 3,
     title: 'Whole Step vs. Half Step',
     subtitle: 'The building blocks of scales',
     concept: 'The building blocks of scales',
     exerciseType: 'step-type',
-    keyPool: KEY_POOLS.WEEK_3_MAJOR,
+    keyPool: KEY_POOLS.SECTION_3_MAJOR,
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
@@ -446,14 +446,14 @@ const week3Lessons: EarSchoolLessonDef[] = [
   },
   {
     id: 'ear-school-3.4',
-    weekId: 'ear-school-week-3',
-    weekNumber: 3,
+    sectionId: 'ear-school-section-3',
+    sectionNumber: 3,
     lessonNumber: 4,
     title: 'Major vs. Minor',
     subtitle: 'Scale quality identification',
     concept: 'Hearing the difference between major and natural minor',
     exerciseType: 'scale-quality',
-    keyPool: [...KEY_POOLS.WEEK_3_MAJOR.slice(0, 4), ...KEY_POOLS.WEEK_3_MINOR],
+    keyPool: [...KEY_POOLS.SECTION_3_MAJOR.slice(0, 4), ...KEY_POOLS.SECTION_3_MINOR],
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
@@ -479,16 +479,16 @@ const week3Lessons: EarSchoolLessonDef[] = [
   },
 ];
 
-const week3Assessment: EarSchoolLessonDef = {
+const section3Assessment: EarSchoolLessonDef = {
   id: 'ear-school-3-assessment',
-  weekId: 'ear-school-week-3',
-  weekNumber: 3,
+  sectionId: 'ear-school-section-3',
+  sectionNumber: 3,
   lessonNumber: 5,
-  title: 'Week 3 Assessment',
+  title: 'Section 3 Assessment',
   subtitle: 'Test your scale construction skills',
   concept: 'Assessment covering scale degrees and major/minor recognition',
   exerciseType: 'scale-degree-id',
-  keyPool: KEY_POOLS.WEEK_3_MAJOR,
+  keyPool: KEY_POOLS.SECTION_3_MAJOR,
   questionCount: 20,
   passThreshold: 80,
   isAssessment: true,
@@ -496,31 +496,31 @@ const week3Assessment: EarSchoolLessonDef = {
     generateScaleDegreeQuestion(keyPool, [1, 2, 3, 4, 5, 6, 7], prev),
 };
 
-const week3: EarSchoolWeekDef = {
-  id: 'ear-school-week-3',
+const section3: EarSchoolSectionDef = {
+  id: 'ear-school-section-3',
   number: 3,
   title: 'Major Scale Construction',
   description:
     'Recognize all seven scale degrees in any major key and understand whole/half step patterns',
-  lessons: week3Lessons,
-  assessment: week3Assessment,
+  lessons: section3Lessons,
+  assessment: section3Assessment,
 };
 
 // ============================================================================
-// Week 4: Simple Rhythms (Placeholder - will be expanded in Phase 5)
+// Section 4: Simple Rhythms (Placeholder - will be expanded in Phase 5)
 // ============================================================================
 
-const week4Lessons: EarSchoolLessonDef[] = [
+const section4Lessons: EarSchoolLessonDef[] = [
   {
     id: 'ear-school-4.1',
-    weekId: 'ear-school-week-4',
-    weekNumber: 4,
+    sectionId: 'ear-school-section-4',
+    sectionNumber: 4,
     lessonNumber: 1,
     title: 'Quarter Note Pulse',
     subtitle: 'Steady beat as rhythmic foundation',
     concept: 'Steady beat as rhythmic foundation',
     exerciseType: 'pulse-count',
-    keyPool: KEY_POOLS.WEEK_4,
+    keyPool: KEY_POOLS.SECTION_4,
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
@@ -546,14 +546,14 @@ const week4Lessons: EarSchoolLessonDef[] = [
   },
   {
     id: 'ear-school-4.2',
-    weekId: 'ear-school-week-4',
-    weekNumber: 4,
+    sectionId: 'ear-school-section-4',
+    sectionNumber: 4,
     lessonNumber: 2,
     title: 'Half Notes and Whole Notes',
     subtitle: 'Notes that span multiple beats',
     concept: 'Notes that span multiple beats',
     exerciseType: 'note-value',
-    keyPool: KEY_POOLS.WEEK_4,
+    keyPool: KEY_POOLS.SECTION_4,
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
@@ -580,14 +580,14 @@ const week4Lessons: EarSchoolLessonDef[] = [
   },
   {
     id: 'ear-school-4.3',
-    weekId: 'ear-school-week-4',
-    weekNumber: 4,
+    sectionId: 'ear-school-section-4',
+    sectionNumber: 4,
     lessonNumber: 3,
     title: 'Simple Rhythm Patterns',
     subtitle: 'Combining note values into patterns',
     concept: 'Combining note values into patterns',
     exerciseType: 'rhythm-pattern',
-    keyPool: KEY_POOLS.WEEK_4,
+    keyPool: KEY_POOLS.SECTION_4,
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
@@ -622,14 +622,14 @@ const week4Lessons: EarSchoolLessonDef[] = [
   },
   {
     id: 'ear-school-4.4',
-    weekId: 'ear-school-week-4',
-    weekNumber: 4,
+    sectionId: 'ear-school-section-4',
+    sectionNumber: 4,
     lessonNumber: 4,
     title: 'Rhythm + Pitch Integration',
     subtitle: 'Hearing rhythm in melodic context',
     concept: 'Hearing rhythm in melodic context',
     exerciseType: 'pitch-rhythm',
-    keyPool: KEY_POOLS.WEEK_4,
+    keyPool: KEY_POOLS.SECTION_4,
     questionCount: 10,
     passThreshold: 70,
     isAssessment: false,
@@ -638,16 +638,16 @@ const week4Lessons: EarSchoolLessonDef[] = [
   },
 ];
 
-const week4Assessment: EarSchoolLessonDef = {
+const section4Assessment: EarSchoolLessonDef = {
   id: 'ear-school-4-assessment',
-  weekId: 'ear-school-week-4',
-  weekNumber: 4,
+  sectionId: 'ear-school-section-4',
+  sectionNumber: 4,
   lessonNumber: 5,
-  title: 'Week 4 Assessment (Final)',
+  title: 'Section 4 Assessment (Final)',
   subtitle: 'Complete ear training assessment',
   concept: 'Assessment covering all rhythm concepts and integration',
   exerciseType: 'rhythm-pattern',
-  keyPool: KEY_POOLS.WEEK_4,
+  keyPool: KEY_POOLS.SECTION_4,
   questionCount: 20,
   passThreshold: 80,
   isAssessment: true,
@@ -681,13 +681,13 @@ const week4Assessment: EarSchoolLessonDef = {
   },
 };
 
-const week4: EarSchoolWeekDef = {
-  id: 'ear-school-week-4',
+const section4: EarSchoolSectionDef = {
+  id: 'ear-school-section-4',
   number: 4,
   title: 'Simple Rhythms',
   description: 'Identify basic note values and simple rhythmic patterns',
-  lessons: week4Lessons,
-  assessment: week4Assessment,
+  lessons: section4Lessons,
+  assessment: section4Assessment,
 };
 
 // ============================================================================
@@ -695,40 +695,40 @@ const week4: EarSchoolWeekDef = {
 // ============================================================================
 
 export const EAR_SCHOOL_CURRICULUM: EarSchoolCurriculum = {
-  weeks: [week1, week2, week3, week4],
+  sections: [section1, section2, section3, section4],
 };
 
 /**
- * Get a week by ID
+ * Get a section by ID
  */
-export const getWeekById = (weekId: string): EarSchoolWeekDef | undefined => {
-  return EAR_SCHOOL_CURRICULUM.weeks.find((w) => w.id === weekId);
+export const getSectionById = (sectionId: string): EarSchoolSectionDef | undefined => {
+  return EAR_SCHOOL_CURRICULUM.sections.find((s) => s.id === sectionId);
 };
 
 /**
  * Get a lesson by ID
  */
 export const getLessonById = (lessonId: string): EarSchoolLessonDef | undefined => {
-  for (const week of EAR_SCHOOL_CURRICULUM.weeks) {
-    const lesson = week.lessons.find((l) => l.id === lessonId);
+  for (const section of EAR_SCHOOL_CURRICULUM.sections) {
+    const lesson = section.lessons.find((l) => l.id === lessonId);
     if (lesson) return lesson;
-    if (week.assessment.id === lessonId) return week.assessment;
+    if (section.assessment.id === lessonId) return section.assessment;
   }
   return undefined;
 };
 
 /**
- * Get all lessons for a week (including assessment)
+ * Get all lessons for a section (including assessment)
  */
-export const getWeekLessons = (weekId: string): EarSchoolLessonDef[] => {
-  const week = getWeekById(weekId);
-  if (!week) return [];
-  return [...week.lessons, week.assessment];
+export const getSectionLessons = (sectionId: string): EarSchoolLessonDef[] => {
+  const section = getSectionById(sectionId);
+  if (!section) return [];
+  return [...section.lessons, section.assessment];
 };
 
 /**
  * Get the total number of lessons (excluding assessments)
  */
 export const getTotalLessonCount = (): number => {
-  return EAR_SCHOOL_CURRICULUM.weeks.reduce((sum, week) => sum + week.lessons.length, 0);
+  return EAR_SCHOOL_CURRICULUM.sections.reduce((sum, section) => sum + section.lessons.length, 0);
 };

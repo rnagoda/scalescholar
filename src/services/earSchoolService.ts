@@ -7,7 +7,7 @@
 import { getDatabase } from './database';
 import {
   EarSchoolLessonProgress,
-  EarSchoolWeekProgress,
+  EarSchoolSectionProgress,
   EarSchoolAdaptiveState,
   EarSchoolAttempt,
   EarSchoolSessionResult,
@@ -55,16 +55,16 @@ export const getLessonProgress = async (
 };
 
 /**
- * Get all lesson progress for a week
+ * Get all lesson progress for a section
  */
-export const getWeekLessonProgress = async (
-  weekId: string
+export const getSectionLessonProgress = async (
+  sectionId: string
 ): Promise<EarSchoolLessonProgress[]> => {
   const db = await getDatabase();
 
-  // Extract week number from weekId (e.g., "ear-school-week-1" -> "ear-school-1")
-  const weekNumber = weekId.match(/week-(\d+)/)?.[1];
-  if (!weekNumber) return [];
+  // Extract section number from sectionId (e.g., "ear-school-section-1" -> "ear-school-1")
+  const sectionNumber = sectionId.match(/section-(\d+)/)?.[1];
+  if (!sectionNumber) return [];
 
   const results = await db.getAllAsync<{
     lesson_id: string;
@@ -76,7 +76,7 @@ export const getWeekLessonProgress = async (
     challenge_mode: number;
     first_passed_at: string | null;
     last_attempt_at: string | null;
-  }>(`SELECT * FROM ear_school_lessons WHERE lesson_id LIKE ?`, `ear-school-${weekNumber}.%`);
+  }>(`SELECT * FROM ear_school_lessons WHERE lesson_id LIKE ?`, `ear-school-${sectionNumber}.%`);
 
   return results.map((row) => ({
     lessonId: row.lesson_id,
@@ -189,29 +189,29 @@ export const setLessonChallengeMode = async (
 };
 
 // ============================================================================
-// Week Progress
+// Section Progress
 // ============================================================================
 
 /**
- * Get week progress by week ID
+ * Get section progress by section ID
  */
-export const getWeekProgress = async (
-  weekId: string
-): Promise<EarSchoolWeekProgress | null> => {
+export const getSectionProgress = async (
+  sectionId: string
+): Promise<EarSchoolSectionProgress | null> => {
   const db = await getDatabase();
 
   const result = await db.getFirstAsync<{
-    week_id: string;
+    section_id: string;
     lessons_passed: number;
     assessment_score: number;
     challenge_mode: number;
     completed_at: string | null;
-  }>(`SELECT * FROM ear_school_weeks WHERE week_id = ?`, weekId);
+  }>(`SELECT * FROM ear_school_sections WHERE section_id = ?`, sectionId);
 
   if (!result) return null;
 
   return {
-    weekId: result.week_id,
+    sectionId: result.section_id,
     lessonsPassed: result.lessons_passed,
     assessmentScore: result.assessment_score,
     challengeModeActive: result.challenge_mode === 1,
@@ -220,21 +220,21 @@ export const getWeekProgress = async (
 };
 
 /**
- * Get all week progress
+ * Get all section progress
  */
-export const getAllWeekProgress = async (): Promise<EarSchoolWeekProgress[]> => {
+export const getAllSectionProgress = async (): Promise<EarSchoolSectionProgress[]> => {
   const db = await getDatabase();
 
   const results = await db.getAllAsync<{
-    week_id: string;
+    section_id: string;
     lessons_passed: number;
     assessment_score: number;
     challenge_mode: number;
     completed_at: string | null;
-  }>(`SELECT * FROM ear_school_weeks ORDER BY week_id`);
+  }>(`SELECT * FROM ear_school_sections ORDER BY section_id`);
 
   return results.map((row) => ({
-    weekId: row.week_id,
+    sectionId: row.section_id,
     lessonsPassed: row.lessons_passed,
     assessmentScore: row.assessment_score,
     challengeModeActive: row.challenge_mode === 1,
@@ -243,10 +243,10 @@ export const getAllWeekProgress = async (): Promise<EarSchoolWeekProgress[]> => 
 };
 
 /**
- * Update week progress
+ * Update section progress
  */
-export const updateWeekProgress = async (
-  weekId: string,
+export const updateSectionProgress = async (
+  sectionId: string,
   lessonsPassed: number,
   assessmentScore?: number
 ): Promise<void> => {
@@ -256,13 +256,13 @@ export const updateWeekProgress = async (
     assessmentScore !== undefined && assessmentScore >= EAR_SCHOOL_THRESHOLDS.ASSESSMENT_PASS;
 
   await db.runAsync(
-    `INSERT INTO ear_school_weeks (week_id, lessons_passed, assessment_score, completed_at)
+    `INSERT INTO ear_school_sections (section_id, lessons_passed, assessment_score, completed_at)
      VALUES (?, ?, ?, ?)
-     ON CONFLICT(week_id) DO UPDATE SET
+     ON CONFLICT(section_id) DO UPDATE SET
        lessons_passed = ?,
        assessment_score = COALESCE(?, assessment_score),
        completed_at = CASE WHEN ? = 1 THEN COALESCE(completed_at, CURRENT_TIMESTAMP) ELSE completed_at END`,
-    weekId,
+    sectionId,
     lessonsPassed,
     assessmentScore ?? 0,
     isComplete ? new Date().toISOString() : null,
@@ -273,16 +273,16 @@ export const updateWeekProgress = async (
 };
 
 /**
- * Set challenge mode for a week
+ * Set challenge mode for a section
  */
-export const setWeekChallengeMode = async (weekId: string, enabled: boolean): Promise<void> => {
+export const setSectionChallengeMode = async (sectionId: string, enabled: boolean): Promise<void> => {
   const db = await getDatabase();
 
   await db.runAsync(
-    `INSERT INTO ear_school_weeks (week_id, challenge_mode)
+    `INSERT INTO ear_school_sections (section_id, challenge_mode)
      VALUES (?, ?)
-     ON CONFLICT(week_id) DO UPDATE SET challenge_mode = ?`,
-    weekId,
+     ON CONFLICT(section_id) DO UPDATE SET challenge_mode = ?`,
+    sectionId,
     enabled ? 1 : 0,
     enabled ? 1 : 0
   );
@@ -458,20 +458,20 @@ export const getOverallProgress = async (): Promise<{
   totalLessons: number;
   lessonsPassed: number;
   lessonsAced: number;
-  weeksCompleted: number;
-  totalWeeks: number;
+  sectionsCompleted: number;
+  totalSections: number;
   completionPercentage: number;
   nextLessonId: string | null;
 }> => {
   const TOTAL_LESSONS = 15; // 3 + 3 + 4 + 4 lessons (not counting assessments)
-  const TOTAL_WEEKS = 4;
+  const TOTAL_SECTIONS = 4;
 
   const lessons = await getAllLessonProgress();
-  const weeks = await getAllWeekProgress();
+  const sections = await getAllSectionProgress();
 
   const lessonsPassed = lessons.filter((l) => l.passed && !l.lessonId.includes('assessment')).length;
   const lessonsAced = lessons.filter((l) => l.aced && !l.lessonId.includes('assessment')).length;
-  const weeksCompleted = weeks.filter((w) => w.completedAt !== null).length;
+  const sectionsCompleted = sections.filter((s) => s.completedAt !== null).length;
 
   // Calculate completion percentage
   const completionPercentage = Math.round((lessonsPassed / TOTAL_LESSONS) * 100);
@@ -505,8 +505,8 @@ export const getOverallProgress = async (): Promise<{
     totalLessons: TOTAL_LESSONS,
     lessonsPassed,
     lessonsAced,
-    weeksCompleted,
-    totalWeeks: TOTAL_WEEKS,
+    sectionsCompleted,
+    totalSections: TOTAL_SECTIONS,
     completionPercentage,
     nextLessonId,
   };
@@ -523,7 +523,7 @@ export const resetAllEarSchoolProgress = async (): Promise<void> => {
   const db = await getDatabase();
 
   await db.runAsync(`DELETE FROM ear_school_lessons`);
-  await db.runAsync(`DELETE FROM ear_school_weeks`);
+  await db.runAsync(`DELETE FROM ear_school_sections`);
   await db.runAsync(`DELETE FROM ear_school_attempts`);
   await db.runAsync(`DELETE FROM ear_school_adaptive`);
 };

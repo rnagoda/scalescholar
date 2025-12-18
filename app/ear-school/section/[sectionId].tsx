@@ -1,7 +1,7 @@
 /**
- * Week Detail Screen
+ * Section Detail Screen
  *
- * Displays lessons within a specific week with progress indicators.
+ * Displays lessons within a specific section with progress indicators.
  */
 
 import React, { useCallback } from 'react';
@@ -12,16 +12,16 @@ import { useRouter, useLocalSearchParams, Href, useFocusEffect } from 'expo-rout
 import { colors, spacing, fonts } from '@/src/theme';
 import { ScreenHeader, Card, BracketButton, Divider } from '@/src/components/common';
 import { useEarSchoolStore } from '@/src/stores/useEarSchoolStore';
-import { getWeekById, getWeekLessons } from '@/src/content/ear-school/curriculum';
+import { getSectionById, getSectionLessons } from '@/src/content/ear-school/curriculum';
 import { EarSchoolLessonDef } from '@/src/types/ear-school';
 
-export default function WeekDetailScreen() {
+export default function SectionDetailScreen() {
   const router = useRouter();
-  const { weekId } = useLocalSearchParams<{ weekId: string }>();
+  const { sectionId } = useLocalSearchParams<{ sectionId: string }>();
   const { lessonProgress, loadProgress, shouldShowChallengeMode } = useEarSchoolStore();
 
-  const week = getWeekById(weekId || '');
-  const lessons = getWeekLessons(weekId || '');
+  const section = getSectionById(sectionId || '');
+  const lessons = getSectionLessons(sectionId || '');
 
   // Reload progress when screen gains focus
   useFocusEffect(
@@ -47,15 +47,15 @@ export default function WeekDetailScreen() {
     return { status: 'attempted', icon: '•', color: colors.accentPink };
   };
 
-  if (!week) {
+  if (!section) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <ScreenHeader
-          title="WEEK NOT FOUND"
+          title="SECTION NOT FOUND"
           rightContent={<BracketButton label="X" onPress={handleClose} />}
         />
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Week not found.</Text>
+          <Text style={styles.errorText}>Section not found.</Text>
         </View>
       </SafeAreaView>
     );
@@ -68,13 +68,13 @@ export default function WeekDetailScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader
-        title={`WEEK ${week.number}`}
-        testID={`week-${week.number}-header-title`}
+        title={`SECTION ${section.number}`}
+        testID={`section-${section.number}-header-title`}
         rightContent={
           <BracketButton
             label="X"
             onPress={handleClose}
-            testID={`week-${week.number}-close-button`}
+            testID={`section-${section.number}-close-button`}
           />
         }
       />
@@ -85,14 +85,14 @@ export default function WeekDetailScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Week Header */}
-        <View style={styles.weekHeader}>
-          <Text style={styles.weekTitle}>{week.title}</Text>
-          <Text style={styles.weekDescription}>{week.description}</Text>
+        {/* Section Header */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{section.title}</Text>
+          <Text style={styles.sectionDescription}>{section.description}</Text>
         </View>
 
         {/* Lessons */}
-        <Text style={styles.sectionTitle}>LESSONS</Text>
+        <Text style={styles.subsectionTitle}>LESSONS</Text>
 
         {regularLessons.map((lesson, index) => {
           const { status, icon, color } = getLessonStatus(lesson);
@@ -105,12 +105,12 @@ export default function WeekDetailScreen() {
               style={styles.lessonCard}
               onPress={() => handleOpenLesson(lesson.id)}
               activeOpacity={0.7}
-              testID={`lesson-${lesson.weekNumber}-${lesson.lessonNumber}-card`}
+              testID={`lesson-${lesson.sectionNumber}-${lesson.lessonNumber}-card`}
             >
               <View style={styles.lessonHeader}>
                 <View style={styles.lessonNumber}>
                   <Text style={styles.lessonNumberText}>
-                    {lesson.weekNumber}.{lesson.lessonNumber}
+                    {lesson.sectionNumber}.{lesson.lessonNumber}
                   </Text>
                 </View>
                 <View style={styles.lessonInfo}>
@@ -138,13 +138,13 @@ export default function WeekDetailScreen() {
         {/* Assessment */}
         {assessment && (
           <>
-            <Text style={styles.sectionTitle}>ASSESSMENT</Text>
+            <Text style={styles.subsectionTitle}>ASSESSMENT</Text>
 
             <TouchableOpacity
               style={[styles.lessonCard, styles.assessmentCard]}
               onPress={() => handleOpenLesson(assessment.id)}
               activeOpacity={0.7}
-              testID={`assessment-${week.number}-card`}
+              testID={`assessment-${section.number}-card`}
             >
               <View style={styles.lessonHeader}>
                 <View style={[styles.lessonNumber, styles.assessmentNumber]}>
@@ -221,22 +221,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.textMuted,
   },
-  weekHeader: {
+  sectionHeader: {
     marginBottom: spacing.xl,
   },
-  weekTitle: {
+  sectionTitle: {
     fontFamily: fonts.monoBold,
     fontSize: 18,
     color: colors.textPrimary,
     marginBottom: spacing.sm,
   },
-  weekDescription: {
+  sectionDescription: {
     fontFamily: fonts.mono,
     fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 22,
   },
-  sectionTitle: {
+  subsectionTitle: {
     fontFamily: fonts.monoBold,
     fontSize: 12,
     color: colors.textMuted,

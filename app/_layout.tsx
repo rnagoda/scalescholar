@@ -68,6 +68,13 @@ function RootLayoutNav() {
               presentation: 'modal',
             }}
           />
+          <Stack.Screen
+            name="ear-school"
+            options={{
+              headerShown: false,
+              presentation: 'modal',
+            }}
+          />
         </Stack>
       </ThemeProvider>
     </GestureHandlerRootView>

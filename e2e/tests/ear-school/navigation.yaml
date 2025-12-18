@@ -9,7 +9,7 @@ appId: com.nagodasoft.scalescholar
 - tapOn:
     id: "ear-school-card"
 
-# Verify Ear School home opened (shows weeks)
+# Verify Ear School home opened (shows sections)
 - assertVisible:
     id: "ear-school-header-title"
 
@@ -17,17 +17,17 @@ appId: com.nagodasoft.scalescholar
 - assertVisible:
     id: "ear-school-close-button"
 
-# Verify week 1 card is present
+# Verify section 1 card is present
 - assertVisible:
-    id: "week-1-card"
+    id: "section-1-card"
 
-# Tap on Week 1 to open it
+# Tap on Section 1 to open it
 - tapOn:
-    id: "week-1-card"
+    id: "section-1-card"
 
-# Verify Week 1 detail screen
+# Verify Section 1 detail screen
 - assertVisible:
-    id: "week-1-header-title"
+    id: "section-1-header-title"
 
 # Verify lesson 1.1 is present
 - assertVisible:
@@ -55,15 +55,15 @@ appId: com.nagodasoft.scalescholar
 - tapOn:
     text: "Leave"
 
-# Wait for week detail screen to be visible after navigation
+# Wait for section detail screen to be visible after navigation
 - extendedWaitUntil:
     visible:
-      id: "week-1-header-title"
+      id: "section-1-header-title"
     timeout: 5000
 
-# Back on week detail - close it
+# Back on section detail - close it
 - tapOn:
-    id: "week-1-close-button"
+    id: "section-1-close-button"
 
 # Back on Ear School home - close it
 - tapOn:

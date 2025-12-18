@@ -1,24 +1,24 @@
 /**
  * Ear School Type Definitions
  *
- * Types for the structured 4-week Ear School curriculum.
+ * Types for the structured 4-section Ear School curriculum.
  */
 
 /**
  * Exercise types for Ear School lessons
  */
 export type EarSchoolExerciseType =
-  | 'identify-tonic' // Week 1: Which note is Do?
-  | 'scale-degree-id' // Week 1, 3: Identify scale degree
-  | 'pattern-match' // Week 1: Match 3-note pattern
-  | 'same-different' // Week 2: Are these notes the same?
-  | 'interval-id' // Week 2: Identify interval
-  | 'step-type' // Week 3: Whole step or half step?
-  | 'scale-quality' // Week 3: Major or minor scale?
-  | 'pulse-count' // Week 4: How many beats?
-  | 'note-value' // Week 4: Note duration
-  | 'rhythm-pattern' // Week 4: Match rhythm pattern
-  | 'pitch-rhythm'; // Week 4: Combined identification
+  | 'identify-tonic' // Section 1: Which note is Do?
+  | 'scale-degree-id' // Section 1, 3: Identify scale degree
+  | 'pattern-match' // Section 1: Match 3-note pattern
+  | 'same-different' // Section 2: Are these notes the same?
+  | 'interval-id' // Section 2: Identify interval
+  | 'step-type' // Section 3: Whole step or half step?
+  | 'scale-quality' // Section 3: Major or minor scale?
+  | 'pulse-count' // Section 4: How many beats?
+  | 'note-value' // Section 4: Note duration
+  | 'rhythm-pattern' // Section 4: Match rhythm pattern
+  | 'pitch-rhythm'; // Section 4: Combined identification
 
 /**
  * Answer option for questions
@@ -87,8 +87,8 @@ export type QuestionGenerator = (
  */
 export interface EarSchoolLessonDef {
   id: string; // e.g., "ear-school-1.2"
-  weekId: string; // e.g., "ear-school-week-1"
-  weekNumber: number;
+  sectionId: string; // e.g., "ear-school-section-1"
+  sectionNumber: number;
   lessonNumber: number;
   title: string; // e.g., "Do-Re-Mi Recognition"
   subtitle: string; // e.g., "Identify scale degrees 1, 2, 3"
@@ -102,10 +102,10 @@ export interface EarSchoolLessonDef {
 }
 
 /**
- * Week definition (static content)
+ * Section definition (static content)
  */
-export interface EarSchoolWeekDef {
-  id: string; // e.g., "ear-school-week-1"
+export interface EarSchoolSectionDef {
+  id: string; // e.g., "ear-school-section-1"
   number: number; // 1-4
   title: string; // e.g., "Basic Solfege & Pitch Awareness"
   description: string; // Learning goal
@@ -114,10 +114,10 @@ export interface EarSchoolWeekDef {
 }
 
 /**
- * Curriculum definition (all weeks)
+ * Curriculum definition (all sections)
  */
 export interface EarSchoolCurriculum {
-  weeks: EarSchoolWeekDef[];
+  sections: EarSchoolSectionDef[];
 }
 
 /**
@@ -136,10 +136,10 @@ export interface EarSchoolLessonProgress {
 }
 
 /**
- * Week progress (from database)
+ * Section progress (from database)
  */
-export interface EarSchoolWeekProgress {
-  weekId: string;
+export interface EarSchoolSectionProgress {
+  sectionId: string;
   lessonsPassed: number;
   assessmentScore: number;
   challengeModeActive: boolean;
@@ -221,8 +221,8 @@ export const EAR_SCHOOL_XP = {
   LESSON_PASSED: 50, // 70-79%
   LESSON_MASTERED: 75, // 80-89%
   LESSON_ACED: 100, // 90%+
-  WEEK_COMPLETED: 200, // Assessment 80%+
-  GRADUATE_ACHIEVEMENT: 500, // All 4 weeks completed
+  SECTION_COMPLETED: 200, // Assessment 80%+
+  GRADUATE_ACHIEVEMENT: 500, // All 4 sections completed
   CHALLENGE_MULTIPLIER: 1.5,
   REPEAT_MULTIPLIER: 0.25, // Subsequent attempts
 } as const;
@@ -254,11 +254,11 @@ export const CHALLENGE_MODE_CONFIG = {
  * Key pools for exercises
  */
 export const KEY_POOLS = {
-  WEEK_1: ['C major', 'G major', 'F major', 'D major'],
-  WEEK_2: ['C major', 'G major', 'D major', 'F major'],
-  WEEK_3_MAJOR: ['C major', 'G major', 'D major', 'A major', 'E major', 'F major', 'Bb major', 'Eb major'],
-  WEEK_3_MINOR: ['A minor', 'E minor', 'D minor', 'G minor'],
-  WEEK_4: ['C major', 'G major', 'D major', 'F major', 'A minor', 'E minor'],
+  SECTION_1: ['C major', 'G major', 'F major', 'D major'],
+  SECTION_2: ['C major', 'G major', 'D major', 'F major'],
+  SECTION_3_MAJOR: ['C major', 'G major', 'D major', 'A major', 'E major', 'F major', 'Bb major', 'Eb major'],
+  SECTION_3_MINOR: ['A minor', 'E minor', 'D minor', 'G minor'],
+  SECTION_4: ['C major', 'G major', 'D major', 'F major', 'A minor', 'E minor'],
   ALL_MAJOR: [
     'C major',
     'G major',
@@ -276,10 +276,10 @@ export const KEY_POOLS = {
 } as const;
 
 /**
- * Helper: Get week number from lesson ID
+ * Helper: Get section number from lesson ID
  */
-export function getWeekFromLessonId(lessonId: string): number {
-  // Format: "ear-school-1.2" -> week 1
+export function getSectionFromLessonId(lessonId: string): number {
+  // Format: "ear-school-1.2" -> section 1
   const match = lessonId.match(/ear-school-(\d+)/);
   return match ? parseInt(match[1], 10) : 0;
 }

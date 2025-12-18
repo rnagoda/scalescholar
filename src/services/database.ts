@@ -170,18 +170,18 @@ const initializeSchema = async (database: SQLite.SQLiteDatabase): Promise<void> 
     CREATE INDEX IF NOT EXISTS idx_ear_school_lessons_lesson_id
       ON ear_school_lessons(lesson_id);
 
-    -- Ear School week progress
-    CREATE TABLE IF NOT EXISTS ear_school_weeks (
+    -- Ear School section progress
+    CREATE TABLE IF NOT EXISTS ear_school_sections (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      week_id TEXT UNIQUE NOT NULL,
+      section_id TEXT UNIQUE NOT NULL,
       lessons_passed INTEGER DEFAULT 0,
       assessment_score INTEGER DEFAULT 0,
       challenge_mode INTEGER DEFAULT 0,
       completed_at TEXT
     );
 
-    CREATE INDEX IF NOT EXISTS idx_ear_school_weeks_week_id
-      ON ear_school_weeks(week_id);
+    CREATE INDEX IF NOT EXISTS idx_ear_school_sections_section_id
+      ON ear_school_sections(section_id);
 
     -- Ear School individual question attempts (for analytics)
     CREATE TABLE IF NOT EXISTS ear_school_attempts (
