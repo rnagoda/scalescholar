@@ -18,6 +18,7 @@ import {
   EAR_SCHOOL_THRESHOLDS,
   calculateXP,
   CHALLENGE_MODE_CONFIG,
+  KEY_POOLS,
 } from '../types/ear-school';
 import {
   getLessonProgress,
@@ -172,10 +173,13 @@ export const useEarSchoolStore = create<EarSchoolStoreState>((set, get) => ({
         ? lesson.questionCount + CHALLENGE_MODE_CONFIG.EXTRA_QUESTIONS
         : lesson.questionCount;
 
+      // Use expanded key pool in challenge mode for more variety
+      const keyPool = challengeMode ? KEY_POOLS.ALL_MAJOR : lesson.keyPool;
+
       const questions: EarSchoolQuestion[] = [];
       for (let i = 0; i < questionCount; i++) {
         const prevQuestion = questions[questions.length - 1];
-        const question = lesson.generateQuestion(lesson.keyPool, prevQuestion);
+        const question = lesson.generateQuestion(keyPool, prevQuestion);
         questions.push(question);
       }
 

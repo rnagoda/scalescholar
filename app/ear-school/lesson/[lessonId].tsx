@@ -4,8 +4,8 @@
  * Handles the full exercise flow: play -> answer -> feedback -> next
  */
 
-import React, { useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
@@ -37,12 +37,69 @@ export default function LessonPlayerScreen() {
 
   const lesson = getLessonById(lessonId || '');
 
+  // Timer state for challenge mode
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerProgressAnim = useRef(new Animated.Value(1)).current;
+
   // Start lesson when mounted
   useEffect(() => {
     if (lesson && !session) {
       startLesson(lesson);
     }
   }, [lesson]);
+
+  // Timer countdown for challenge mode
+  useEffect(() => {
+    // Start timer when entering answering state with timerSeconds
+    if (session?.state === 'answering' && session.timerSeconds) {
+      setTimeRemaining(session.timerSeconds);
+      timerProgressAnim.setValue(1);
+
+      // Animate the progress bar
+      Animated.timing(timerProgressAnim, {
+        toValue: 0,
+        duration: session.timerSeconds * 1000,
+        useNativeDriver: false,
+      }).start();
+
+      // Start countdown
+      timerRef.current = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev === null || prev <= 1) {
+            // Time's up - clear interval and submit wrong answer
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = null;
+            }
+            // Auto-submit timeout (wrong answer)
+            const currentQuestion = session.questions[session.currentIndex];
+            // Pick a wrong answer (or empty string)
+            const wrongAnswerId = currentQuestion.options.find(
+              (o) => o.id !== currentQuestion.correctAnswerId
+            )?.id || '';
+            submitAnswer(wrongAnswerId);
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      // Clear timer when not in answering state
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      setTimeRemaining(null);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [session?.state, session?.currentIndex]);
 
   const handleClose = () => {
     if (session && session.state !== 'complete') {
@@ -363,6 +420,35 @@ export default function LessonPlayerScreen() {
               >
                 <Text style={styles.replayButtonText}>[ ↻ REPLAY ]</Text>
               </TouchableOpacity>
+
+              {/* Timer display for challenge mode */}
+              {timeRemaining !== null && (
+                <View style={styles.timerContainer}>
+                  <View style={styles.timerBarBg}>
+                    <Animated.View
+                      style={[
+                        styles.timerBarFill,
+                        {
+                          width: timerProgressAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0%', '100%'],
+                          }),
+                          backgroundColor: timeRemaining <= 3 ? colors.accentPink : colors.accentBlue,
+                        },
+                      ]}
+                    />
+                  </View>
+                  <Text
+                    style={[
+                      styles.timerText,
+                      timeRemaining <= 3 && styles.timerTextUrgent,
+                    ]}
+                  >
+                    {timeRemaining}s
+                  </Text>
+                </View>
+              )}
+
               <Text style={styles.answerHint} testID="play-hint">
                 Select your answer below
               </Text>
@@ -513,6 +599,32 @@ const styles = StyleSheet.create({
     fontFamily: fonts.mono,
     fontSize: 14,
     color: colors.textMuted,
+  },
+  timerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: spacing.md,
+    gap: spacing.sm,
+  },
+  timerBarBg: {
+    width: 120,
+    height: 8,
+    backgroundColor: colors.progressTrack,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  timerBarFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  timerText: {
+    fontFamily: fonts.monoBold,
+    fontSize: 14,
+    color: colors.accentBlue,
+    width: 30,
+  },
+  timerTextUrgent: {
+    color: colors.accentPink,
   },
   feedbackContainer: {
     alignItems: 'center',
