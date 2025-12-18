@@ -17,29 +17,55 @@ appId: com.nagodasoft.scalescholar
 - assertVisible:
     id: "ear-school-header-title"
 
-# Open Intervals
+# Open Week 1
 - tapOn:
-    id: "intervals-card"
+    id: "week-1-card"
+
+- assertVisible:
+    id: "week-1-header-title"
+
+# Open Lesson 1.1
+- tapOn:
+    id: "lesson-1-1-card"
 
 # Play and answer a question
 - tapOn:
     id: "play-button"
 
-# Wait for answering state (wait for specific text)
+# Wait for answering state
 - extendedWaitUntil:
     visible:
-      text: "Select your answer below"
+      id: "play-hint"
     timeout: 5000
 
 # Submit an answer
 - tapOn:
-    id: "answer-m3"
+    text: "1"
+
+# Wait for feedback
+- extendedWaitUntil:
+    visible:
+      id: "next-button"
+    timeout: 3000
 
 # Close the exercise
 - tapOn:
-    id: "intervals-close-button"
+    id: "lesson-ear-school-1.1-close-button"
 
-# Go back to home (close Ear School menu)
+# Confirm leave
+- extendedWaitUntil:
+    visible:
+      text: "Leave"
+    timeout: 3000
+
+- tapOn:
+    text: "Leave"
+
+# Back at week - close it
+- tapOn:
+    id: "week-1-close-button"
+
+# Back at Ear School home - close it
 - tapOn:
     id: "ear-school-close-button"
 

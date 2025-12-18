@@ -58,6 +58,13 @@ interface XPStoreState extends XPState {
   awardNewUnlock: (itemDescription: string) => Promise<void>;
   awardVoiceExerciseCorrect: () => Promise<void>;
   awardVoiceSessionComplete: () => Promise<void>;
+  awardEarSchoolLesson: (
+    lessonId: string,
+    amount: number,
+    passed: boolean,
+    mastered: boolean,
+    aced: boolean
+  ) => Promise<void>;
 
   // Clear last XP gain (after animation)
   clearLastXPGain: () => void;
@@ -199,6 +206,21 @@ export const useXPStore = create<XPStoreState>((set, get) => ({
 
   awardVoiceSessionComplete: async () => {
     await get().addXP('voice-school', XP_AMOUNTS.VOICE_SESSION_COMPLETE);
+  },
+
+  awardEarSchoolLesson: async (
+    lessonId: string,
+    amount: number,
+    passed: boolean,
+    mastered: boolean,
+    aced: boolean
+  ) => {
+    const status = aced ? 'aced' : mastered ? 'mastered' : passed ? 'passed' : 'incomplete';
+    await get().addXP(
+      'ear-school',
+      amount,
+      JSON.stringify({ lessonId, status })
+    );
   },
 
   clearLastXPGain: () => {

@@ -35,6 +35,7 @@ import { resetAllVoiceSchoolProgress } from '@/src/services/voiceProfileService'
 import { useXPStore } from '@/src/stores/useXPStore';
 import { useProgressStore } from '@/src/stores/useProgressStore';
 import { useVoiceProfileStore } from '@/src/stores/useVoiceProfileStore';
+import { useEarSchoolStore } from '@/src/stores/useEarSchoolStore';
 
 // Reference pitch options (common concert pitch variations)
 const REFERENCE_PITCH_OPTIONS = [415, 432, 440, 442, 444, 466];
@@ -67,6 +68,7 @@ export default function SettingsScreen() {
   const { resetAllXP } = useXPStore();
   const { initialize: reinitializeProgress } = useProgressStore();
   const { initialize: reinitializeVoiceProfile } = useVoiceProfileStore();
+  const { adaptiveState, toggleAdaptiveDifficulty } = useEarSchoolStore();
 
   // Sync instrument setting with AudioEngine
   useEffect(() => {
@@ -221,6 +223,18 @@ export default function SettingsScreen() {
             value={hapticFeedback}
             onToggle={setHapticFeedback}
           />
+        </Card>
+
+        <SectionHeader title="EAR SCHOOL" />
+        <Card>
+          <SettingToggle
+            label="Adaptive Difficulty"
+            value={adaptiveState.enabled}
+            onToggle={toggleAdaptiveDifficulty}
+          />
+          <Text style={styles.settingHint}>
+            When enabled, scoring 90%+ activates Challenge Mode with timed questions and harder difficulty
+          </Text>
         </Card>
 
         <SectionHeader title="DATA" />

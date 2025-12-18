@@ -1,0 +1,93 @@
+appId: com.nagodasoft.scalescholar
+---
+# Test: Ear School Lesson Flow
+# Verifies: Play -> Answer -> Feedback -> Next cycle
+
+- launchApp:
+    clearState: true
+
+# Navigate to Ear School
+- tapOn:
+    id: "ear-school-card"
+
+- assertVisible:
+    id: "ear-school-header-title"
+
+# Open Week 1
+- tapOn:
+    id: "week-1-card"
+
+- assertVisible:
+    id: "week-1-header-title"
+
+# Open Lesson 1.1
+- tapOn:
+    id: "lesson-1-1-card"
+
+# Verify lesson player loaded
+- assertVisible:
+    id: "lesson-ear-school-1.1-header-title"
+
+# Verify progress indicator is visible
+- assertVisible:
+    id: "progress-indicator"
+
+# Tap the play button
+- tapOn:
+    id: "play-button"
+
+# Wait for answering state
+- extendedWaitUntil:
+    visible:
+      id: "play-hint"
+    timeout: 5000
+
+# Verify replay button is available
+- assertVisible:
+    id: "replay-button"
+
+# Tap an answer (any answer works for testing flow)
+- tapOn:
+    text: "1"
+
+# Verify feedback is shown (next button appears)
+- extendedWaitUntil:
+    visible:
+      id: "next-button"
+    timeout: 3000
+
+# Tap next to go to question 2
+- tapOn:
+    id: "next-button"
+
+# Should be back in ready state - verify play button
+- assertVisible:
+    id: "play-button"
+
+# Close the lesson
+- tapOn:
+    id: "lesson-ear-school-1.1-close-button"
+
+# Confirm leave dialog appears (since session not complete)
+- extendedWaitUntil:
+    visible:
+      text: "Leave"
+    timeout: 3000
+
+# Tap Leave to confirm
+- tapOn:
+    text: "Leave"
+
+# Should be back at week detail
+- assertVisible:
+    id: "week-1-header-title"
+
+# Navigate back to home
+- tapOn:
+    id: "week-1-close-button"
+
+- tapOn:
+    id: "ear-school-close-button"
+
+- assertVisible:
+    id: "home-header-title"
