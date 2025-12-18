@@ -5,6 +5,7 @@
  */
 
 import { getDatabase } from './database';
+import { queryCache, CACHE_KEYS } from './queryCache';
 import {
   EarSchoolLessonProgress,
   EarSchoolSectionProgress,
@@ -518,12 +519,34 @@ export const getOverallProgress = async (): Promise<{
 
 /**
  * Reset all Ear School progress
+ * Clears both curriculum progress and practice mode progress
  */
 export const resetAllEarSchoolProgress = async (): Promise<void> => {
   const db = await getDatabase();
 
+  // Clear curriculum tables
   await db.runAsync(`DELETE FROM ear_school_lessons`);
   await db.runAsync(`DELETE FROM ear_school_sections`);
   await db.runAsync(`DELETE FROM ear_school_attempts`);
   await db.runAsync(`DELETE FROM ear_school_adaptive`);
+
+  // Clear practice mode tables (intervals, scale-degrees, chords)
+  const practiceTypes = ['intervals', 'scale-degrees', 'chords'];
+  await db.runAsync(
+    `DELETE FROM exercise_attempts WHERE exercise_type IN (?, ?, ?)`,
+    ...practiceTypes
+  );
+  await db.runAsync(
+    `DELETE FROM sessions WHERE exercise_type IN (?, ?, ?)`,
+    ...practiceTypes
+  );
+  await db.runAsync(
+    `DELETE FROM unlocks WHERE exercise_type IN (?, ?, ?)`,
+    ...practiceTypes
+  );
+
+  // Invalidate caches for practice types
+  for (const exerciseType of practiceTypes) {
+    queryCache.invalidate(CACHE_KEYS.EXERCISE_STATS, [exerciseType]);
+  }
 };

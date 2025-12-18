@@ -248,22 +248,7 @@ export default function LessonPlayerScreen() {
     router.back();
   };
 
-  // Loading state
-  if (isLoading || !session) {
-    return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <ScreenHeader
-          title="LOADING..."
-          rightContent={<BracketButton label="X" onPress={handleClose} />}
-        />
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Preparing lesson...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  // Results screen
+  // Results screen (check first since session is null when showing results)
   if (lastResult) {
     const passed = lastResult.passed;
     const resultColor = passed ? colors.accentGreen : colors.accentPink;
@@ -307,7 +292,7 @@ export default function LessonPlayerScreen() {
                 : lastResult.mastered
                 ? 'Great job! You\'ve mastered this material.'
                 : 'Good work! You passed the lesson.'
-              : `You need ${session.lesson.passThreshold}% to pass. Keep practicing!`}
+              : `You need ${lesson?.passThreshold ?? 70}% to pass. Keep practicing!`}
           </Text>
 
           <View style={styles.resultsButtons}>
@@ -331,6 +316,21 @@ export default function LessonPlayerScreen() {
               </Text>
             </TouchableOpacity>
           </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Loading state
+  if (isLoading || !session) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <ScreenHeader
+          title="LOADING..."
+          rightContent={<BracketButton label="X" onPress={handleClose} />}
+        />
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Preparing lesson...</Text>
         </View>
       </SafeAreaView>
     );
@@ -651,18 +651,13 @@ const styles = StyleSheet.create({
   nextButton: {
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xxl,
-    borderWidth: 1,
-    borderColor: colors.textPrimary,
-    borderRadius: 8,
   },
   nextButtonText: {
     fontFamily: fonts.monoBold,
     fontSize: 16,
     color: colors.textPrimary,
   },
-  finishButton: {
-    borderColor: colors.accentGreen,
-  },
+  finishButton: {},
   finishButtonText: {
     color: colors.accentGreen,
   },
@@ -718,19 +713,13 @@ const styles = StyleSheet.create({
   resultsButton: {
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.textSecondary,
-    borderRadius: 8,
   },
   resultsButtonText: {
     fontFamily: fonts.monoBold,
     fontSize: 14,
     color: colors.textSecondary,
   },
-  continueButton: {
-    borderColor: colors.accentGreen,
-    backgroundColor: colors.accentGreen + '20',
-  },
+  continueButton: {},
   continueButtonText: {
     color: colors.accentGreen,
   },

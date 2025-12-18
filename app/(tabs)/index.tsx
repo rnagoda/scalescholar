@@ -154,11 +154,7 @@ export default function HomeScreen() {
         {/* Ear School */}
         <Card onPress={() => router.push('/ear-school' as Href)} testID="ear-school-card">
           <Text style={styles.cardTitle}>Ear School</Text>
-          <Text style={styles.cardDescription}>
-            {earSchoolOverallProgress
-              ? `Section ${Math.min(4, Math.floor(earSchoolOverallProgress.lessonsPassed / 4) + 1)} of 4 — ${earSchoolOverallProgress.completionPercentage}% complete`
-              : '4-section ear training curriculum'}
-          </Text>
+          <Text style={styles.cardDescription}>Train your ear.</Text>
           <View style={styles.progressRow}>
             <TerminalProgressBar progress={earSchoolProgress} />
           </View>
