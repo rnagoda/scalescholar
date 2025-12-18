@@ -30,7 +30,7 @@ import {
 import { AudioEngine } from '@/src/audio';
 import { SynthType } from '@/src/types/audio';
 import { resetAllLessonProgress } from '@/src/services/lessonService';
-import { resetAllEarSchoolProgress } from '@/src/services/progressService';
+import { resetAllEarSchoolProgress } from '@/src/services/earSchoolService';
 import { resetAllVoiceSchoolProgress } from '@/src/services/voiceProfileService';
 import { useXPStore } from '@/src/stores/useXPStore';
 import { useProgressStore } from '@/src/stores/useProgressStore';
@@ -68,7 +68,7 @@ export default function SettingsScreen() {
   const { resetAllXP } = useXPStore();
   const { initialize: reinitializeProgress } = useProgressStore();
   const { initialize: reinitializeVoiceProfile } = useVoiceProfileStore();
-  const { adaptiveState, toggleAdaptiveDifficulty } = useEarSchoolStore();
+  const { adaptiveState, toggleAdaptiveDifficulty, loadProgress: reinitializeEarSchool } = useEarSchoolStore();
 
   // Sync instrument setting with AudioEngine
   useEffect(() => {
@@ -110,16 +110,17 @@ export default function SettingsScreen() {
   // Reset all progress (lessons, XP, Ear School, Voice School)
   const handleResetProgress = async () => {
     await Promise.all([
-      resetAllLessonProgress(),    // Music School
-      resetAllXP(),                 // XP system
-      resetAllEarSchoolProgress(),  // Ear School (intervals, scale degrees, chords)
-      resetAllVoiceSchoolProgress(), // Voice School (profile, attempts, sessions)
+      resetAllLessonProgress(),       // Music School
+      resetAllXP(),                   // XP system
+      resetAllEarSchoolProgress(),    // Ear School (curriculum + practice)
+      resetAllVoiceSchoolProgress(),  // Voice School (profile, attempts, sessions)
     ]);
 
     // Reinitialize stores to reflect reset state
     await Promise.all([
       reinitializeProgress(),
       reinitializeVoiceProfile(),
+      reinitializeEarSchool(),
     ]);
   };
 
