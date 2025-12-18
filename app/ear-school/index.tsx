@@ -4,8 +4,8 @@
  * Displays the 4-section curriculum with progress indicators.
  */
 
-import React, { useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, Href, useFocusEffect } from 'expo-router';
 
@@ -16,13 +16,8 @@ import { EAR_SCHOOL_CURRICULUM } from '@/src/content/ear-school/curriculum';
 
 export default function EarSchoolHomeScreen() {
   const router = useRouter();
-  const {
-    lessonProgress,
-    sectionProgress,
-    overallProgress,
-    loadProgress,
-    isLoading,
-  } = useEarSchoolStore();
+  const { lessonProgress, overallProgress, loadProgress } = useEarSchoolStore();
+  const [showProgressModal, setShowProgressModal] = useState(false);
 
   // Load progress when screen gains focus
   useFocusEffect(
@@ -107,41 +102,30 @@ export default function EarSchoolHomeScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Overall Progress */}
+        {/* Overall Progress Bar */}
         {overallProgress && (
-          <Card style={styles.progressCard}>
-            <Text style={styles.progressTitle}>YOUR PROGRESS</Text>
-            <View style={styles.progressStats}>
-              <View style={styles.progressStat}>
-                <Text style={styles.progressNumber}>
-                  {overallProgress.lessonsPassed}/{overallProgress.totalLessons}
-                </Text>
-                <Text style={styles.progressLabel}>Lessons</Text>
-              </View>
-              <View style={styles.progressDivider} />
-              <View style={styles.progressStat}>
-                <Text style={styles.progressNumber}>
-                  {overallProgress.sectionsCompleted}/{overallProgress.totalSections}
-                </Text>
-                <Text style={styles.progressLabel}>Sections</Text>
-              </View>
-              <View style={styles.progressDivider} />
-              <View style={styles.progressStat}>
-                <Text style={styles.progressNumber}>
-                  {overallProgress.completionPercentage}%
-                </Text>
-                <Text style={styles.progressLabel}>Complete</Text>
-              </View>
+          <TouchableOpacity
+            style={styles.progressBarContainer}
+            onPress={() => setShowProgressModal(true)}
+            activeOpacity={0.7}
+            testID="ear-school-progress-bar"
+          >
+            <View style={styles.progressBarTrack}>
+              <View
+                style={[
+                  styles.progressBarFill,
+                  { width: `${overallProgress.completionPercentage}%` },
+                ]}
+              />
             </View>
-          </Card>
+            <Text style={styles.progressBarLabel}>
+              {overallProgress.completionPercentage}% complete
+            </Text>
+          </TouchableOpacity>
         )}
 
         {/* Section List */}
-        {EAR_SCHOOL_CURRICULUM.sections.map((section) => {
-          const sectionProg = sectionProgress.get(section.id);
-          const isCompleted = sectionProg?.completedAt !== null;
-
-          return (
+        {EAR_SCHOOL_CURRICULUM.sections.map((section) => (
             <TouchableOpacity
               key={section.id}
               style={styles.sectionCard}
@@ -150,16 +134,10 @@ export default function EarSchoolHomeScreen() {
               testID={`section-${section.number}-card`}
             >
               <View style={styles.sectionHeader}>
-                <View style={styles.sectionNumber}>
-                  <Text style={styles.sectionNumberText}>{section.number}</Text>
-                </View>
                 <View style={styles.sectionInfo}>
                   <Text style={styles.sectionLabel}>SECTION {section.number}</Text>
                   <Text style={styles.sectionSubtitle}>{section.title}</Text>
                 </View>
-                {isCompleted && (
-                  <Text style={styles.completedIcon}>✓</Text>
-                )}
               </View>
 
               <Text style={styles.sectionDescription}>{section.description}</Text>
@@ -172,14 +150,61 @@ export default function EarSchoolHomeScreen() {
                 </Text>
               </View>
             </TouchableOpacity>
-          );
-        })}
+        ))}
 
         {/* Footer Note */}
         <Text style={styles.footerNote}>
           All sections are accessible. Tap any section to view lessons.
         </Text>
       </ScrollView>
+
+      {/* Progress Details Modal */}
+      <Modal
+        visible={showProgressModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowProgressModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowProgressModal(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>EAR SCHOOL PROGRESS</Text>
+
+            {overallProgress && (
+              <View style={styles.modalStats}>
+                <View style={styles.modalStatRow}>
+                  <Text style={styles.modalStatLabel}>Lessons Passed</Text>
+                  <Text style={styles.modalStatValue}>
+                    {overallProgress.lessonsPassed} / {overallProgress.totalLessons}
+                  </Text>
+                </View>
+                <View style={styles.modalStatRow}>
+                  <Text style={styles.modalStatLabel}>Sections Completed</Text>
+                  <Text style={styles.modalStatValue}>
+                    {overallProgress.sectionsCompleted} / {overallProgress.totalSections}
+                  </Text>
+                </View>
+                <View style={styles.modalStatRow}>
+                  <Text style={styles.modalStatLabel}>Overall Progress</Text>
+                  <Text style={styles.modalStatValueHighlight}>
+                    {overallProgress.completionPercentage}%
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setShowProgressModal(false)}
+            >
+              <Text style={styles.modalCloseText}>[ X ]</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -200,41 +225,85 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     paddingBottom: spacing.xxxl,
   },
-  progressCard: {
+  progressBarContainer: {
     marginBottom: spacing.xl,
   },
-  progressTitle: {
-    fontFamily: fonts.monoBold,
-    fontSize: 12,
-    color: colors.textMuted,
-    letterSpacing: 1.5,
-    marginBottom: spacing.md,
-    textAlign: 'center',
+  progressBarTrack: {
+    height: 8,
+    backgroundColor: colors.progressTrack,
+    borderRadius: 4,
+    overflow: 'hidden',
   },
-  progressStats: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: colors.accentGreen,
+    borderRadius: 4,
   },
-  progressStat: {
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  progressNumber: {
-    fontFamily: fonts.monoBold,
-    fontSize: 24,
-    color: colors.accentGreen,
-  },
-  progressLabel: {
+  progressBarLabel: {
     fontFamily: fonts.mono,
     fontSize: 12,
     color: colors.textSecondary,
-    marginTop: spacing.xs,
+    textAlign: 'center',
+    marginTop: spacing.sm,
   },
-  progressDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: colors.cardBorder,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.xl,
+  },
+  modalContent: {
+    backgroundColor: colors.cardBackground,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    borderRadius: 8,
+    padding: spacing.xl,
+    width: '100%',
+    maxWidth: 320,
+  },
+  modalTitle: {
+    fontFamily: fonts.monoBold,
+    fontSize: 14,
+    color: colors.textPrimary,
+    letterSpacing: 1.5,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+  },
+  modalStats: {
+    marginBottom: spacing.xl,
+  },
+  modalStatRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.cardBorder,
+  },
+  modalStatLabel: {
+    fontFamily: fonts.mono,
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  modalStatValue: {
+    fontFamily: fonts.monoBold,
+    fontSize: 14,
+    color: colors.textPrimary,
+  },
+  modalStatValueHighlight: {
+    fontFamily: fonts.monoBold,
+    fontSize: 18,
+    color: colors.accentGreen,
+  },
+  modalCloseButton: {
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+  },
+  modalCloseText: {
+    fontFamily: fonts.mono,
+    fontSize: 14,
+    color: colors.textSecondary,
   },
   sectionCard: {
     backgroundColor: colors.cardBackground,
@@ -248,22 +317,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: spacing.md,
-  },
-  sectionNumber: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md,
-  },
-  sectionNumberText: {
-    fontFamily: fonts.monoBold,
-    fontSize: 16,
-    color: colors.textPrimary,
   },
   sectionInfo: {
     flex: 1,
@@ -279,10 +332,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.textPrimary,
     marginTop: spacing.xs,
-  },
-  completedIcon: {
-    fontSize: 24,
-    color: colors.accentGreen,
   },
   sectionDescription: {
     fontFamily: fonts.mono,
