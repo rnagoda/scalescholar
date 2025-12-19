@@ -652,6 +652,10 @@ Follow a disciplined git workflow to maintain code quality and project history.
 
 **NEVER push directly to `main`. NEVER.** This includes documentation, small fixes, "quick changes" — everything. All changes to main happen through merged pull requests after testing and review.
 
+**NEVER merge pull requests.** The user will merge PRs themselves after review.
+
+**NEVER delete branches.** Under no circumstances delete any branch without very explicit permission from the user.
+
 All work happens on feature branches:
 
 ```bash
