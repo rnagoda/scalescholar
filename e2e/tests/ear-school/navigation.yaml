@@ -37,13 +37,13 @@ appId: com.nagodasoft.scalescholar
 - tapOn:
     id: "lesson-1-1-card"
 
-# Verify lesson player opened
+# Verify intro screen opened
 - assertVisible:
-    id: "lesson-ear-school-1.1-header-title"
+    id: "lesson-ear-school-1.1-intro-header"
 
-# Close lesson player
+# Close from intro screen
 - tapOn:
-    id: "lesson-ear-school-1.1-close-button"
+    id: "intro-close-button"
 
 # Confirm leave dialog appears (since session not complete)
 - extendedWaitUntil:
