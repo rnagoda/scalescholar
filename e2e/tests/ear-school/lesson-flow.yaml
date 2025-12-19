@@ -24,9 +24,13 @@ appId: com.nagodasoft.scalescholar
 - tapOn:
     id: "lesson-1-1-card"
 
-# Verify lesson player loaded
+# Verify intro screen loaded
 - assertVisible:
-    id: "lesson-ear-school-1.1-header-title"
+    id: "lesson-ear-school-1.1-intro-header"
+
+# Tap BEGIN to start exercises
+- tapOn:
+    id: "begin-lesson-button"
 
 # Verify progress indicator is visible
 - assertVisible:
@@ -46,9 +50,9 @@ appId: com.nagodasoft.scalescholar
 - assertVisible:
     id: "replay-button"
 
-# Tap an answer (any answer works for testing flow)
+# Tap an answer (any solfege option - testing flow, not correctness)
 - tapOn:
-    text: "1"
+    text: "Do"
 
 # Verify feedback is shown (next button appears)
 - extendedWaitUntil:

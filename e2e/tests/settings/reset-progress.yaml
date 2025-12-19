@@ -28,6 +28,13 @@ appId: com.nagodasoft.scalescholar
 - tapOn:
     id: "lesson-1-1-card"
 
+# Verify intro screen and tap begin
+- assertVisible:
+    id: "lesson-ear-school-1.1-intro-header"
+
+- tapOn:
+    id: "begin-lesson-button"
+
 # Play and answer a question
 - tapOn:
     id: "play-button"
@@ -38,9 +45,9 @@ appId: com.nagodasoft.scalescholar
       id: "play-hint"
     timeout: 5000
 
-# Submit an answer
+# Submit an answer (lesson 1.1 uses solfege: Do, Re, Mi)
 - tapOn:
-    text: "1"
+    text: "Do"
 
 # Wait for feedback
 - extendedWaitUntil:

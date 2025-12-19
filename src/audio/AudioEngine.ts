@@ -352,6 +352,69 @@ class AudioEngineClass {
   }
 
   /**
+   * Play a melodic phrase that ends on a specific scale degree
+   * Used for "Finding Do" exercises where user identifies the tonic
+   * @param keyRootMidi - The root MIDI note of the key
+   * @param endingDegree - The scale degree the phrase ends on (1, 2, or 3)
+   * @param velocity - Velocity/volume from 0.0 to 1.0 (optional, default 0.7)
+   */
+  async playMelodicPhrase(
+    keyRootMidi: number,
+    endingDegree: 1 | 2 | 3,
+    velocity?: number
+  ): Promise<void> {
+    await this.initialize();
+    if (!this.synth) return;
+
+    // Major scale degrees to MIDI offsets
+    const scaleOffsets = [0, 2, 4, 5, 7, 9, 11]; // 1, 2, 3, 4, 5, 6, 7
+
+    // Generate phrase length (4-6 notes)
+    const phraseLength = 4 + Math.floor(Math.random() * 3); // 4, 5, or 6
+
+    // Build phrase algorithmically:
+    // 1. Start on a stable tone (1, 3, or 5)
+    // 2. Move by steps or small leaps
+    // 3. End on the specified degree
+    const phrase: number[] = [];
+
+    // Starting degree options (stable tones)
+    const startOptions = [1, 3, 5];
+    let currentDegree = startOptions[Math.floor(Math.random() * startOptions.length)];
+    phrase.push(currentDegree);
+
+    // Generate middle notes (move by step or small leap)
+    for (let i = 1; i < phraseLength - 1; i++) {
+      // Allowed moves: -3 to +3 degrees
+      const moves = [-2, -1, 1, 2];
+      const move = moves[Math.floor(Math.random() * moves.length)];
+      let nextDegree = currentDegree + move;
+
+      // Keep within 1-7 range
+      if (nextDegree < 1) nextDegree = 1;
+      if (nextDegree > 7) nextDegree = 7;
+
+      phrase.push(nextDegree);
+      currentDegree = nextDegree;
+    }
+
+    // End on the specified degree
+    phrase.push(endingDegree);
+
+    // Play the phrase
+    const noteDuration = 0.4;
+    const noteGap = 350; // ms between notes
+
+    for (const degree of phrase) {
+      const midiOffset = scaleOffsets[degree - 1];
+      const midiNote = keyRootMidi + midiOffset;
+      const frequency = midiToFrequency(midiNote, this.a4Frequency);
+      await this.synth.playNote(frequency, noteDuration, velocity);
+      await this.delay(noteGap);
+    }
+  }
+
+  /**
    * Stop all playing sounds
    */
   stop(): void {

@@ -40,6 +40,7 @@ export interface EarSchoolAudioParams {
   // For scale degree exercises
   scaleDegrees?: number[]; // Array of scale degrees to play
   playContext?: boolean; // Whether to play key context first
+  octaveOffset?: number; // Octave offset for the target note (0 = same, 1 = up an octave)
 
   // For interval exercises
   interval?: number; // Semitones
@@ -50,6 +51,9 @@ export interface EarSchoolAudioParams {
 
   // For scale quality exercises
   scaleType?: 'major' | 'minor'; // Scale quality to play
+
+  // For identify-tonic (melodic phrase) exercises
+  endingDegree?: 1 | 2 | 3; // Which degree the phrase ends on
 
   // For rhythm exercises
   rhythmPattern?: string; // e.g., "q q q q", "h q q", "w"
